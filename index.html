@@ -3,9 +3,28 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<meta name="description" content="Wigan Wetbelts. Specialist wet belt, timing belt and timing chain replacement, diagnostics and engine repair in Wigan, UK." />
+<meta name="description" content="Wet belt and timing chain specialists in Wigan. Dealer level repairs, diagnostics and OEM quality timing system replacement for Ford EcoBoost, PureTech, BMW, Volkswagen, Land Rover and more." />
 <meta name="theme-color" content="#0a0c0e" />
-<title>Wigan Wetbelts | Wet Belt &amp; Timing Chain Specialists in Wigan</title>
+<title>Wigan Wetbelts | Wet Belt &amp; Timing Chain Specialists</title>
+
+<!-- Favicon + Apple touch icon.
+     Both files ship alongside index.html in the GitHub repo root.
+     The .ico is a multi-resolution bundle (16, 32, 48) so it stays
+     crisp on browser tabs and bookmarks across every device. -->
+<link rel="icon" type="image/x-icon" href="favicon.ico" />
+<link rel="shortcut icon" type="image/x-icon" href="favicon.ico" />
+<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png" />
+
+<!-- Open Graph + Twitter card so shared links pull through the
+     workshop branding and trust copy in iMessage, WhatsApp, etc. -->
+<meta property="og:title" content="Wigan Wetbelts | Wet Belt & Timing Chain Specialists" />
+<meta property="og:description" content="Wet belt and timing chain specialists in Wigan. Dealer level repairs, diagnostics and OEM quality timing system replacement for Ford EcoBoost, PureTech, BMW, Volkswagen, Land Rover and more." />
+<meta property="og:image" content="apple-touch-icon.png" />
+<meta property="og:type" content="website" />
+<meta name="twitter:card" content="summary" />
+<meta name="twitter:title" content="Wigan Wetbelts | Wet Belt & Timing Chain Specialists" />
+<meta name="twitter:description" content="Wet belt and timing chain specialists in Wigan. Dealer level repairs, diagnostics and OEM quality timing system replacement for Ford EcoBoost, PureTech, BMW, Volkswagen, Land Rover and more." />
+<meta name="twitter:image" content="apple-touch-icon.png" />
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500;1,600&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -201,6 +220,62 @@ p{color:var(--text-2);line-height:1.7}
 .brand-text{display:flex;flex-direction:column;line-height:1.1}
 .brand-text strong{font-size:1rem;font-weight:700;letter-spacing:.005em}
 .brand-text small{font-size:.66rem;color:var(--muted);letter-spacing:.18em;text-transform:uppercase;font-weight:500;margin-top:2px}
+
+/* ----- Wordmark logo variant -----
+   Used when the brand link IS the full Wigan Wetbelts logo (no separate
+   icon + text). Reserves a fixed height + auto width so the navbar never
+   shifts as the page loads, and adds a soft teal glow on hover that
+   mirrors the existing brand-mark interaction.
+   Heights tuned smaller than the original placeholder mark for a more
+   refined, less dominant navbar presence. */
+.brand--logo{gap:0}
+.brand-logo{
+  display:block;
+  height:36px;
+  width:auto;
+  filter:drop-shadow(0 0 0 rgba(34,211,197,0));
+  transition:filter .4s ease, transform .4s cubic-bezier(.22,1,.36,1);
+}
+.brand--logo:hover .brand-logo{
+  filter:drop-shadow(0 0 12px rgba(34,211,197,.45));
+  transform:translateY(-1px);
+}
+@media (max-width:760px){
+  .brand-logo{height:30px}
+}
+@media (max-width:420px){
+  .brand-logo{height:26px}
+}
+@media (prefers-reduced-motion:reduce){
+  .brand-logo{transition:none}
+  .brand--logo:hover .brand-logo{transform:none}
+}
+
+/* ----- Scroll-aware bottom edge fade -----
+   Fixed overlay along the very bottom of the viewport. A soft vertical
+   gradient blends content into the page colour, then JS nudges the
+   opacity higher when scrolling DOWN (signalling more content below)
+   and lower when scrolling UP. pointer-events:none keeps every click
+   passing through to the page underneath. */
+.bottom-fade{
+  position:fixed;
+  left:0;right:0;bottom:0;
+  height:120px;
+  pointer-events:none;
+  z-index:40;
+  opacity:0;
+  background:linear-gradient(to bottom,
+    rgba(8,10,12,0)   0%,
+    rgba(8,10,12,.45) 55%,
+    rgba(8,10,12,.85) 100%
+  );
+  transition:opacity .55s cubic-bezier(.22,1,.36,1);
+  will-change:opacity;
+}
+.bottom-fade.is-visible{opacity:1}
+@media (prefers-reduced-motion:reduce){
+  .bottom-fade{transition:none;opacity:0 !important}
+}
 
 .nav-links{display:flex;align-items:center;gap:30px}
 .nav-links a{font-size:.92rem;font-weight:500;color:var(--text-2);position:relative;padding:6px 0}
@@ -1984,6 +2059,41 @@ body{
 }
 .qc-included[open] .qci-icon::after{ transform:translate(-50%,-50%) rotate(90deg);opacity:0 }
 
+/* Premium section divider inside the What's Included panel.
+   Teal accent line + small uppercase label + subtle glow. Wet-belt heading
+   has no top spacing (sits straight under the summary); the chain heading
+   adds extra top spacing + glow so the visual break between the two
+   inclusion lists is obvious without redesigning the panel. */
+.qci-section-head{
+  display:flex;align-items:center;gap:14px;
+  margin:6px 18px 4px;
+  padding-top:2px;
+}
+.qci-section-head--chain{
+  margin-top:22px;
+  padding-top:18px;
+  border-top:1px solid rgba(34,211,197,.18);
+  box-shadow:0 -8px 24px rgba(34,211,197,.06);
+}
+.qci-section-line{
+  flex:0 0 auto;
+  width:18px;height:1px;
+  background:linear-gradient(90deg, rgba(34,211,197,.0), var(--accent));
+  box-shadow:0 0 6px rgba(34,211,197,.45);
+}
+.qci-section-label{
+  font-size:.7rem;
+  font-weight:600;
+  letter-spacing:.18em;
+  text-transform:uppercase;
+  color:var(--accent);
+  white-space:nowrap;
+  text-shadow:0 0 12px rgba(34,211,197,.18);
+}
+@media (max-width:520px){
+  .qci-section-label{font-size:.62rem;letter-spacing:.14em;white-space:normal;line-height:1.4}
+}
+
 .qci-list{
   list-style:none;
   margin:0;
@@ -1991,6 +2101,11 @@ body{
   display:grid;
   gap:0;
   animation:qciReveal .55s cubic-bezier(.22,1,.36,1);
+}
+/* Subtle highlight when this list matches the currently-selected service. */
+.qci-list--active li::before{
+  box-shadow:0 0 10px rgba(34,211,197,.22), inset 0 1px 0 rgba(255,255,255,.06);
+  border-color:rgba(34,211,197,.60);
 }
 @keyframes qciReveal{
   0%{opacity:0;transform:translateY(-4px)}
@@ -2163,30 +2278,225 @@ body{
     transform:none !important;
   }
 }
+
+/* =========================================================
+   WET BELT RUN — premium mini-game modal + canvas styling
+   ========================================================= */
+
+/* Success-message Play button cluster — appears after a successful
+   FormSubmit POST inside the qcFeedback "success" block. */
+.qc-after-actions{
+  margin-top:14px;
+  display:flex;flex-wrap:wrap;gap:10px;align-items:center;
+}
+.qc-after-actions .qc-play-btn{padding:11px 18px;font-size:.88rem;gap:8px}
+.qc-after-actions .qc-play-close{padding:10px 16px;font-size:.86rem}
+.qc-after-actions .qc-play-hint{
+  display:block;width:100%;
+  font-size:.74rem;color:var(--muted);letter-spacing:.02em;
+  margin-top:2px;
+}
+
+/* Modal backdrop — fixed full-screen, dim + blur so the page
+   underneath softly recedes when the game is open. */
+.wbr-modal{
+  position:fixed;inset:0;z-index:200;
+  display:flex;align-items:center;justify-content:center;
+  padding:18px;
+}
+.wbr-modal[hidden]{display:none}
+.wbr-backdrop{
+  position:absolute;inset:0;
+  background:rgba(4,6,8,.78);
+  backdrop-filter:blur(14px) saturate(120%);
+  -webkit-backdrop-filter:blur(14px) saturate(120%);
+  animation:wbrFadeIn .35s cubic-bezier(.22,1,.36,1);
+}
+@keyframes wbrFadeIn{from{opacity:0}to{opacity:1}}
+
+/* Locks the page scroll while the modal is open so the bottom-fade
+   overlay and other scroll-driven effects don't fight the game. */
+body.wbr-locked{overflow:hidden}
+
+/* Modal shell — glass card matching the rest of the site, holds the
+   HUD on top, canvas in the middle and footer label at the bottom. */
+.wbr-shell{
+  position:relative;
+  width:min(440px, 100%);
+  height:min(720px, 92vh);
+  display:flex;flex-direction:column;
+  background:linear-gradient(180deg, rgba(20,24,28,.92), rgba(8,10,12,.96));
+  border:1px solid rgba(34,211,197,.22);
+  border-radius:22px;
+  box-shadow:
+    0 30px 80px rgba(0,0,0,.65),
+    0 0 0 1px rgba(255,255,255,.04) inset,
+    0 0 48px rgba(34,211,197,.15);
+  overflow:hidden;
+  animation:wbrSlideIn .5s cubic-bezier(.22,1,.36,1);
+}
+@keyframes wbrSlideIn{
+  from{transform:translateY(20px) scale(.96);opacity:0}
+  to  {transform:none;opacity:1}
+}
+.wbr-x{
+  position:absolute;top:12px;right:12px;z-index:3;
+  width:36px;height:36px;
+  display:grid;place-items:center;
+  background:rgba(0,0,0,.45);
+  border:1px solid rgba(34,211,197,.30);
+  color:var(--text);
+  border-radius:50%;
+  cursor:pointer;
+  transition:background .25s ease, border-color .25s ease, transform .25s ease;
+}
+.wbr-x:hover{
+  background:rgba(34,211,197,.18);
+  border-color:rgba(34,211,197,.65);
+  transform:scale(1.05);
+}
+
+/* HUD — score top-left, best top-right, premium uppercase labels. */
+.wbr-hud{
+  position:absolute;top:0;left:0;right:0;
+  display:flex;justify-content:space-between;align-items:flex-start;
+  padding:18px 60px 14px 22px;
+  pointer-events:none;
+  z-index:2;
+}
+.wbr-stat{display:flex;flex-direction:column;line-height:1.1}
+.wbr-stat-best{align-items:flex-end;text-align:right}
+.wbr-stat-label{
+  font-size:.62rem;letter-spacing:.22em;text-transform:uppercase;
+  color:var(--muted);font-weight:600;margin-bottom:4px;
+}
+.wbr-stat strong{
+  font-size:1.4rem;font-weight:700;color:var(--text);
+  letter-spacing:.04em;
+  text-shadow:0 0 14px rgba(34,211,197,.30);
+}
+
+/* Canvas itself — fills the shell, sits behind HUD + footer. */
+.wbr-canvas{
+  flex:1;
+  width:100%;
+  height:100%;
+  display:block;
+  background:#0a0c0e;
+  touch-action:none;
+  outline:none;
+}
+
+.wbr-footer{
+  position:absolute;bottom:14px;left:0;right:0;
+  text-align:center;
+  font-size:.66rem;letter-spacing:.32em;text-transform:uppercase;
+  color:rgba(94,234,212,.55);
+  font-weight:600;
+  pointer-events:none;
+  z-index:2;
+  text-shadow:0 0 12px rgba(34,211,197,.25);
+}
+
+/* Game-over overlay — sits inside the shell, covers the canvas with
+   a soft dark blur and shows the final/best score + actions. */
+.wbr-over{
+  position:absolute;inset:0;z-index:5;
+  display:grid;place-items:center;
+  background:rgba(4,6,8,.55);
+  backdrop-filter:blur(6px) saturate(110%);
+  -webkit-backdrop-filter:blur(6px) saturate(110%);
+  animation:wbrFadeIn .3s ease;
+  padding:20px;
+}
+.wbr-over[hidden]{display:none !important}
+.wbr-over-card{
+  width:min(320px, 100%);
+  padding:26px 24px;
+  background:linear-gradient(180deg, rgba(15,18,22,.92), rgba(8,10,12,.96));
+  border:1px solid rgba(34,211,197,.30);
+  border-radius:18px;
+  box-shadow:0 24px 60px rgba(0,0,0,.6), 0 0 32px rgba(34,211,197,.18);
+  text-align:center;
+}
+.wbr-over-eyebrow{
+  display:block;
+  font-size:.7rem;letter-spacing:.32em;text-transform:uppercase;
+  color:var(--accent);font-weight:700;margin-bottom:18px;
+}
+.wbr-over-stats{
+  display:grid;grid-template-columns:1fr 1fr;gap:14px;
+  margin-bottom:22px;
+}
+.wbr-over-stat small{
+  display:block;
+  font-size:.62rem;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--muted);font-weight:600;margin-bottom:4px;
+}
+.wbr-over-stat strong{
+  display:block;font-size:1.7rem;font-weight:700;color:var(--text);
+  text-shadow:0 0 14px rgba(34,211,197,.32);
+}
+.wbr-over-actions{
+  display:flex;flex-direction:column;gap:10px;
+}
+.wbr-btn-again, .wbr-btn-close{
+  width:100%;justify-content:center;padding:12px 16px;font-size:.9rem;
+}
+
+@media (max-width:520px){
+  .wbr-shell{height:88vh;border-radius:18px}
+  .wbr-hud{padding:14px 50px 12px 16px}
+  .wbr-stat strong{font-size:1.2rem}
+  .wbr-over-card{padding:22px 20px}
+  .wbr-over-stat strong{font-size:1.5rem}
+}
+
+@media (prefers-reduced-motion:reduce){
+  .wbr-backdrop, .wbr-shell, .wbr-over{animation:none}
+  .wbr-x{transition:none}
+}
 </style>
 </head>
 <body>
 
+<!-- Bottom edge fade overlay — opacity is driven by scroll direction
+     (fade IN scrolling down, fade OUT scrolling up). aria-hidden because
+     it's purely decorative; pointer-events:none in CSS keeps it from
+     blocking any clicks. -->
+<div class="bottom-fade" id="bottomFade" aria-hidden="true"></div>
+
 <header class="nav" id="nav">
   <div class="nav-inner">
-    <a href="#home" class="brand" aria-label="Wigan Wetbelts home">
-      <span class="brand-mark" aria-hidden="true">
-        <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <defs>
-            <linearGradient id="wwLogoG" x1="4" y1="9" x2="28" y2="23" gradientUnits="userSpaceOnUse">
-              <stop offset="0" stop-color="#5eead4"/>
-              <stop offset=".55" stop-color="#22d3c5"/>
-              <stop offset="1" stop-color="#0ea5b7"/>
-            </linearGradient>
-          </defs>
-          <path d="M11 5.5 L21 5.5" stroke="#22d3c5" stroke-width="1.6" stroke-linecap="round" opacity=".55"/>
-          <path d="M4 9 L10 23 L16 14 L22 23 L28 9" stroke="url(#wwLogoG)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-        </svg>
-      </span>
-      <span class="brand-text">
-        <strong>Wigan Wetbelts</strong>
-        <small>Wet Belt Specialists</small>
-      </span>
+    <a href="#home" class="brand brand--logo" aria-label="Wigan Wetbelts home">
+      <!-- Wigan Wetbelts wordmark — recreated as inline SVG so it stays
+           razor-sharp at every screen density, scales cleanly on mobile,
+           and ships with index.html (no external image request, no layout
+           shift while the page loads). Matches the uploaded reference:
+           a tight two-tone box, "WIGAN" in white on black, "WETBELTS"
+           in black on white, framed by a thin white border. -->
+      <svg class="brand-logo" viewBox="0 0 720 190"
+           xmlns="http://www.w3.org/2000/svg"
+           preserveAspectRatio="xMidYMid meet"
+           role="img" aria-label="Wigan Wetbelts">
+        <!-- Left half: black panel -->
+        <rect x="0" y="0" width="280" height="190" fill="#000000"/>
+        <!-- Right half: white panel -->
+        <rect x="280" y="0" width="440" height="190" fill="#ffffff"/>
+        <!-- Outer white border that frames the whole strip -->
+        <rect x="3" y="3" width="714" height="184" fill="none"
+              stroke="#ffffff" stroke-width="6"/>
+        <!-- WIGAN — white on black -->
+        <text x="140" y="125" text-anchor="middle"
+              font-family="'Helvetica Neue', Helvetica, Arial, sans-serif"
+              font-weight="700" font-size="62" letter-spacing="6"
+              fill="#ffffff">WIGAN</text>
+        <!-- WETBELTS — black on white -->
+        <text x="500" y="125" text-anchor="middle"
+              font-family="'Helvetica Neue', Helvetica, Arial, sans-serif"
+              font-weight="700" font-size="62" letter-spacing="6"
+              fill="#000000">WETBELTS</text>
+      </svg>
     </a>
 
     <nav class="nav-links" aria-label="Primary">
@@ -2412,7 +2722,6 @@ body{
                 <select id="qJob" required>
                   <option value="">Select work…</option>
                   <option>Belt / Wet Belt Replacement</option>
-                  <option>Wet Oil Pump Belt Replacement</option>
                   <option>Timing Chain Replacement</option>
                   <option>Diagnosis / Inspection</option>
                 </select>
@@ -2578,7 +2887,15 @@ body{
             <span class="qci-label">What's Included</span>
             <span class="qci-icon" aria-hidden="true"></span>
           </summary>
-          <!-- Wet belt / wet oil pump belt inclusions -->
+
+          <!-- Section heading: Belt / Wet Belt Replacement inclusions.
+               Always visible — both belt and chain lists now sit side by side
+               (visually stacked) so customers can see what each service covers
+               at a glance. Divider between the two adds clear separation. -->
+          <div class="qci-section-head">
+            <span class="qci-section-line"></span>
+            <span class="qci-section-label">Belt / Wet Belt Replacement — What's Included</span>
+          </div>
           <ul class="qci-list" data-for="wet">
             <li>Genuine or OEM timing belt kit</li>
             <li>Oil pump belt where applicable</li>
@@ -2592,8 +2909,14 @@ body{
             <li>Road test &amp; final leak / oil pressure checks</li>
             <li>All parts supplied &amp; fitted</li>
           </ul>
-          <!-- Timing chain inclusions -->
-          <ul class="qci-list" data-for="chain" hidden>
+
+          <!-- Premium divider — teal accent line + uppercase label + subtle glow.
+               Visually separates the wet belt list from the timing chain list. -->
+          <div class="qci-section-head qci-section-head--chain">
+            <span class="qci-section-line"></span>
+            <span class="qci-section-label">Timing Chain Replacement — What's Included</span>
+          </div>
+          <ul class="qci-list" data-for="chain">
             <li>Genuine or OEM timing chain kit</li>
             <li>New guides and tensioners</li>
             <li>Crankshaft seals where required</li>
@@ -2624,8 +2947,8 @@ body{
     <div class="service-grid">
       <article class="glass-card service reveal">
         <div class="s-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3"/></svg></div>
-        <h3>Wet Belt Replacement</h3>
-        <p>Full kit replacement on PSA PureTech, Ford EcoBoost and similar wet belt engines, including pickup inspection and oil flush.</p>
+        <h3>Dealer Level Repairs</h3>
+        <p>Advanced belt, wet belt and timing system repairs carried out using OEM grade parts, correct locking tools and workshop level inspection processes.</p>
       </article>
 
       <article class="glass-card service reveal">
@@ -3116,54 +3439,65 @@ body{
     { service:'Belt / Wet Belt Replacement', make:'Toyota', models:['Proace'],
       engines:['2.0 HDi'], from:750, to:1100 },
 
-    /* ----- Volkswagen belt — per-model / per-engine ranges.
-       `noFloor:true` opts these rules out of the £750 wet-belt minimum so
-       sub-£750 quotes (e.g. Tiguan 1.6 TDI from £567) display exactly as
-       supplied. NO 1.4 TSI under belt — 1.4 TSI is chain-only for VW. */
+    /* ----- Volkswagen belt — year-aware, per-engine ranges.
+       yearFrom/yearTo: when the customer has chosen a vehicle Year, the
+       engine dropdown only offers rules whose year window contains it.
+       noFloor:true: workshop-supplied sub-£750 ranges display as quoted
+       (the global £750 wet-belt minimum does NOT apply to VW). */
     { service:'Belt / Wet Belt Replacement', make:'Volkswagen', models:['Golf'],
-      engines:['1.0 TSI'], from:657, to:799,  noFloor:true },
+      engines:['1.0 TSI'], yearFrom:2013, yearTo:2026, from:657, to:799,  noFloor:true },
     { service:'Belt / Wet Belt Replacement', make:'Volkswagen', models:['Golf'],
-      engines:['1.6 TDI'], from:657, to:957,  noFloor:true },
+      engines:['1.5 TSI'], yearFrom:2017, yearTo:2026, from:757, to:957,  noFloor:true },
     { service:'Belt / Wet Belt Replacement', make:'Volkswagen', models:['Golf'],
-      engines:['2.0 TDI'], from:757, to:1150, noFloor:true },
+      engines:['1.6 TDI'], yearFrom:2008, yearTo:2026, from:657, to:957,  noFloor:true },
+    { service:'Belt / Wet Belt Replacement', make:'Volkswagen', models:['Golf'],
+      engines:['2.0 TDI'], yearFrom:2008, yearTo:2026, from:757, to:1150, noFloor:true },
     { service:'Belt / Wet Belt Replacement', make:'Volkswagen', models:['Golf GTD'],
-      engines:['2.0 TDI'], from:757, to:857,  noFloor:true },
+      engines:['2.0 TDI'], yearFrom:2013, yearTo:2026, from:757, to:857,  noFloor:true },
     { service:'Belt / Wet Belt Replacement', make:'Volkswagen', models:['Polo'],
-      engines:['1.0 TSI'], from:657, to:757,  noFloor:true },
+      engines:['1.0 TSI'], yearFrom:2014, yearTo:2026, from:657, to:757,  noFloor:true },
     { service:'Belt / Wet Belt Replacement', make:'Volkswagen', models:['Polo'],
-      engines:['1.4 TDI'], from:657, to:857,  noFloor:true },
+      engines:['1.4 TDI'], yearFrom:2008, yearTo:2018, from:657, to:857,  noFloor:true },
     { service:'Belt / Wet Belt Replacement', make:'Volkswagen', models:['Polo'],
-      engines:['1.6 TDI'], from:757, to:957,  noFloor:true },
+      engines:['1.6 TDI'], yearFrom:2009, yearTo:2020, from:757, to:957,  noFloor:true },
     { service:'Belt / Wet Belt Replacement', make:'Volkswagen', models:['Passat'],
-      engines:['1.6 TDI'], from:657, to:857,  noFloor:true },
+      engines:['1.6 TDI'], yearFrom:2008, yearTo:2026, from:657, to:857,  noFloor:true },
     { service:'Belt / Wet Belt Replacement', make:'Volkswagen', models:['Passat'],
-      engines:['2.0 TDI'], from:657, to:957,  noFloor:true },
+      engines:['2.0 TDI'], yearFrom:2008, yearTo:2026, from:657, to:957,  noFloor:true },
     { service:'Belt / Wet Belt Replacement', make:'Volkswagen', models:['Tiguan'],
-      engines:['1.6 TDI'], from:567, to:757,  noFloor:true },
+      engines:['1.6 TDI'], yearFrom:2008, yearTo:2020, from:567, to:757,  noFloor:true },
     { service:'Belt / Wet Belt Replacement', make:'Volkswagen', models:['Tiguan'],
-      engines:['2.0 TDI'], from:757, to:957,  noFloor:true },
+      engines:['2.0 TDI'], yearFrom:2008, yearTo:2026, from:757, to:957,  noFloor:true },
     { service:'Belt / Wet Belt Replacement', make:'Volkswagen', models:['Touran'],
-      engines:['1.6 TDI'], from:657, to:857,  noFloor:true },
+      engines:['1.6 TDI'], yearFrom:2010, yearTo:2022, from:657, to:857,  noFloor:true },
     { service:'Belt / Wet Belt Replacement', make:'Volkswagen', models:['Sharan'],
-      engines:['1.9 TDI'], from:657, to:757,  noFloor:true },
+      engines:['1.9 TDI'], yearFrom:2008, yearTo:2012, from:657, to:757,  noFloor:true },
     { service:'Belt / Wet Belt Replacement', make:'Volkswagen', models:['Sharan'],
-      engines:['2.0 TDI'], from:757, to:957,  noFloor:true },
+      engines:['2.0 TDI'], yearFrom:2008, yearTo:2022, from:757, to:957,  noFloor:true },
     { service:'Belt / Wet Belt Replacement', make:'Volkswagen', models:['Caddy'],
-      engines:['1.6 TDI'], from:657, to:857,  noFloor:true },
+      engines:['1.6 TDI'], yearFrom:2010, yearTo:2020, from:657, to:857,  noFloor:true },
     { service:'Belt / Wet Belt Replacement', make:'Volkswagen', models:['Caddy'],
-      engines:['2.0 TDI'], from:757, to:957,  noFloor:true },
+      engines:['2.0 TDI'], yearFrom:2008, yearTo:2026, from:757, to:957,  noFloor:true },
     { service:'Belt / Wet Belt Replacement', make:'Volkswagen', models:['Transporter'],
-      engines:['1.9 TDI'], from:657, to:757,  noFloor:true },
+      engines:['1.9 TDI'], yearFrom:2008, yearTo:2015, from:657, to:757,  noFloor:true },
     { service:'Belt / Wet Belt Replacement', make:'Volkswagen', models:['Transporter'],
-      engines:['2.0 TDI'], from:757, to:957,  noFloor:true },
+      engines:['2.0 TDI'], yearFrom:2010, yearTo:2026, from:757, to:957,  noFloor:true },
     { service:'Belt / Wet Belt Replacement', make:'Volkswagen', models:['Crafter'],
-      engines:['2.0 TDI'], from:857, to:1120, noFloor:true },
+      engines:['2.0 TDI'], yearFrom:2011, yearTo:2026, from:857, to:1120, noFloor:true },
     { service:'Belt / Wet Belt Replacement', make:'Volkswagen', models:['Scirocco'],
-      engines:['2.0 TDI'], from:657, to:857,  noFloor:true },
+      engines:['2.0 TDI'], yearFrom:2008, yearTo:2017, from:657, to:857,  noFloor:true },
     { service:'Belt / Wet Belt Replacement', make:'Volkswagen', models:['Beetle'],
-      engines:['1.6 TDI'], from:657, to:857,  noFloor:true },
+      engines:['1.6 TDI'], yearFrom:2011, yearTo:2018, from:657, to:857,  noFloor:true },
     { service:'Belt / Wet Belt Replacement', make:'Volkswagen', models:['Beetle'],
-      engines:['2.0 TDI'], from:757, to:957,  noFloor:true },
+      engines:['2.0 TDI'], yearFrom:2011, yearTo:2018, from:757, to:957,  noFloor:true },
+    { service:'Belt / Wet Belt Replacement', make:'Volkswagen', models:['T Roc'],
+      engines:['1.0 TSI'], yearFrom:2017, yearTo:2026, from:757, to:957,  noFloor:true },
+    { service:'Belt / Wet Belt Replacement', make:'Volkswagen', models:['T Roc'],
+      engines:['2.0 TDI'], yearFrom:2017, yearTo:2026, from:757, to:1050, noFloor:true },
+    { service:'Belt / Wet Belt Replacement', make:'Volkswagen', models:['Taigo'],
+      engines:['1.0 TSI'], yearFrom:2021, yearTo:2026, from:757, to:957,  noFloor:true },
+    { service:'Belt / Wet Belt Replacement', make:'Volkswagen', models:['Arteon'],
+      engines:['2.0 TDI'], yearFrom:2017, yearTo:2026, from:857, to:1150, noFloor:true },
 
     /* ----- VAG (Audi/SEAT/Skoda) belt work — £789 fixed
        VW is handled above per-model. Audi/SEAT/Skoda stay on £789 here. */
@@ -3254,20 +3588,11 @@ body{
       engines:['1.6 CRDi'], from:650, to:950 },
 
     /* ================================================================
-       WET OIL PUMP BELT REPLACEMENT — VAG EA288 (separate service)
+       (Wet Oil Pump Belt Replacement entries removed — service no longer
+        offered as a separate quote option. Wet oil pump belt work is
+        discussed manually as part of the Belt / Wet Belt Replacement
+        quote or at workshop inspection stage.)
     ================================================================ */
-    { service:'Wet Oil Pump Belt Replacement', make:'Volkswagen',
-      models:['Golf','Passat','Tiguan'],
-      engines:['EA288 Wet Oil Pump'], from:1050, to:1150 },
-    { service:'Wet Oil Pump Belt Replacement', make:'Audi',
-      models:['A3','A4','A5','Q3','Q5'],
-      engines:['EA288 Wet Oil Pump'], from:1050, to:1150 },
-    { service:'Wet Oil Pump Belt Replacement', make:'SEAT',
-      models:['Leon','Ateca'],
-      engines:['EA288 Wet Oil Pump'], from:1050, to:1150 },
-    { service:'Wet Oil Pump Belt Replacement', make:'Skoda',
-      models:['Octavia','Superb','Kodiaq'],
-      engines:['EA288 Wet Oil Pump'], from:1050, to:1150 },
 
     /* ================================================================
        TIMING CHAIN REPLACEMENT
@@ -3349,43 +3674,52 @@ body{
     { service:'Timing Chain Replacement', make:'Audi', models:['Q5'],
       engines:['2.0 TFSI','2.0 TDI','3.0 TDI'], from:950, to:2200 },
 
-    /* ----- VW chain — per-model / per-engine ranges from workshop spec.
-       Petrol TSI engines are chain-driven on these generations; no diesel
-       under chain except where explicitly listed (chain-driven variants). */
+    /* ----- VW chain — year-aware, per-engine ranges.
+       EA111 chain engines are mostly pre-2013; EA211 belt-style engines
+       are 2013 onward. Year window stops legacy chain engines appearing
+       on newer model years. Petrol TSI only — no diesel under chain. */
     { service:'Timing Chain Replacement', make:'Volkswagen', models:['Golf'],
-      engines:['1.2 TSI'], from:499,  to:760 },
+      engines:['1.2 TSI'], yearFrom:2009, yearTo:2014, from:499,  to:760 },
     { service:'Timing Chain Replacement', make:'Volkswagen', models:['Golf'],
-      engines:['1.4 TSI'], from:699,  to:957 },
+      engines:['1.4 TSI'], yearFrom:2007, yearTo:2013, from:699,  to:957 },
     { service:'Timing Chain Replacement', make:'Volkswagen', models:['Golf'],
-      engines:['1.8 TSI'], from:950,  to:1250 },
+      engines:['1.8 TSI'], yearFrom:2008, yearTo:2015, from:950,  to:1250 },
     { service:'Timing Chain Replacement', make:'Volkswagen', models:['Golf'],
-      engines:['2.0 TSI'], from:450,  to:600 },
+      engines:['2.0 TSI GTI / R'], yearFrom:2005, yearTo:2016, from:950,  to:1250 },
     { service:'Timing Chain Replacement', make:'Volkswagen', models:['Polo'],
-      engines:['1.2 TSI'], from:550,  to:800 },
+      engines:['1.2 TSI'], yearFrom:2010, yearTo:2017, from:550,  to:800 },
     { service:'Timing Chain Replacement', make:'Volkswagen', models:['Polo'],
-      engines:['1.4 TSI'], from:650,  to:957 },
-    { service:'Timing Chain Replacement', make:'Volkswagen', models:['Tiguan'],
-      engines:['1.4 TSI'], from:950,  to:1500 },
-    { service:'Timing Chain Replacement', make:'Volkswagen', models:['Tiguan'],
-      engines:['2.0 TSI'], from:950,  to:1500 },
+      engines:['1.4 TSI'], yearFrom:2010, yearTo:2017, from:650,  to:957 },
     { service:'Timing Chain Replacement', make:'Volkswagen', models:['Scirocco'],
-      engines:['1.4 TSI'], from:1000, to:1500 },
+      engines:['1.4 TSI'], yearFrom:2008, yearTo:2017, from:1000, to:1500 },
     { service:'Timing Chain Replacement', make:'Volkswagen', models:['Scirocco'],
-      engines:['2.0 TSI'], from:850,  to:1000 },
+      engines:['2.0 TSI'], yearFrom:2008, yearTo:2017, from:850,  to:1000 },
+    { service:'Timing Chain Replacement', make:'Volkswagen', models:['Passat'],
+      engines:['1.4 TSI'], yearFrom:2008, yearTo:2014, from:850,  to:1400 },
+    { service:'Timing Chain Replacement', make:'Volkswagen', models:['Passat'],
+      engines:['1.8 TSI'], yearFrom:2008, yearTo:2015, from:1000, to:1250 },
+    { service:'Timing Chain Replacement', make:'Volkswagen', models:['Passat'],
+      engines:['2.0 TSI'], yearFrom:2008, yearTo:2015, from:950,  to:1450 },
     { service:'Timing Chain Replacement', make:'Volkswagen', models:['Touran'],
-      engines:['1.4 TSI'], from:950,  to:1250 },
+      engines:['1.4 TSI'], yearFrom:2007, yearTo:2015, from:950,  to:1250 },
     { service:'Timing Chain Replacement', make:'Volkswagen', models:['Beetle'],
-      engines:['1.2 TSI'], from:620,  to:750 },
+      engines:['1.2 TSI'], yearFrom:2011, yearTo:2018, from:620,  to:750 },
     { service:'Timing Chain Replacement', make:'Volkswagen', models:['Beetle'],
-      engines:['1.4 TSI'], from:800,  to:1220 },
+      engines:['1.4 TSI'], yearFrom:2011, yearTo:2018, from:800,  to:1220 },
     { service:'Timing Chain Replacement', make:'Volkswagen', models:['Beetle'],
-      engines:['2.0 TSI'], from:700,  to:1150 },
-    { service:'Timing Chain Replacement', make:'Volkswagen', models:['Passat'],
-      engines:['1.4 TSI'], from:850,  to:1400 },
-    { service:'Timing Chain Replacement', make:'Volkswagen', models:['Passat'],
-      engines:['1.8 TSI'], from:1000, to:1250 },
-    { service:'Timing Chain Replacement', make:'Volkswagen', models:['Passat'],
-      engines:['2.0 TSI'], from:500,  to:750 },
+      engines:['2.0 TSI'], yearFrom:2011, yearTo:2018, from:700,  to:1150 },
+    { service:'Timing Chain Replacement', make:'Volkswagen', models:['Tiguan'],
+      engines:['1.4 TSI'], yearFrom:2008, yearTo:2016, from:950,  to:1500 },
+    { service:'Timing Chain Replacement', make:'Volkswagen', models:['Tiguan'],
+      engines:['2.0 TSI'], yearFrom:2008, yearTo:2017, from:950,  to:1500 },
+    { service:'Timing Chain Replacement', make:'Volkswagen', models:['EOS'],
+      engines:['1.4 TSI'], yearFrom:2008, yearTo:2015, from:850,  to:1200 },
+    { service:'Timing Chain Replacement', make:'Volkswagen', models:['EOS'],
+      engines:['2.0 TSI'], yearFrom:2008, yearTo:2015, from:950,  to:1350 },
+    { service:'Timing Chain Replacement', make:'Volkswagen', models:['CC'],
+      engines:['1.8 TSI'], yearFrom:2009, yearTo:2016, from:950,  to:1400 },
+    { service:'Timing Chain Replacement', make:'Volkswagen', models:['CC'],
+      engines:['2.0 TSI'], yearFrom:2009, yearTo:2016, from:950,  to:1450 },
 
     /* ----- SEAT chain ----- */
     { service:'Timing Chain Replacement', make:'SEAT', models:['Leon'],
@@ -3615,8 +3949,9 @@ body{
   // Timing Chain Replacement and Wet Oil Pump Belt Replacement are NOT clamped.
   var WET_BELT_MIN = 750;
 
-  function calculateNet(make, model, engine, jobType){
+  function calculateNet(make, model, engine, jobType, year){
     if (!make || !model || !engine || !jobType) return null;
+    var y = year ? parseInt(year, 10) : null;
 
     for (var i = 0; i < PRICING.length; i++){
       var r = PRICING[i];
@@ -3627,6 +3962,13 @@ body{
       if (engineList && engineList.indexOf(engine) === -1) continue;
       var modelList = r.models || (r.model ? [r.model] : null);
       if (modelList && modelList.indexOf(model) === -1) continue;
+      // Year window — only checked when the rule declares one AND
+      // the customer chose a year. Lets two rules share the same
+      // model/engine but apply at different price points by generation.
+      if (y !== null && (r.yearFrom !== undefined || r.yearTo !== undefined)){
+        if (r.yearFrom !== undefined && y < r.yearFrom) continue;
+        if (r.yearTo   !== undefined && y > r.yearTo)   continue;
+      }
       var p = { from: r.from };
       if (r.to   !== undefined) p.to   = r.to;
       if (r.plus === true)      p.plus = true;
@@ -3705,8 +4047,12 @@ body{
     return Object.keys(matched).sort();
   }
 
-  function enginesForMakeModelService(make, model, service){
-    if (!make || !model || !service) return [];   // all three gates required
+  function enginesForMakeModelService(make, model, service, year){
+    if (!make || !model || !service) return [];   // make/model/service required
+    // Year is OPTIONAL. When provided, year-aware rules (those carrying
+    // yearFrom/yearTo) only appear if the selected year is within range.
+    // Rules WITHOUT yearFrom/yearTo are unaffected.
+    var y = year ? parseInt(year, 10) : null;
     var matched = {}, hasUniversal = false, ordered = [];
     for (var i = 0; i < PRICING.length; i++){
       var r = PRICING[i];
@@ -3715,6 +4061,12 @@ body{
       if (ms.length > 0 && ms.indexOf(make) === -1) continue;
       var mds = r.models || (r.model ? [r.model] : []);
       if (mds.length > 0 && mds.indexOf(model) === -1) continue;
+      // Year-window check — only applies when the rule declares one AND
+      // the customer has chosen a year.
+      if (y !== null && (r.yearFrom !== undefined || r.yearTo !== undefined)){
+        if (r.yearFrom !== undefined && y < r.yearFrom) continue;
+        if (r.yearTo   !== undefined && y > r.yearTo)   continue;
+      }
       var es = r.engines || (r.engine ? [r.engine] : []);
       if (es.length === 0){ hasUniversal = true; continue; }
       for (var j = 0; j < es.length; j++){
@@ -3932,29 +4284,38 @@ body{
   });
 
   // --- Model change: rebuild Engine from (service + make + model) only.
-  if (qModel) qModel.addEventListener('change', function(){
+  // Shared helper — rebuilds the engine dropdown from the current Job
+  // Type + Make + Model + Year selection. Called from both Model change
+  // AND Year change so picking a year correctly prunes engines that
+  // aren't valid for that model year (e.g. Golf 1.4 TSI chain only
+  // appears for years 2007-2013).
+  function rebuildEngines(){
     var make    = qMake  ? qMake.value  : '';
     var model   = qModel ? qModel.value : '';
     var service = qJob   ? qJob.value   : '';
-
+    var year    = qYear  ? qYear.value  : '';
     resetEngineDropdown();
-
     if (make && model && service){
-      var engines = enginesForMakeModelService(make, model, service);
+      var engines = enginesForMakeModelService(make, model, service, year);
       clearAndAdd(qEngine, engines, 'Select engine…');
       qEngine.disabled = (engines.length === 0);
-      // Convenience: auto-select if only one valid engine.
       if (engines.length === 1) qEngine.value = engines[0];
     }
+  }
 
+  if (qModel) qModel.addEventListener('change', function(){
+    rebuildEngines();
     updateQuoteCard();
   });
 
   // --- Engine change: only refresh the quote card. No further cascade.
   if (qEngine) qEngine.addEventListener('change', updateQuoteCard);
-  // --- Year change: metadata only — refresh the quote card so the live
-  //     vehicle summary block shows the chosen year right away.
-  if (qYear)   qYear.addEventListener('change',   updateQuoteCard);
+  // --- Year change: rebuild engines (year-aware filter) AND refresh
+  //     the live quote card summary block.
+  if (qYear)   qYear.addEventListener('change',   function(){
+    rebuildEngines();
+    updateQuoteCard();
+  });
 
   // Switch the "What's Included" panel content to match the
   // selected service. Wet belt + wet oil pump belt share one
@@ -3962,13 +4323,14 @@ body{
   function updateIncludedPanel(service){
     var panel = document.getElementById('qcIncluded');
     if (!panel) return;
-    var key;
-    if (service === 'Timing Chain Replacement')                                                       key = 'chain';
-    else if (service === 'Belt / Wet Belt Replacement' || service === 'Wet Oil Pump Belt Replacement') key = 'wet';
-    else                                                                                               key = 'wet';
+    // Both lists are now ALWAYS visible (each under its own section heading
+    // with a premium divider between them). We still flip data-service on
+    // the panel so the active list can be subtly highlighted by CSS.
+    var key = (service === 'Timing Chain Replacement') ? 'chain' : 'wet';
     panel.setAttribute('data-service', key);
     panel.querySelectorAll('.qci-list').forEach(function(ul){
-      ul.hidden = (ul.getAttribute('data-for') !== key);
+      ul.hidden = false;
+      ul.classList.toggle('qci-list--active', ul.getAttribute('data-for') === key);
     });
   }
 
@@ -4018,7 +4380,7 @@ body{
       return;
     }
 
-    var p = calculateNet(make, model, engine, job);
+    var p = calculateNet(make, model, engine, job, year);
 
     if (p === null){
       qcStatus.textContent = 'Enquiry required';
@@ -4080,7 +4442,7 @@ body{
         return;
       }
 
-      var p = calculateNet(make, model, engine, job);
+      var p = calculateNet(make, model, engine, job, year);
       var netLbl   = priceLabel(p, 'net');
       var vatLbl   = priceLabel(p, 'vat');
       var grossLbl = priceLabel(p, 'gross');
@@ -4221,9 +4583,42 @@ body{
             '<strong>Enquiry sent successfully</strong>' +
             '<small>Thank you for contacting <strong>Wigan Wetbelts</strong>. A member of our team will be in touch shortly. For urgent enquiries call ' +
             '<a href="tel:01942800252" style="color:inherit;text-decoration:underline">01942 800252</a>.</small>' +
+            // ----- Wet Belt Run launcher -----
+            // Only injected once the FormSubmit POST returns 2xx, so the
+            // game can NEVER appear before the enquiry is on its way to
+            // the workshop. The buttons fire window.WBR.open() (defined
+            // in the game module further down).
+            '<div class="qc-after-actions">' +
+              '<button type="button" class="btn btn-primary qc-play-btn" id="qcPlayGame">' +
+                '<span>Play Wet Belt Run</span>' +
+                '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="6 4 20 12 6 20 6 4"/></svg>' +
+              '</button>' +
+              '<button type="button" class="btn btn-ghost qc-play-close" id="qcPlayClose">Close</button>' +
+              '<small class="qc-play-hint">A small thank-you while we get to your enquiry.</small>' +
+            '</div>' +
           '</div>';
         qcFeedback.classList.add('show','success');
         _restoreBtn();
+
+        // Wire the freshly injected buttons. Re-querying is cheap and
+        // avoids any duplicate listeners — the innerHTML above wipes out
+        // any previous click bindings on its children.
+        var playBtn  = document.getElementById('qcPlayGame');
+        var closeBtn = document.getElementById('qcPlayClose');
+        if (playBtn){
+          playBtn.addEventListener('click', function(){
+            if (window.WBR && typeof window.WBR.open === 'function') window.WBR.open();
+          });
+        }
+        if (closeBtn){
+          closeBtn.addEventListener('click', function(){
+            // Hide the entire success block — gives the customer a clean
+            // page state again if they don't want to play.
+            qcFeedback.classList.remove('show','success');
+            qcFeedback.innerHTML = '';
+          });
+        }
+
         try {
           if (qcSummary && qcSummary.scrollIntoView){
             setTimeout(function(){ qcSummary.scrollIntoView({behavior:'smooth', block:'center'}); }, 140);
@@ -4563,6 +4958,41 @@ body{
   try { _isNarrow = window.matchMedia('(max-width:900px)').matches; } catch(e){}
 
   // ----- Hero parallax (subtle, smooth, mobile-safe) -----
+  // ----- Scroll-aware bottom edge fade -----
+  // Adds .is-visible to #bottomFade while the user is scrolling DOWN and
+  // removes it while scrolling UP. The CSS opacity transition handles the
+  // actual fade — JS is just nudging the class. Also hides the fade when
+  // the user is parked at the very top or very bottom of the page so it
+  // doesn't sit awkwardly when there's nothing more below.
+  (function setupBottomFade(){
+    if (_prefersReduced) return;
+    var fade = document.getElementById('bottomFade');
+    if (!fade) return;
+    var lastY    = window.scrollY || 0;
+    var ticking  = false;
+
+    function update(){
+      ticking = false;
+      var y      = window.scrollY || 0;
+      var max    = (document.documentElement.scrollHeight - window.innerHeight) || 1;
+      var dy     = y - lastY;
+      lastY      = y;
+      var atTop    = y < 40;
+      var atBottom = (max - y) < 40;
+      var scrollingDown = dy > 0;
+      // Show fade when actively scrolling down and we're not pinned at
+      // either extreme of the page.
+      if (scrollingDown && !atTop && !atBottom){
+        fade.classList.add('is-visible');
+      } else if (dy < 0 || atTop || atBottom){
+        fade.classList.remove('is-visible');
+      }
+    }
+    window.addEventListener('scroll', function(){
+      if (!ticking){ requestAnimationFrame(update); ticking = true; }
+    }, {passive:true});
+  })();
+
   (function setupHeroParallax(){
     if (_prefersReduced) return;
 
@@ -4867,6 +5297,504 @@ body{
     // Initial render — covers any restored state from localStorage
     update();
   })();
+})();
+</script>
+
+<!-- ============================================================
+     WET BELT RUN — premium mini-game
+     Hidden until the customer's quote has successfully sent. The
+     launcher button inside the success message calls window.WBR.open().
+     Encapsulated in its own IIFE so nothing leaks into the main page
+     scope. requestAnimationFrame is paused on close so it never runs
+     in the background. Best score persists via localStorage.
+     ============================================================ -->
+<div class="wbr-modal" id="wbrModal" hidden aria-hidden="true" role="dialog" aria-label="Wet Belt Run mini game">
+  <div class="wbr-backdrop" data-close="1"></div>
+  <div class="wbr-shell">
+    <button class="wbr-x" type="button" id="wbrXClose" aria-label="Close game" data-close="1">
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6 18 18M18 6 6 18"/></svg>
+    </button>
+
+    <div class="wbr-hud">
+      <div class="wbr-stat wbr-stat-score"><span class="wbr-stat-label">Score</span><strong id="wbrScore">0</strong></div>
+      <div class="wbr-stat wbr-stat-best"><span class="wbr-stat-label">Best</span><strong id="wbrBest">0</strong></div>
+    </div>
+
+    <canvas id="wbrCanvas" class="wbr-canvas" tabindex="0"></canvas>
+
+    <div class="wbr-footer">Wet Belt Run</div>
+
+    <!-- Game over overlay — fixed inside the modal so the canvas stays
+         behind it. Buttons get fresh click bindings each time, never
+         layered. -->
+    <div class="wbr-over" id="wbrOver" hidden>
+      <div class="wbr-over-card">
+        <span class="wbr-over-eyebrow">Game Over</span>
+        <div class="wbr-over-stats">
+          <div class="wbr-over-stat"><small>Final Score</small><strong id="wbrFinalScore">0</strong></div>
+          <div class="wbr-over-stat"><small>Best Score</small><strong id="wbrBestScore">0</strong></div>
+        </div>
+        <div class="wbr-over-actions">
+          <button type="button" class="btn btn-primary wbr-btn-again" id="wbrAgain">Play Again</button>
+          <button type="button" class="btn btn-ghost wbr-btn-close" id="wbrCloseGame" data-close="1">Close Game</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   WET BELT RUN — game engine
+   Standalone module. Exposes window.WBR with open()/close() so
+   the quote success handler can trigger it. Touch drag + arrow
+   keys. Canvas auto-resizes with devicePixelRatio. Best score
+   stored in localStorage under 'wbr.best.v1'.
+   ============================================================ */
+(function(){
+  var modal   = document.getElementById('wbrModal');
+  var canvas  = document.getElementById('wbrCanvas');
+  if (!modal || !canvas) return;
+  var ctx     = canvas.getContext('2d');
+
+  var elScore     = document.getElementById('wbrScore');
+  var elBest      = document.getElementById('wbrBest');
+  var elOver      = document.getElementById('wbrOver');
+  var elFinalScore= document.getElementById('wbrFinalScore');
+  var elBestScore = document.getElementById('wbrBestScore');
+  var btnAgain    = document.getElementById('wbrAgain');
+
+  var BEST_KEY = 'wbr.best.v1';
+
+  // Logical canvas dimensions — set by resize(). We keep all game
+  // coordinates in CSS pixels and let the DPR scaling apply the
+  // device-pixel multiplier so it stays razor sharp on retina.
+  var W = 0, H = 0;
+
+  // Game state
+  var running    = false;     // RAF loop running?
+  var alive      = false;     // not crashed yet?
+  var rafId      = 0;
+  var lastTime   = 0;
+  var roadOffset = 0;
+  var speed      = 0;
+  var score      = 0;
+  var bestScore  = 0;
+  var spawnTimer = 0;
+  var spawnEvery = 0;
+  var obstacles  = [];
+  var player     = null;
+  var keys       = { left:false, right:false };
+  var touch      = { active:false, lastX:0 };
+
+  // ---------- Setup ----------
+  function loadBest(){
+    try { bestScore = parseInt(localStorage.getItem(BEST_KEY), 10) || 0; }
+    catch(e){ bestScore = 0; }
+    if (elBest) elBest.textContent = bestScore;
+  }
+  function saveBest(){
+    try { localStorage.setItem(BEST_KEY, String(bestScore)); } catch(e){}
+  }
+
+  function resize(){
+    var rect = canvas.getBoundingClientRect();
+    var dpr = Math.max(1, window.devicePixelRatio || 1);
+    W = Math.max(240, Math.round(rect.width));
+    H = Math.max(360, Math.round(rect.height));
+    canvas.width  = Math.round(W * dpr);
+    canvas.height = Math.round(H * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+
+  function newGame(){
+    resize();
+    var pw = Math.max(34, Math.min(64, W * 0.13));
+    player = {
+      w: pw,
+      h: pw * 1.7,
+      x: W * 0.5 - pw * 0.5,
+      tx: W * 0.5 - pw * 0.5,
+      y: H - pw * 1.7 - Math.max(20, H * 0.06)
+    };
+    obstacles  = [];
+    roadOffset = 0;
+    speed      = Math.max(3.4, H * 0.0055);
+    score      = 0;
+    spawnTimer = 0;
+    spawnEvery = 78;
+    alive      = true;
+    if (elOver) elOver.hidden = true;
+    if (elScore) elScore.textContent = 0;
+  }
+
+  // ---------- Spawning ----------
+  function spawnObstacle(){
+    // Six obstacle archetypes. Width picked per-type for variety.
+    var TYPES = [
+      { t:'car',      w:0.13, h:0.22, c:'#2c3038' },
+      { t:'oil',      w:0.18, h:0.10, c:'#0c0e10' },
+      { t:'debris',   w:0.12, h:0.06, c:'#48413a' },
+      { t:'triangle', w:0.10, h:0.10, c:'#f5a524' },
+      { t:'tool',     w:0.09, h:0.18, c:'#7a808a' },
+      { t:'cone',     w:0.07, h:0.10, c:'#f97316' }
+    ];
+    var pick = TYPES[(Math.random() * TYPES.length) | 0];
+    var ow = Math.max(28, W * pick.w);
+    var oh = Math.max(22, H * pick.h);
+    var lanePad = Math.max(12, W * 0.05);
+    var ox = lanePad + Math.random() * (W - ow - 2 * lanePad);
+    obstacles.push({ type:pick.t, x:ox, y:-oh - 10, w:ow, h:oh, colour:pick.c });
+  }
+
+  // ---------- Update ----------
+  function updatePlayer(dt){
+    var step = Math.max(4, W * 0.012) * dt * 60;
+    if (keys.left)  player.tx -= step;
+    if (keys.right) player.tx += step;
+    // Clamp to road
+    var pad = Math.max(8, W * 0.03);
+    if (player.tx < pad) player.tx = pad;
+    if (player.tx + player.w > W - pad) player.tx = W - pad - player.w;
+    // Lerp for smooth handling feel
+    player.x += (player.tx - player.x) * 0.22;
+  }
+  function updateObstacles(dt){
+    for (var i = 0; i < obstacles.length; i++){
+      obstacles[i].y += speed * dt * 60;
+    }
+    // Drop ones past the bottom
+    obstacles = obstacles.filter(function(o){ return o.y < H + 40; });
+  }
+  function checkCollision(){
+    var p = player;
+    // Inset the player hitbox slightly so corners don't trigger unfair hits
+    var pl = p.x + p.w * 0.12;
+    var pr = p.x + p.w * 0.88;
+    var pt = p.y + p.h * 0.10;
+    var pb = p.y + p.h * 0.95;
+    for (var i = 0; i < obstacles.length; i++){
+      var o = obstacles[i];
+      if (pr < o.x || pl > o.x + o.w) continue;
+      if (pb < o.y || pt > o.y + o.h) continue;
+      return true;
+    }
+    return false;
+  }
+
+  function update(dt){
+    if (!alive) return;
+    roadOffset = (roadOffset + speed * dt * 60) % 80;
+    updatePlayer(dt);
+    updateObstacles(dt);
+    spawnTimer += dt * 60;
+    if (spawnTimer >= spawnEvery){
+      spawnTimer = 0;
+      spawnObstacle();
+      // Gradually tighten spawn interval down to a floor.
+      if (spawnEvery > 28) spawnEvery -= 0.35;
+    }
+    // Speed and score
+    speed  += 0.0025 * dt * 60;
+    score  += Math.max(1, Math.round(speed * 0.6));
+    if (elScore) elScore.textContent = score;
+    if (checkCollision()) endGame();
+  }
+
+  // ---------- Draw ----------
+  function drawRoad(){
+    // Base road
+    ctx.fillStyle = '#0a0c0e';
+    ctx.fillRect(0, 0, W, H);
+    // Charcoal road body
+    var roadPad = Math.max(8, W * 0.04);
+    ctx.fillStyle = '#15181c';
+    ctx.fillRect(roadPad, 0, W - 2 * roadPad, H);
+    // Subtle teal vignette glow along road edges
+    var grad = ctx.createLinearGradient(0, 0, W, 0);
+    grad.addColorStop(0,    'rgba(34,211,197,.10)');
+    grad.addColorStop(0.5,  'rgba(34,211,197,0)');
+    grad.addColorStop(1,    'rgba(34,211,197,.10)');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, W, H);
+    // Lane markers — three lanes, dashed white-ish lines that scroll
+    ctx.strokeStyle = 'rgba(255,255,255,.30)';
+    ctx.lineWidth   = Math.max(2, W * 0.005);
+    ctx.setLineDash([24, 28]);
+    ctx.lineDashOffset = -roadOffset;
+    for (var i = 1; i < 3; i++){
+      var lx = roadPad + (W - 2 * roadPad) * (i / 3);
+      ctx.beginPath();
+      ctx.moveTo(lx, -20);
+      ctx.lineTo(lx, H + 20);
+      ctx.stroke();
+    }
+    ctx.setLineDash([]);
+    ctx.lineDashOffset = 0;
+    // Edge glow strips
+    ctx.fillStyle = 'rgba(34,211,197,.35)';
+    ctx.fillRect(roadPad - 2, 0, 2, H);
+    ctx.fillRect(W - roadPad, 0, 2, H);
+  }
+  function drawPlayer(){
+    var p = player;
+    // Body — rounded rect with teal underglow
+    ctx.save();
+    ctx.shadowColor = 'rgba(34,211,197,.55)';
+    ctx.shadowBlur  = 18;
+    roundedRect(p.x, p.y, p.w, p.h, Math.min(8, p.w * 0.18));
+    var g = ctx.createLinearGradient(p.x, p.y, p.x, p.y + p.h);
+    g.addColorStop(0,    '#1c2127');
+    g.addColorStop(0.55, '#0f1216');
+    g.addColorStop(1,    '#06080a');
+    ctx.fillStyle = g;
+    ctx.fill();
+    ctx.restore();
+    // Windscreen + roof line
+    ctx.fillStyle = 'rgba(94,234,212,.18)';
+    ctx.fillRect(p.x + p.w * 0.18, p.y + p.h * 0.16, p.w * 0.64, p.h * 0.30);
+    ctx.fillStyle = 'rgba(255,255,255,.05)';
+    ctx.fillRect(p.x + p.w * 0.18, p.y + p.h * 0.52, p.w * 0.64, p.h * 0.22);
+    // Headlight teal sparks at the front
+    ctx.fillStyle = 'rgba(94,234,212,.85)';
+    ctx.fillRect(p.x + p.w * 0.16, p.y + p.h * 0.05, p.w * 0.18, p.h * 0.04);
+    ctx.fillRect(p.x + p.w * 0.66, p.y + p.h * 0.05, p.w * 0.18, p.h * 0.04);
+    // Tail lights
+    ctx.fillStyle = 'rgba(239, 68, 68, .80)';
+    ctx.fillRect(p.x + p.w * 0.16, p.y + p.h * 0.92, p.w * 0.18, p.h * 0.04);
+    ctx.fillRect(p.x + p.w * 0.66, p.y + p.h * 0.92, p.w * 0.18, p.h * 0.04);
+  }
+  function roundedRect(x, y, w, h, r){
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.lineTo(x + w - r, y);
+    ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+    ctx.lineTo(x + w, y + h - r);
+    ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+    ctx.lineTo(x + r, y + h);
+    ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+    ctx.lineTo(x, y + r);
+    ctx.quadraticCurveTo(x, y, x + r, y);
+    ctx.closePath();
+  }
+  function drawObstacles(){
+    for (var i = 0; i < obstacles.length; i++){
+      var o = obstacles[i];
+      ctx.save();
+      switch (o.type){
+        case 'car':
+          ctx.shadowColor = 'rgba(0,0,0,.5)'; ctx.shadowBlur = 10;
+          roundedRect(o.x, o.y, o.w, o.h, 6);
+          var gc = ctx.createLinearGradient(o.x, o.y, o.x, o.y + o.h);
+          gc.addColorStop(0, '#2c3038'); gc.addColorStop(1, '#15181c');
+          ctx.fillStyle = gc; ctx.fill();
+          ctx.fillStyle = 'rgba(255,255,255,.10)';
+          ctx.fillRect(o.x + o.w * 0.18, o.y + o.h * 0.30, o.w * 0.64, o.h * 0.18);
+          // Tail lights (these cars are facing AWAY from player)
+          ctx.fillStyle = 'rgba(239,68,68,.7)';
+          ctx.fillRect(o.x + o.w * 0.10, o.y + o.h * 0.06, o.w * 0.22, o.h * 0.04);
+          ctx.fillRect(o.x + o.w * 0.68, o.y + o.h * 0.06, o.w * 0.22, o.h * 0.04);
+          break;
+        case 'oil':
+          var og = ctx.createRadialGradient(o.x + o.w/2, o.y + o.h/2, 2, o.x + o.w/2, o.y + o.h/2, o.w/1.4);
+          og.addColorStop(0, 'rgba(34,211,197,.35)');
+          og.addColorStop(0.4, 'rgba(0,0,0,.95)');
+          og.addColorStop(1, 'rgba(0,0,0,.0)');
+          ctx.fillStyle = og;
+          ctx.beginPath();
+          ctx.ellipse(o.x + o.w/2, o.y + o.h/2, o.w/2, o.h/2, 0, 0, Math.PI*2);
+          ctx.fill();
+          break;
+        case 'debris':
+          ctx.fillStyle = '#3a342d';
+          for (var k = 0; k < 4; k++){
+            var dx = o.x + Math.random() * o.w * 0.7;
+            var dy = o.y + Math.random() * o.h * 0.6;
+            ctx.fillRect(dx, dy, o.w * 0.2, 3);
+          }
+          ctx.fillStyle = 'rgba(94,234,212,.25)';
+          ctx.fillRect(o.x, o.y + o.h*0.3, o.w, 2);
+          break;
+        case 'triangle':
+          ctx.fillStyle = o.colour;
+          ctx.beginPath();
+          ctx.moveTo(o.x + o.w/2, o.y);
+          ctx.lineTo(o.x + o.w, o.y + o.h);
+          ctx.lineTo(o.x, o.y + o.h);
+          ctx.closePath();
+          ctx.fill();
+          ctx.fillStyle = '#000';
+          ctx.fillRect(o.x + o.w*0.42, o.y + o.h*0.3, o.w*0.16, o.h*0.4);
+          ctx.fillRect(o.x + o.w*0.42, o.y + o.h*0.78, o.w*0.16, o.h*0.10);
+          break;
+        case 'tool':
+          ctx.fillStyle = '#7a808a';
+          roundedRect(o.x + o.w*0.30, o.y, o.w*0.4, o.h*0.85, 3);
+          ctx.fill();
+          ctx.fillStyle = '#15181c';
+          ctx.fillRect(o.x + o.w*0.30, o.y + o.h*0.78, o.w*0.4, o.h*0.18);
+          ctx.fillStyle = 'rgba(255,255,255,.18)';
+          ctx.fillRect(o.x + o.w*0.32, o.y + o.h*0.10, o.w*0.36, 2);
+          break;
+        case 'cone':
+          ctx.fillStyle = o.colour;
+          ctx.beginPath();
+          ctx.moveTo(o.x + o.w/2, o.y);
+          ctx.lineTo(o.x + o.w, o.y + o.h*0.85);
+          ctx.lineTo(o.x, o.y + o.h*0.85);
+          ctx.closePath();
+          ctx.fill();
+          ctx.fillStyle = 'rgba(255,255,255,.7)';
+          ctx.fillRect(o.x + o.w*0.18, o.y + o.h*0.35, o.w*0.64, 3);
+          ctx.fillStyle = '#15181c';
+          ctx.fillRect(o.x - o.w*0.05, o.y + o.h*0.85, o.w*1.1, o.h*0.13);
+          break;
+      }
+      ctx.restore();
+    }
+  }
+  function render(){
+    drawRoad();
+    drawObstacles();
+    drawPlayer();
+  }
+
+  function tick(now){
+    if (!running) return;
+    if (!lastTime) lastTime = now;
+    var dt = Math.min(0.05, (now - lastTime) / 1000);
+    lastTime = now;
+    update(dt);
+    render();
+    rafId = requestAnimationFrame(tick);
+  }
+
+  function endGame(){
+    alive = false;
+    if (score > bestScore){
+      bestScore = score;
+      saveBest();
+    }
+    if (elBest)       elBest.textContent       = bestScore;
+    if (elFinalScore) elFinalScore.textContent = score;
+    if (elBestScore)  elBestScore.textContent  = bestScore;
+    if (elOver)       elOver.hidden = false;
+  }
+
+  // ---------- Input handlers (stored so we can remove cleanly) ----------
+  function onKeyDown(e){
+    if (e.key === 'ArrowLeft'  || e.key === 'a' || e.key === 'A') keys.left  = true;
+    if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') keys.right = true;
+    if (e.key === 'Escape') close();
+  }
+  function onKeyUp(e){
+    if (e.key === 'ArrowLeft'  || e.key === 'a' || e.key === 'A') keys.left  = false;
+    if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') keys.right = false;
+  }
+  function onTouchStart(e){
+    if (!e.touches || !e.touches.length) return;
+    touch.active = true;
+    touch.lastX  = e.touches[0].clientX;
+  }
+  function onTouchMove(e){
+    if (!touch.active || !e.touches || !e.touches.length) return;
+    e.preventDefault();
+    var x  = e.touches[0].clientX;
+    var dx = x - touch.lastX;
+    touch.lastX = x;
+    if (player) player.tx += dx;
+  }
+  function onTouchEnd(){ touch.active = false; }
+  function onPointerDown(e){
+    if (e.pointerType === 'mouse') return; // only treat as drag for touch/pen
+    touch.active = true; touch.lastX = e.clientX;
+  }
+  function onPointerMove(e){
+    if (!touch.active || e.pointerType === 'mouse') return;
+    var x = e.clientX; var dx = x - touch.lastX; touch.lastX = x;
+    if (player) player.tx += dx;
+  }
+  function onPointerUp(){ touch.active = false; }
+  function onResize(){ resize(); }
+
+  function bindInputs(){
+    document.addEventListener('keydown', onKeyDown);
+    document.addEventListener('keyup',   onKeyUp);
+    canvas.addEventListener('touchstart', onTouchStart, {passive:true});
+    canvas.addEventListener('touchmove',  onTouchMove,  {passive:false});
+    canvas.addEventListener('touchend',   onTouchEnd);
+    canvas.addEventListener('touchcancel',onTouchEnd);
+    canvas.addEventListener('pointerdown', onPointerDown);
+    canvas.addEventListener('pointermove', onPointerMove);
+    canvas.addEventListener('pointerup',   onPointerUp);
+    canvas.addEventListener('pointercancel', onPointerUp);
+    window.addEventListener('resize', onResize);
+  }
+  function unbindInputs(){
+    document.removeEventListener('keydown', onKeyDown);
+    document.removeEventListener('keyup',   onKeyUp);
+    canvas.removeEventListener('touchstart', onTouchStart);
+    canvas.removeEventListener('touchmove',  onTouchMove);
+    canvas.removeEventListener('touchend',   onTouchEnd);
+    canvas.removeEventListener('touchcancel',onTouchEnd);
+    canvas.removeEventListener('pointerdown', onPointerDown);
+    canvas.removeEventListener('pointermove', onPointerMove);
+    canvas.removeEventListener('pointerup',   onPointerUp);
+    canvas.removeEventListener('pointercancel', onPointerUp);
+    window.removeEventListener('resize', onResize);
+  }
+
+  // ---------- Public API ----------
+  function open(){
+    loadBest();
+    modal.hidden = false;
+    modal.setAttribute('aria-hidden', 'false');
+    document.body.classList.add('wbr-locked');
+    // Defer one frame so the modal's layout is measured before we
+    // size the canvas to it.
+    requestAnimationFrame(function(){
+      newGame();
+      bindInputs();
+      running  = true;
+      lastTime = 0;
+      cancelAnimationFrame(rafId);
+      rafId = requestAnimationFrame(tick);
+      try { canvas.focus({preventScroll:true}); } catch(e){}
+    });
+  }
+  function close(){
+    running = false;
+    cancelAnimationFrame(rafId);
+    rafId = 0;
+    unbindInputs();
+    if (elOver) elOver.hidden = true;
+    modal.hidden = true;
+    modal.setAttribute('aria-hidden', 'true');
+    document.body.classList.remove('wbr-locked');
+  }
+  function restart(){
+    newGame();
+    running = true;
+    lastTime = 0;
+    cancelAnimationFrame(rafId);
+    rafId = requestAnimationFrame(tick);
+  }
+
+  // Bind the persistent shell controls ONCE on script load.
+  if (btnAgain) btnAgain.addEventListener('click', restart);
+  // Any element marked [data-close] (the × button, the backdrop, the
+  // Close Game button on the game-over card) closes the modal.
+  modal.addEventListener('click', function(e){
+    var t = e.target;
+    while (t && t !== modal){
+      if (t.hasAttribute && t.hasAttribute('data-close')){ close(); return; }
+      t = t.parentNode;
+    }
+  });
+
+  // Expose API for the success-message launcher.
+  window.WBR = { open: open, close: close };
+  loadBest();
 })();
 </script>
 </body>
