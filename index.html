@@ -2423,10 +2423,35 @@ body{
 
           <fieldset class="qf-block">
             <legend>2. Your Vehicle</legend>
-            <div class="qf-row" style="margin-bottom:14px">
+            <div class="qf-row" style="margin-bottom:14px;grid-template-columns:1fr 1fr">
               <label class="qf-field">
                 <span>Vehicle Registration <i>*</i></span>
                 <input id="qReg" type="text" placeholder="AB12 CDE" autocomplete="off" maxlength="10" required style="text-transform:uppercase;letter-spacing:.05em"/>
+              </label>
+              <label class="qf-field">
+                <span>Year</span>
+                <select id="qYear">
+                  <option value="">Select year…</option>
+                  <option>2026</option>
+                  <option>2025</option>
+                  <option>2024</option>
+                  <option>2023</option>
+                  <option>2022</option>
+                  <option>2021</option>
+                  <option>2020</option>
+                  <option>2019</option>
+                  <option>2018</option>
+                  <option>2017</option>
+                  <option>2016</option>
+                  <option>2015</option>
+                  <option>2014</option>
+                  <option>2013</option>
+                  <option>2012</option>
+                  <option>2011</option>
+                  <option>2010</option>
+                  <option>2009</option>
+                  <option>2008</option>
+                </select>
               </label>
             </div>
             <div class="qf-row">
@@ -2521,6 +2546,7 @@ body{
           <div class="qc-block"><small>Make</small><strong id="qcMake">…</strong></div>
           <div class="qc-block"><small>Model</small><strong id="qcModel">…</strong></div>
           <div class="qc-block"><small>Engine</small><strong id="qcEngine">…</strong></div>
+          <div class="qc-block"><small>Year</small><strong id="qcYear">…</strong></div>
           <div class="qc-block"><small>Job Type</small><strong id="qcJob">…</strong></div>
         </div>
 
@@ -3018,10 +3044,17 @@ body{
     /* ----- Ford EcoBoost / EcoBlue ----- */
     { service:'Belt / Wet Belt Replacement', make:'Ford', models:['Fiesta'],
       engines:['1.0 EcoBoost','1.0 EcoBoost Hybrid'], from:957 },
+    /* Focus split: 1.0 EcoBoost = £1020, Hybrid stays at £1100. */
     { service:'Belt / Wet Belt Replacement', make:'Ford', models:['Focus'],
-      engines:['1.0 EcoBoost','1.0 EcoBoost Hybrid'], from:1100 },
-    { service:'Belt / Wet Belt Replacement', make:'Ford', models:['Puma'],
+      engines:['1.0 EcoBoost'], from:1020 },
+    { service:'Belt / Wet Belt Replacement', make:'Ford', models:['Focus'],
       engines:['1.0 EcoBoost Hybrid'], from:1100 },
+    { service:'Belt / Wet Belt Replacement', make:'Ford', models:['Puma'],
+      engines:['1.0 EcoBoost Hybrid'], from:850 },
+    { service:'Belt / Wet Belt Replacement', make:'Ford', models:['C Max'],
+      engines:['1.0 EcoBoost'], from:957 },
+    { service:'Belt / Wet Belt Replacement', make:'Ford', models:['D Max'],
+      engines:['1.0 EcoBoost'], from:957 },
     { service:'Belt / Wet Belt Replacement', make:'Ford', models:['EcoSport'],
       engines:['1.0 EcoBoost'], from:1100 },
     { service:'Belt / Wet Belt Replacement', make:'Ford', models:['Transit Courier'],
@@ -3083,18 +3116,57 @@ body{
     { service:'Belt / Wet Belt Replacement', make:'Toyota', models:['Proace'],
       engines:['2.0 HDi'], from:750, to:1100 },
 
-    /* ----- VAG (VW/Audi/SEAT/Skoda) belt work — £789 fixed
-       Not wet belts technically, but covered by Belt / Wet Belt Replacement. */
+    /* ----- Volkswagen belt — per-model / per-engine ranges.
+       `noFloor:true` opts these rules out of the £750 wet-belt minimum so
+       sub-£750 quotes (e.g. Tiguan 1.6 TDI from £567) display exactly as
+       supplied. NO 1.4 TSI under belt — 1.4 TSI is chain-only for VW. */
     { service:'Belt / Wet Belt Replacement', make:'Volkswagen', models:['Golf'],
-      engines:['1.0 TSI','1.6 TDI','2.0 TDI'], from:789 },
-    { service:'Belt / Wet Belt Replacement', make:'Volkswagen', models:['Polo'],
-      engines:['1.0 TSI','1.4 TDI'], from:789 },
-    { service:'Belt / Wet Belt Replacement', make:'Volkswagen', models:['Passat'],
-      engines:['1.6 TDI','2.0 TDI'], from:789 },
-    { service:'Belt / Wet Belt Replacement', make:'Volkswagen', models:['Tiguan'],
-      engines:['2.0 TDI'], from:789 },
+      engines:['1.0 TSI'], from:657, to:799,  noFloor:true },
+    { service:'Belt / Wet Belt Replacement', make:'Volkswagen', models:['Golf'],
+      engines:['1.6 TDI'], from:657, to:957,  noFloor:true },
+    { service:'Belt / Wet Belt Replacement', make:'Volkswagen', models:['Golf'],
+      engines:['2.0 TDI'], from:757, to:1150, noFloor:true },
     { service:'Belt / Wet Belt Replacement', make:'Volkswagen', models:['Golf GTD'],
-      engines:['2.0 TDI'], from:789 },
+      engines:['2.0 TDI'], from:757, to:857,  noFloor:true },
+    { service:'Belt / Wet Belt Replacement', make:'Volkswagen', models:['Polo'],
+      engines:['1.0 TSI'], from:657, to:757,  noFloor:true },
+    { service:'Belt / Wet Belt Replacement', make:'Volkswagen', models:['Polo'],
+      engines:['1.4 TDI'], from:657, to:857,  noFloor:true },
+    { service:'Belt / Wet Belt Replacement', make:'Volkswagen', models:['Polo'],
+      engines:['1.6 TDI'], from:757, to:957,  noFloor:true },
+    { service:'Belt / Wet Belt Replacement', make:'Volkswagen', models:['Passat'],
+      engines:['1.6 TDI'], from:657, to:857,  noFloor:true },
+    { service:'Belt / Wet Belt Replacement', make:'Volkswagen', models:['Passat'],
+      engines:['2.0 TDI'], from:657, to:957,  noFloor:true },
+    { service:'Belt / Wet Belt Replacement', make:'Volkswagen', models:['Tiguan'],
+      engines:['1.6 TDI'], from:567, to:757,  noFloor:true },
+    { service:'Belt / Wet Belt Replacement', make:'Volkswagen', models:['Tiguan'],
+      engines:['2.0 TDI'], from:757, to:957,  noFloor:true },
+    { service:'Belt / Wet Belt Replacement', make:'Volkswagen', models:['Touran'],
+      engines:['1.6 TDI'], from:657, to:857,  noFloor:true },
+    { service:'Belt / Wet Belt Replacement', make:'Volkswagen', models:['Sharan'],
+      engines:['1.9 TDI'], from:657, to:757,  noFloor:true },
+    { service:'Belt / Wet Belt Replacement', make:'Volkswagen', models:['Sharan'],
+      engines:['2.0 TDI'], from:757, to:957,  noFloor:true },
+    { service:'Belt / Wet Belt Replacement', make:'Volkswagen', models:['Caddy'],
+      engines:['1.6 TDI'], from:657, to:857,  noFloor:true },
+    { service:'Belt / Wet Belt Replacement', make:'Volkswagen', models:['Caddy'],
+      engines:['2.0 TDI'], from:757, to:957,  noFloor:true },
+    { service:'Belt / Wet Belt Replacement', make:'Volkswagen', models:['Transporter'],
+      engines:['1.9 TDI'], from:657, to:757,  noFloor:true },
+    { service:'Belt / Wet Belt Replacement', make:'Volkswagen', models:['Transporter'],
+      engines:['2.0 TDI'], from:757, to:957,  noFloor:true },
+    { service:'Belt / Wet Belt Replacement', make:'Volkswagen', models:['Crafter'],
+      engines:['2.0 TDI'], from:857, to:1120, noFloor:true },
+    { service:'Belt / Wet Belt Replacement', make:'Volkswagen', models:['Scirocco'],
+      engines:['2.0 TDI'], from:657, to:857,  noFloor:true },
+    { service:'Belt / Wet Belt Replacement', make:'Volkswagen', models:['Beetle'],
+      engines:['1.6 TDI'], from:657, to:857,  noFloor:true },
+    { service:'Belt / Wet Belt Replacement', make:'Volkswagen', models:['Beetle'],
+      engines:['2.0 TDI'], from:757, to:957,  noFloor:true },
+
+    /* ----- VAG (Audi/SEAT/Skoda) belt work — £789 fixed
+       VW is handled above per-model. Audi/SEAT/Skoda stay on £789 here. */
     { service:'Belt / Wet Belt Replacement', make:'Audi', models:['A1'],
       engines:['1.0 TSI'], from:789 },
     { service:'Belt / Wet Belt Replacement', make:'Audi', models:['A3'],
@@ -3141,15 +3213,31 @@ body{
     { service:'Belt / Wet Belt Replacement', make:'Alfa Romeo', models:['Giulia'],
       engines:['2.0 Multijet'], from:850, to:1250 },
 
-    /* ----- Volvo D-series ----- */
-    { service:'Belt / Wet Belt Replacement', make:'Volvo', models:['V40'],
-      engines:['D2','D3','D4'], from:850, to:1450 },
-    { service:'Belt / Wet Belt Replacement', make:'Volvo', models:['V60'],
-      engines:['D2','D3','D4','D5'], from:850, to:1450 },
-    { service:'Belt / Wet Belt Replacement', make:'Volvo', models:['XC60'],
-      engines:['D3','D4','D5'], from:850, to:1450 },
+    /* ----- Volvo wet belt — diesel only.
+       Per-engine pricing, customer-facing engine labels (no internal codes).
+       D2 1.6 / D2 2.0 Diesel  = £850   (V40, V60, S60)
+       D3 2.0 Diesel           = £950   (V40, V60, S60, XC60, V70, S80)
+       D4 2.0 Diesel           = £1050  (V40, V60, S60, XC60, V70, S80)
+       D4 2.0 Diesel  (XC90)   = £1150  (XC90 only — uprated)
+       D5 2.4 Diesel           = £1250  (V60, S60, XC60, V70, S80)
+       D5 2.4 Diesel  (XC90)   = £1450  (XC90 only — uprated)
+       NO PETROL ENGINES UNDER WET BELT. ----- */
+    { service:'Belt / Wet Belt Replacement', make:'Volvo',
+      models:['V40','V60','S60'],
+      engines:['D2 1.6 Diesel','D2 2.0 Diesel'], from:850 },
+    { service:'Belt / Wet Belt Replacement', make:'Volvo',
+      models:['V40','V60','S60','XC60','V70','S80'],
+      engines:['D3 2.0 Diesel'], from:950 },
+    { service:'Belt / Wet Belt Replacement', make:'Volvo',
+      models:['V40','V60','S60','XC60','V70','S80'],
+      engines:['D4 2.0 Diesel'], from:1050 },
     { service:'Belt / Wet Belt Replacement', make:'Volvo', models:['XC90'],
-      engines:['D4','D5'], from:850, to:1450 },
+      engines:['D4 2.0 Diesel'], from:1150 },
+    { service:'Belt / Wet Belt Replacement', make:'Volvo',
+      models:['V60','S60','XC60','V70','S80'],
+      engines:['D5 2.4 Diesel'], from:1250 },
+    { service:'Belt / Wet Belt Replacement', make:'Volvo', models:['XC90'],
+      engines:['D5 2.4 Diesel'], from:1450 },
 
     /* ----- Honda — Civic 1.0 VTEC Turbo only (CR V 1.0 removed),
             plus 2.2 i CDTi for Civic/Accord/CR V. */
@@ -3261,19 +3349,43 @@ body{
     { service:'Timing Chain Replacement', make:'Audi', models:['Q5'],
       engines:['2.0 TFSI','2.0 TDI','3.0 TDI'], from:950, to:2200 },
 
-    /* ----- VW chain ----- */
+    /* ----- VW chain — per-model / per-engine ranges from workshop spec.
+       Petrol TSI engines are chain-driven on these generations; no diesel
+       under chain except where explicitly listed (chain-driven variants). */
     { service:'Timing Chain Replacement', make:'Volkswagen', models:['Golf'],
-      engines:['1.2 TSI','1.4 TSI','1.8 TSI','2.0 TSI','2.0 TDI'], from:950, to:2200 },
+      engines:['1.2 TSI'], from:499,  to:760 },
+    { service:'Timing Chain Replacement', make:'Volkswagen', models:['Golf'],
+      engines:['1.4 TSI'], from:699,  to:957 },
+    { service:'Timing Chain Replacement', make:'Volkswagen', models:['Golf'],
+      engines:['1.8 TSI'], from:950,  to:1250 },
+    { service:'Timing Chain Replacement', make:'Volkswagen', models:['Golf'],
+      engines:['2.0 TSI'], from:450,  to:600 },
     { service:'Timing Chain Replacement', make:'Volkswagen', models:['Polo'],
-      engines:['1.2 TSI','1.4 TSI'], from:950, to:2200 },
-    { service:'Timing Chain Replacement', make:'Volkswagen', models:['Passat'],
-      engines:['1.4 TSI','1.8 TSI','2.0 TSI','2.0 TDI'], from:950, to:2200 },
+      engines:['1.2 TSI'], from:550,  to:800 },
+    { service:'Timing Chain Replacement', make:'Volkswagen', models:['Polo'],
+      engines:['1.4 TSI'], from:650,  to:957 },
     { service:'Timing Chain Replacement', make:'Volkswagen', models:['Tiguan'],
-      engines:['1.4 TSI','2.0 TSI','2.0 TDI'], from:950, to:2200 },
+      engines:['1.4 TSI'], from:950,  to:1500 },
+    { service:'Timing Chain Replacement', make:'Volkswagen', models:['Tiguan'],
+      engines:['2.0 TSI'], from:950,  to:1500 },
+    { service:'Timing Chain Replacement', make:'Volkswagen', models:['Scirocco'],
+      engines:['1.4 TSI'], from:1000, to:1500 },
+    { service:'Timing Chain Replacement', make:'Volkswagen', models:['Scirocco'],
+      engines:['2.0 TSI'], from:850,  to:1000 },
     { service:'Timing Chain Replacement', make:'Volkswagen', models:['Touran'],
-      engines:['1.4 TSI','2.0 TDI'], from:950, to:2200 },
-    { service:'Timing Chain Replacement', make:'Volkswagen', models:['Transporter'],
-      engines:['2.0 TDI'], from:950, to:2200 },
+      engines:['1.4 TSI'], from:950,  to:1250 },
+    { service:'Timing Chain Replacement', make:'Volkswagen', models:['Beetle'],
+      engines:['1.2 TSI'], from:620,  to:750 },
+    { service:'Timing Chain Replacement', make:'Volkswagen', models:['Beetle'],
+      engines:['1.4 TSI'], from:800,  to:1220 },
+    { service:'Timing Chain Replacement', make:'Volkswagen', models:['Beetle'],
+      engines:['2.0 TSI'], from:700,  to:1150 },
+    { service:'Timing Chain Replacement', make:'Volkswagen', models:['Passat'],
+      engines:['1.4 TSI'], from:850,  to:1400 },
+    { service:'Timing Chain Replacement', make:'Volkswagen', models:['Passat'],
+      engines:['1.8 TSI'], from:1000, to:1250 },
+    { service:'Timing Chain Replacement', make:'Volkswagen', models:['Passat'],
+      engines:['2.0 TSI'], from:500,  to:750 },
 
     /* ----- SEAT chain ----- */
     { service:'Timing Chain Replacement', make:'SEAT', models:['Leon'],
@@ -3305,6 +3417,34 @@ body{
     { service:'Timing Chain Replacement', make:'Ford', models:['Mustang'],
       engines:['5.0 V8'], from:1200, to:2500 },
 
+    /* ----- Volvo timing chain — petrol + hybrid + chain-driven diesels.
+       Per-model engine lists, all priced From £950 to £2200 + VAT.
+       Customer-facing labels only (no internal Drive-E / VEA codes).
+       Diesel D2/D3/D4 here are the CHAIN-driven 2.0 variants — distinct
+       from the BELT-driven D2 1.6 / D3/D4 2.0 / D5 2.4 entries under
+       Belt / Wet Belt Replacement. ----- */
+    { service:'Timing Chain Replacement', make:'Volvo', models:['V40'],
+      engines:['T2 1.5 Petrol','T3 1.5 Petrol','T4 2.0 Petrol','T5 2.0 Petrol','D2 2.0 Diesel'],
+      from:950, to:2200 },
+    { service:'Timing Chain Replacement', make:'Volvo', models:['S60','V60'],
+      engines:['T3 1.5 Petrol','T4 2.0 Petrol','T5 2.0 Petrol','T6 2.0 Petrol','D3 2.0 Diesel','D4 2.0 Diesel'],
+      from:950, to:2200 },
+    { service:'Timing Chain Replacement', make:'Volvo', models:['V70'],
+      engines:['T4 1.6 Petrol','T5 2.0 Petrol','D3 2.0 Diesel','D4 2.0 Diesel'],
+      from:950, to:2200 },
+    { service:'Timing Chain Replacement', make:'Volvo', models:['S80'],
+      engines:['T4 1.6 Petrol','T5 2.0 Petrol','T6 3.0 Petrol','D3 2.0 Diesel','D4 2.0 Diesel'],
+      from:950, to:2200 },
+    { service:'Timing Chain Replacement', make:'Volvo', models:['XC40'],
+      engines:['T2 1.5 Petrol','T3 1.5 Petrol','T4 2.0 Petrol','T5 2.0 Petrol','D3 2.0 Diesel','D4 2.0 Diesel'],
+      from:950, to:2200 },
+    { service:'Timing Chain Replacement', make:'Volvo', models:['XC60'],
+      engines:['T4 2.0 Petrol','T5 2.0 Petrol','T6 2.0 Petrol','T8 Hybrid 2.0 Petrol','D3 2.0 Diesel','D4 2.0 Diesel'],
+      from:950, to:2200 },
+    { service:'Timing Chain Replacement', make:'Volvo', models:['XC90'],
+      engines:['T5 2.0 Petrol','T6 2.0 Petrol','T8 Hybrid 2.0 Petrol','D4 2.0 Diesel','D5 2.0 Diesel'],
+      from:950, to:2200 },
+
     /* ----- Jaguar ----- */
     { service:'Timing Chain Replacement', make:'Jaguar', models:['XE','XF'],
       engines:['2.0 Ingenium Diesel','2.0 Ingenium Petrol','2.7D','3.0D'], from:1450, to:3000 },
@@ -3313,22 +3453,25 @@ body{
     { service:'Timing Chain Replacement', make:'Jaguar', models:['XJ'],
       engines:['2.7D','3.0D'], from:1450, to:3000 },
 
-    /* ----- Land Rover — all models £2219 inc VAT (£1849.17 ex VAT) ----- */
+    /* ----- Land Rover — all models £2219 inc VAT (£1849.17 ex VAT).
+       `exact:true` keeps the customer-facing price as the precise total
+       (no "From" prefix) since the workshop pre-absorbs the VAT into the
+       £2219 round figure quoted to the customer. ----- */
     { service:'Timing Chain Replacement', make:'Land Rover', models:['Discovery'],
       engines:['2.0 Ingenium Diesel','2.0 Ingenium Petrol','3.0 SDV6'],
-      from:1849.17 },
+      from:1849.17, exact:true },
     { service:'Timing Chain Replacement', make:'Land Rover', models:['Discovery Sport'],
       engines:['2.0 Ingenium Diesel','2.0 Ingenium Petrol'],
-      from:1849.17 },
+      from:1849.17, exact:true },
     { service:'Timing Chain Replacement', make:'Land Rover', models:['Evoque'],
       engines:['2.0 Ingenium Diesel','2.0 Ingenium Petrol'],
-      from:1849.17 },
+      from:1849.17, exact:true },
     { service:'Timing Chain Replacement', make:'Land Rover', models:['Range Rover Sport'],
       engines:['2.0 Ingenium Diesel','2.0 Ingenium Petrol','3.0 SDV6'],
-      from:1849.17 },
+      from:1849.17, exact:true },
     { service:'Timing Chain Replacement', make:'Land Rover', models:['Velar'],
       engines:['2.0 Ingenium Diesel','2.0 Ingenium Petrol','3.0 SDV6'],
-      from:1849.17 },
+      from:1849.17, exact:true },
 
     /* ----- Vauxhall chain ----- */
     { service:'Timing Chain Replacement', make:'Vauxhall', models:['Corsa'],
@@ -3348,9 +3491,9 @@ body{
       models:['DS3','DS4','C3','C4'],
       engines:['1.6 THP Petrol'], from:950, to:1450 },
 
-    /* ----- Renault chain (Clio 1.0 TCe Petrol fixed £757 first) ----- */
+    /* ----- Renault chain (Clio 1.0 TCe = From £850 + VAT) ----- */
     { service:'Timing Chain Replacement', make:'Renault', models:['Clio'],
-      engines:['1.0 TCe Petrol'], from:757 },
+      engines:['1.0 TCe'], from:850 },
     { service:'Timing Chain Replacement', make:'Renault', models:['Clio'],
       engines:['1.2 TCe','1.3 TCe'], from:950, to:1600 },
     { service:'Timing Chain Replacement', make:'Renault', models:['Megane','Captur'],
@@ -3487,10 +3630,14 @@ body{
       var p = { from: r.from };
       if (r.to   !== undefined) p.to   = r.to;
       if (r.plus === true)      p.plus = true;
+      if (r.exact === true)     p.exact = true;
+      if (r.noFloor === true)   p.noFloor = true;
       if (r.note)               p.note = r.note;
 
-      // Apply the £750 wet-belt floor (only this service).
-      if (jobType === 'Belt / Wet Belt Replacement'){
+      // Apply the £750 wet-belt floor (only this service, and only when
+      // the rule has NOT opted out via `noFloor:true`). Volkswagen rules
+      // opt out so workshop-supplied sub-£750 ranges display as quoted.
+      if (jobType === 'Belt / Wet Belt Replacement' && !p.noFloor){
         if (p.from < WET_BELT_MIN) p.from = WET_BELT_MIN;
         if (p.to !== undefined){
           if (p.to < WET_BELT_MIN) p.to = WET_BELT_MIN;
@@ -3586,16 +3733,24 @@ body{
     return '£' + Number(n).toLocaleString('en-GB', { minimumFractionDigits:2, maximumFractionDigits:2 });
   }
 
-  // Format a price value with the correct prefix/suffix for ranges
-  // and open-ended ("plus") quotes. `kind` is 'net' | 'vat' | 'gross'.
+  // Format a price value for the customer-facing UI.
+  //   `kind` is 'net' | 'vat' | 'gross'.
+  //
+  // Every customer-facing quote now reads "From £X" (with "+" suffix for
+  // open-ended "plus" prices) — this applies even to fixed prices, for
+  // consistency and to reduce misquotes after on-site inspection.
+  //
+  // The single exception is `exact:true` entries (Land Rover) where the
+  // workshop has already absorbed the VAT into the customer-facing total,
+  // so the price is shown without the "From" prefix.
   function priceLabel(p, kind){
     if (!p) return 'Quote required';
     var amount;
     if (kind === 'vat')        amount = +(p.from * 0.20).toFixed(2);
     else if (kind === 'gross') amount = +((p.from * 1.20)).toFixed(2);
     else                       amount = p.from;
-    var prefix = (p.to || p.plus) ? 'From ' : '';
-    var suffix = p.plus ? '+' : '';
+    var prefix = p.exact ? '' : 'From ';
+    var suffix = p.plus  ? '+' : '';
     return prefix + fmt(amount) + suffix;
   }
 
@@ -3609,6 +3764,7 @@ body{
   var qEmail  = document.getElementById('qEmail');
   var qMsg    = document.getElementById('qMsg');
   var qReg    = document.getElementById('qReg');
+  var qYear   = document.getElementById('qYear');              // vehicle year-of-manufacture
   var qContact     = document.getElementById('qContact');      // hidden value carrier
   var qContactGrid = document.getElementById('qContactGrid');  // tile group container
 
@@ -3678,6 +3834,7 @@ body{
   var qcMake   = document.getElementById('qcMake');
   var qcModel  = document.getElementById('qcModel');
   var qcEngine = document.getElementById('qcEngine');
+  var qcYear   = document.getElementById('qcYear');
   var qcJob    = document.getElementById('qcJob');
   var qcStatus = document.getElementById('qcStatus');
   var qcPrices = document.getElementById('qcPrices');
@@ -3795,6 +3952,9 @@ body{
 
   // --- Engine change: only refresh the quote card. No further cascade.
   if (qEngine) qEngine.addEventListener('change', updateQuoteCard);
+  // --- Year change: metadata only — refresh the quote card so the live
+  //     vehicle summary block shows the chosen year right away.
+  if (qYear)   qYear.addEventListener('change',   updateQuoteCard);
 
   // Switch the "What's Included" panel content to match the
   // selected service. Wet belt + wet oil pump belt share one
@@ -3831,10 +3991,12 @@ body{
     var model = qModel ? qModel.value : '';
     var engine = qEngine ? qEngine.value : '';
     var job = qJob ? qJob.value : '';
+    var year = qYear ? qYear.value : '';
 
     if (qcMake)   qcMake.textContent   = make   || PLACEHOLDER;
     if (qcModel)  qcModel.textContent  = model  || PLACEHOLDER;
     if (qcEngine) qcEngine.textContent = engine || PLACEHOLDER;
+    if (qcYear)   qcYear.textContent   = year   || PLACEHOLDER;
     if (qcJob)    qcJob.textContent    = job    || PLACEHOLDER;
 
     updateIncludedPanel(job);
@@ -3899,6 +4061,7 @@ body{
       var job    = qJob    ? qJob.value    : '';
       var date   = qDate   ? qDate.value   : '';
       var msg    = qMsg    ? qMsg.value.trim() : '';
+      var year   = qYear   ? qYear.value   : '';
       var contact = (qContact && qContact.value) || 'Phone Call';
 
       qcFeedback.classList.remove('show','success','error');
@@ -3936,6 +4099,7 @@ body{
       lines.push('');
       lines.push('VEHICLE DETAILS');
       lines.push('Registration: ' + v(reg));
+      lines.push('Year: ' + v(year));
       lines.push('Make: ' + v(make));
       lines.push('Model: ' + v(model));
       lines.push('Engine: ' + v(engine));
@@ -4016,6 +4180,7 @@ body{
           '<div class="qc-line"><span>Preferred Contact</span><strong>' + esc(contact) + '</strong></div>' +
           '<div style="' + labelStyle + groupGap + '">Vehicle</div>' +
           '<div class="qc-line"><span>Registration</span><strong>' + esc(reg || 'Not provided') + '</strong></div>' +
+          '<div class="qc-line"><span>Year</span><strong>' + esc(year || 'Not provided') + '</strong></div>' +
           '<div class="qc-line"><span>Make</span><strong>' + esc(make || 'Not provided') + '</strong></div>' +
           '<div class="qc-line"><span>Model</span><strong>' + esc(model || 'Not provided') + '</strong></div>' +
           '<div class="qc-line"><span>Engine</span><strong>' + esc(engine || 'Not provided') + '</strong></div>' +
@@ -4092,44 +4257,83 @@ body{
       //   - The FIRST submission triggers a one-time activation email to
       //     wiganwetbelts@gmail.com. The link in that email must be clicked
       //     once. Every submission after that delivers instantly.
-      //   - _captcha:false suppresses the bot-check page.
-      //   - _template:table renders the payload as a readable table.
-      //   - _subject sets the inbox subject line.
+      //   - _captcha:false      suppresses the bot-check page.
+      //   - _template:table     renders the payload as a readable table.
+      //   - _subject            sets the workshop inbox subject line.
+      //   - _autoresponse       plain-text reply emailed back to the customer
+      //                         (FormSubmit free tier is text-only; styled
+      //                         HTML autoresponses require a paid upgrade).
       //
       // If the fetch fails (network down, CORS, etc.) we fall back to the
       // customer's own mail client via the mailto link built above so the
       // enquiry can still reach the workshop.
       var FORMSUBMIT_URL = 'https://formsubmit.co/ajax/wiganwetbelts@gmail.com';
 
+      // Customer auto-reply (plain text) — sent to whatever address the
+      // customer typed in the Email field. If they left email blank, this
+      // is harmless (FormSubmit simply has no address to reply to).
+      var customerAutoReply =
+        'Thank you for your interest.\n\n' +
+        'A member of our team will pick up your enquiry and create your own vehicle quote and availability.\n\n' +
+        'We have received your vehicle details and preferred contact method. Our team will review the information and be in touch shortly.\n\n' +
+        'For urgent enquiries, call us on 01942 800252.\n\n' +
+        'Thanks,\n' +
+        'Wigan Wetbelts\n' +
+        'Unit 2E, Cricket Street, Wigan, WN6 7TP\n\n' +
+        '━━━━━━━━━━━━━━━━━━━━\n' +
+        'Please do not reply to this email as this is an automated notification inbox.\n' +
+        'For direct support or urgent enquiries, contact:\n' +
+        '01942 800252\n' +
+        '━━━━━━━━━━━━━━━━━━━━';
+
+      // Format the estimate value displayed in the admin email. For range
+      // / open-ended quotes this notes the upper figure too.
+      var estimateLine;
+      if (p){
+        if (p.to)        estimateLine = 'Range ' + fmt(p.from) + ' to ' + fmt(p.to) + ' (ex VAT)';
+        else if (p.plus) estimateLine = 'From ' + fmt(p.from) + '+ (ex VAT)';
+        else if (p.exact) estimateLine = fmt(p.from) + ' (ex VAT, VAT-inclusive total displayed)';
+        else             estimateLine = 'From ' + fmt(p.from) + ' (ex VAT)';
+      } else {
+        estimateLine = 'Quote required — workshop to confirm';
+      }
+
+      // Field order below = the order rows appear in the workshop's email,
+      // grouped as: Customer → Vehicle → Job → Estimate → Notes → Source.
+      // Keys use human-readable labels (with spaces) so the FormSubmit
+      // `table` template renders them directly as the row labels.
       var payload = {
         // Hidden FormSubmit configuration
-        _subject:  'New Wigan Wetbelts Quote Enquiry',
-        _template: 'table',
-        _captcha:  'false',
+        _subject:       'New Wigan Wetbelts Quote Enquiry',
+        _template:      'table',
+        _captcha:       'false',
+        _autoresponse:  customerAutoReply,
 
-        // Customer details
-        name:                 name,
-        phone:                phone,
-        email:                email || 'Not provided',
-        preferredContactMethod: contact,
+        // -------- Customer Details --------
+        'Customer Name':           name,
+        'Phone Number':            phone,
+        'Email Address':           email || 'Not provided',
+        'Preferred Contact Method': contact,
 
-        // Vehicle
-        vehicle_registration: reg,
-        make:                 make   || 'Not provided',
-        model:                model  || 'Not provided',
-        engine:               engine || 'Not provided',
+        // -------- Vehicle Details --------
+        'Vehicle Registration':    reg,
+        'Year':                    year   || 'Not provided',
+        'Make':                    make   || 'Not provided',
+        'Model':                   model  || 'Not provided',
+        'Engine':                  engine || 'Not provided',
+        'Job Type':                job    || 'Not provided',
+        'Preferred Date':          date   || 'Not provided',
 
-        // Job + scheduling
-        job_type:             job    || 'Not provided',
-        preferred_date:       date   || 'Not provided',
-        message:              msg    || 'No additional notes.',
+        // -------- Quote Estimate --------
+        'Estimate Type':           estimateLine,
+        'Price (excluding VAT)':   netLbl,
+        'VAT (20%)':               vatLbl,
+        'Total (including VAT)':   grossLbl,
+        'Service Note':            (p && p.note) ? p.note : '—',
 
-        // Pricing
-        price_ex_vat:         netLbl,
-        vat_amount:           vatLbl,
-        total_inc_vat:        grossLbl,
-        price_estimate_type:  p ? (p.plus ? 'open-ended (£' + p.from + '+)' : (p.to ? ('range (£' + p.from + ' to £' + p.to + ')') : 'fixed')) : 'enquiry-only',
-        service_note:         (p && p.note) ? p.note : ''
+        // -------- Customer Message + Source --------
+        'Customer Message':        msg || 'No additional notes.',
+        'Website Source':          'Wigan Wetbelts Instant Quote'
       };
 
       console.log('Submitting enquiry to FormSubmit', { url: FORMSUBMIT_URL, payload: payload });
@@ -4266,6 +4470,7 @@ body{
     try {
       var data = {
         reg:    qReg    ? qReg.value    : '',
+        year:   qYear   ? qYear.value   : '',
         make:   qMake   ? qMake.value   : '',
         model:  qModel  ? qModel.value  : '',
         engine: qEngine ? qEngine.value : '',
@@ -4289,6 +4494,7 @@ body{
       var data = JSON.parse(raw);
 
       if (qReg   && data.reg)   qReg.value   = data.reg;
+      if (qYear  && data.year)  qYear.value  = data.year;
       if (qName  && data.name)  qName.value  = data.name;
       if (qPhone && data.phone) qPhone.value = data.phone;
       if (qEmail && data.email) qEmail.value = data.email;
@@ -4338,7 +4544,7 @@ body{
     } catch(e){}
   }
 
-  [qReg, qMake, qModel, qEngine, qJob, qDate, qName, qPhone, qEmail, qMsg, qContact].forEach(function(el){
+  [qReg, qYear, qMake, qModel, qEngine, qJob, qDate, qName, qPhone, qEmail, qMsg, qContact].forEach(function(el){
     if (!el) return;
     el.addEventListener('input',  saveBackup);
     el.addEventListener('change', saveBackup);
