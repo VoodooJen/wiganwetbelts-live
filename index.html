@@ -33,7 +33,7 @@
          "Specialists." accent and hero stat numerals. Reads like a
          Vogue / Hermès masthead.
        Manrope + Bodoni Moda kept loaded as graceful fallbacks. -->
-<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;500;600;700;800&family=Italiana&family=Manrope:wght@300;400;500;600;700&family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;0,6..96,500;0,6..96,600;1,6..96,400;1,6..96,500;1,6..96,600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;500;600;700;800&family=Italiana&family=Manrope:wght@300;400;500;600;700&family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;0,6..96,500;0,6..96,600;1,6..96,400;1,6..96,500;1,6..96,600&family=Sigmar&family=Bagel+Fat+One&display=swap" rel="stylesheet">
 <style>
 /* =========================================================
    WIGAN WETBELTS — Premium Automotive Theme
@@ -139,34 +139,59 @@ h3{font-size:1.2rem;font-weight:600;letter-spacing:-0.02em}
 h4{font-size:1rem;font-weight:600;letter-spacing:-0.012em}
 p{color:var(--text-2);line-height:1.75;font-weight:400}
 
-/* ----- "Specialists." — the chrome-silver couture moment -----
-   Italiana for the letterforms — a high-contrast couture display
-   serif that reads like Hermès / Vogue / Cartier signage. The fill
-   is now a true polished-chrome gradient (highlight / shadow band /
-   highlight) so the word looks like it's been milled out of brushed
-   stainless steel. A faint teal drop-shadow ties it back to the
-   brand accent without contaminating the silver fill itself. */
+/* ----- "Specialists." — BUBBLE CHROME edition -----
+   The user wanted a bubble-font, metallic silver chrome look. Bagel
+   Fat One is a chunky, rounded display face that reads as "bubble"
+   straight away. The chrome fill is layered:
+     1. Multi-stop vertical gradient on the text fill (highlight →
+        mid-grey shadow band → highlight) — that's the polished
+        stainless / chrome surface.
+     2. A heavy drop-shadow stack that mimics a dark outline AND
+        the underside of the bubble (offset down/right with a faint
+        blue underglow tying it back to the new brand colour).
+   Letterspacing pulled in slightly so the bubble letters touch /
+   nearly-touch like classic chrome lettering. */
 .accent em{
-  font-family:'Italiana','Bodoni Moda','Cormorant Garamond',serif;
-  font-style:normal;          /* Italiana is naturally elegant — no italic override needed */
+  font-family:'Bagel Fat One','Sigmar','Lilita One','Outfit',sans-serif;
+  font-style:normal;
   font-weight:400;
-  letter-spacing:.005em;
-  padding:0 .14em 0 .08em;
+  letter-spacing:-.005em;
+  padding:0 .08em;
+  /* Polished-chrome gradient — light at top + bottom, dark band in
+     the middle, so the bubble letters look like they reflect a
+     horizon line. */
   background:linear-gradient(180deg,
-    #fafafa 0%,
-    #e6e7ea 18%,
-    #d6d8dc 30%,
-    #9a9da3 50%,    /* the dark shadow band that sells the chrome */
-    #d6d8dc 70%,
-    #e6e7ea 82%,
-    #fafafa 100%);
+    #ffffff   0%,
+    #f4f5f7  12%,
+    #d8dade  28%,
+    #8d9097  48%,   /* horizon shadow band */
+    #6c6f76  52%,
+    #b8bbc1  64%,
+    #e2e4e8  78%,
+    #ffffff 100%);
   -webkit-background-clip:text;background-clip:text;color:transparent;
-  /* Soft outline so the silver doesn't get lost against the dark bg.
-     Two-layer drop-shadow: a hard near-black edge for legibility,
-     plus a soft teal underglow that anchors it to the brand colour. */
+  /* Heavy multi-layer shadow stack creates the bubble depth +
+     readable dark outline against the dark page bg. */
   filter:
-    drop-shadow(0 1px 0 rgba(0,0,0,.55))
-    drop-shadow(0 0 28px rgba(93,169,255,.18));
+    drop-shadow(0 1px 0 rgba(0,0,0,.85))
+    drop-shadow(0 2px 0 rgba(0,0,0,.55))
+    drop-shadow(0 4px 8px rgba(0,0,0,.55))
+    drop-shadow(0 0 24px rgba(93,169,255,.32));
+  /* Webkit text-stroke gives a fine dark edge that holds the
+     bubble silhouette together over any background. */
+  -webkit-text-stroke:1px rgba(0,0,0,.45);
+  text-stroke:1px rgba(0,0,0,.45);
+}
+/* The "." after Specialists doesn't need to be bubble — keep it
+   subtle so the bubble word is the focal point. */
+.hero-h1-accent .accent em + *{vertical-align:baseline}
+
+/* ----- 3D belt: hide on computer / laptop view (≥901px) only.
+   The user wants it gone on desktop. We keep the mobile fallback
+   intact so the existing media-query rule still controls phone view. */
+@media (min-width:901px){
+  .hero-belt-3d{display:none !important}
+  .hero--showroom .hero-visual::before{display:none !important}
 }
 
 .container{max-width:var(--maxw);margin:0 auto;padding:0 var(--pad)}
@@ -629,11 +654,24 @@ p{color:var(--text-2);line-height:1.75;font-weight:400}
   display:block;
   line-height:1.02;
 }
-.hero-h1-accent{margin:.04em 0}
+.hero-h1-accent{margin:.06em 0}
 .hero-h1 .accent em{
-  /* Already styled by existing .accent + serif rules; reinforce italic
-     focal weight inside the new line-break structure. */
+  /* The bubble word is the focal moment — give it its own
+     ever-so-slightly larger scale than the surrounding Outfit
+     letters so the chrome bubble form really pops out. */
   display:inline-block;
+  font-size:1.08em;
+  line-height:.95;
+  /* Tiny subtle bob so the bubble feels alive — disabled by the
+     prefers-reduced-motion rule further down. */
+  animation:bubbleFloat 6.2s ease-in-out infinite;
+}
+@keyframes bubbleFloat{
+  0%,100% { transform:translateY(0) }
+  50%     { transform:translateY(-3px) }
+}
+@media (prefers-reduced-motion:reduce){
+  .hero-h1 .accent em{animation:none}
 }
 
 /* ----- Magnetic button — base hook (transform applied by JS) ----- */
@@ -3163,7 +3201,7 @@ body.wbr-locked{overflow:hidden}
            italic serif focal point. The line-break structure also adapts
            cleanly on mobile because each line is its own <span>. -->
       <h1 class="hero-h1">
-        <span class="hero-h1-line">Wet Belt &amp; Timing Chain</span>
+        <span class="hero-h1-line"><span class="wb-blue">Wet Belt</span> &amp; Timing Chain</span>
         <span class="hero-h1-line hero-h1-accent"><span class="accent"><em>Specialists</em></span></span>
         <span class="hero-h1-line">in Wigan</span>
       </h1>
