@@ -1398,31 +1398,50 @@ p{color:var(--text-2);line-height:1.75;font-weight:400}
 .qc-breakdown .qc-line{font-size:.85rem;color:var(--muted);padding:6px 4px}
 .qc-breakdown .qc-line strong{font-size:.9rem;font-weight:600;color:var(--text-2)}
 
-/* ---------- Dealer Price Range block ---------- */
+/* ---------- Estimated Repair Pricing block ----------
+   Tightened proportions, cleaner premium feel. Two-line "FROM / TO"
+   format is enforced by .qc-dealer-line (display:block) so the price
+   reads like a luxury spec card rather than a single shouty line. */
 .qc-dealer-range{
   text-align:center;
-  padding:18px 16px 16px;
-  border-radius:14px;
+  padding:14px 14px 12px;
+  border-radius:12px;
   margin-bottom:14px;
   position:relative;
-  background:linear-gradient(135deg, rgba(255,255,255,.04) 0%, rgba(255,255,255,.02) 100%);
-  border:1px solid rgba(255,255,255,.08);
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.06), 0 8px 24px rgba(0,0,0,.18);
+  background:linear-gradient(135deg, rgba(255,255,255,.025) 0%, rgba(255,255,255,.012) 100%);
+  border:1px solid rgba(255,255,255,.07);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.04), 0 4px 14px rgba(0,0,0,.12);
 }
 .qc-dealer-label{
-  font-size:.66rem;font-weight:600;letter-spacing:.24em;text-transform:uppercase;
+  font-size:.62rem;font-weight:600;letter-spacing:.26em;text-transform:uppercase;
   color:var(--muted);margin-bottom:8px;
 }
 .qc-dealer-value{
   font-family:'Manrope','Inter',sans-serif;
-  font-size:clamp(.95rem, 2.2vw, 1.18rem);
-  font-weight:600;letter-spacing:.01em;color:var(--text);
+  font-size:clamp(.92rem, 1.9vw, 1.08rem);
+  font-weight:600;letter-spacing:.005em;color:var(--text);
   font-variant-numeric:tabular-nums;
-  line-height:1.25;
+  line-height:1.4;
+  display:flex;flex-direction:column;align-items:center;gap:2px;
+}
+.qc-dealer-line{
+  display:block;
+  white-space:nowrap;
 }
 .qc-dealer-meta{
-  font-size:.7rem;color:var(--muted);margin-top:8px;
-  letter-spacing:.04em;
+  font-size:.7rem;color:var(--muted);margin-top:10px;
+  letter-spacing:.01em;line-height:1.55;
+  max-width:42ch;margin-left:auto;margin-right:auto;
+}
+/* Desktop / mobile subtext swap — mobile gets the shorter wording so
+   the card reads cleanly on narrow viewports. */
+.qc-dealer-meta-mobile{display:none}
+@media (max-width:640px){
+  .qc-dealer-range{padding:12px 12px 11px;margin-bottom:12px;border-radius:11px}
+  .qc-dealer-label{font-size:.58rem;letter-spacing:.22em;margin-bottom:6px}
+  .qc-dealer-value{font-size:.94rem;line-height:1.45;gap:1px}
+  .qc-dealer-meta-desktop{display:none}
+  .qc-dealer-meta-mobile{display:block;font-size:.66rem;margin-top:8px;line-height:1.5}
 }
 
 /* ---------- Meta breakdown lines (repair time, kit cost) ---------- */
@@ -3425,13 +3444,14 @@ body.wbr-locked{overflow:hidden}
 
         <div class="qc-prices" id="qcPrices" hidden>
           <div class="qc-dealer-range" id="qcRangeBlock">
-            <div class="qc-dealer-label">Estimated Repair Range</div>
+            <div class="qc-dealer-label">Estimated Repair Pricing</div>
             <div class="qc-dealer-value" id="qcRange">£0 + VAT</div>
-            <div class="qc-dealer-meta">Final pricing can vary depending on vehicle condition, parts availability and inspection findings.</div>
+            <div class="qc-dealer-meta qc-dealer-meta-desktop">Final pricing can vary depending on vehicle condition, engine configuration, required components and inspection findings.</div>
+            <div class="qc-dealer-meta qc-dealer-meta-mobile">Pricing may vary depending on inspection findings and parts required.</div>
           </div>
 
           <div class="qc-total-block">
-            <div class="qc-total-label">Estimated Quote</div>
+            <div class="qc-total-label">Estimated Workshop Quote</div>
             <div class="qc-total-value" id="qcGross">£0.00</div>
             <div class="qc-total-meta">Including VAT (20%)</div>
           </div>
@@ -4644,7 +4664,7 @@ body.wbr-locked{overflow:hidden}
 
     /* ============================================================
        MINI — Dry Timing Belt (Cooper D / One D 1.6 Diesel PSA DV6).
-       Dealer Price Range: FROM £950 to £1250
+       Estimated Repair Pricing: FROM £950 to £1250
        Repair Time: 5.5 to 7.0 Hours    OEM Kit: £260 to £420
        ============================================================ */
     { service:'Belt / Wet Belt Replacement', make:'MINI',
@@ -6411,17 +6431,25 @@ body.wbr-locked{overflow:hidden}
     qcVat.textContent   = priceLabel(p, 'vat');
     qcGross.textContent = priceLabel(p, 'gross');
 
-    // ---- Dealer Price Range ("FROM £X + VAT TO £Y + VAT") ----
+    // ---- Estimated Repair Pricing block ----
+    // Format spec:
+    //   range (from + to)        -> "FROM £X + VAT" on its own line,
+    //                                "TO £Y + VAT" on the next line.
+    //   single-fixed / from-only -> "Estimated From £X + VAT"
+    //   exact (Land Rover)       -> "Estimated From £X + VAT"
+    // We use innerHTML with a <span class="qc-dealer-line"> per line so
+    // CSS controls the visual stacking + spacing rather than HTML <br>.
     if (qcRange){
       if (p.exact){
-        qcRange.textContent = fmt0(p.from) + ' + VAT';
+        qcRange.innerHTML = '<span class="qc-dealer-line">Estimated From ' + fmt0(p.from) + ' + VAT</span>';
         if (qcRangeBlock) qcRangeBlock.hidden = false;
       } else if (p.to === undefined){
-        // Single-sided "from" rule (no max) — show as a single-line "+ VAT" value.
-        qcRange.textContent = 'FROM ' + fmt0(p.from) + (p.plus ? '+ + VAT' : ' + VAT');
+        qcRange.innerHTML = '<span class="qc-dealer-line">Estimated From ' + fmt0(p.from) + (p.plus ? '+' : '') + ' + VAT</span>';
         if (qcRangeBlock) qcRangeBlock.hidden = false;
       } else {
-        qcRange.textContent = 'FROM ' + fmt0(p.from) + ' + VAT  TO  ' + fmt0(p.to) + ' + VAT';
+        qcRange.innerHTML =
+          '<span class="qc-dealer-line">FROM ' + fmt0(p.from) + ' + VAT</span>' +
+          '<span class="qc-dealer-line">TO '   + fmt0(p.to)   + ' + VAT</span>';
         if (qcRangeBlock) qcRangeBlock.hidden = false;
       }
     }
@@ -6522,22 +6550,24 @@ body.wbr-locked{overflow:hidden}
       lines.push('');
       lines.push('ESTIMATE');
       if (p){
-        // ---- Dealer Price Range ----
+        // ---- Estimated Repair Pricing ----
+        // Mirrors the on-page card format: range = "FROM £X + VAT / TO £Y + VAT",
+        // single fixed / from-only = "Estimated From £X + VAT".
         var dealerRangeText;
         if (p.exact){
-          dealerRangeText = fmt0(p.from) + ' + VAT';
+          dealerRangeText = 'Estimated From ' + fmt0(p.from) + ' + VAT';
         } else if (p.to === undefined){
-          dealerRangeText = 'FROM ' + fmt0(p.from) + (p.plus ? '+ + VAT' : ' + VAT');
+          dealerRangeText = 'Estimated From ' + fmt0(p.from) + (p.plus ? '+' : '') + ' + VAT';
         } else {
-          dealerRangeText = 'FROM ' + fmt0(p.from) + ' + VAT TO ' + fmt0(p.to) + ' + VAT';
+          dealerRangeText = 'FROM ' + fmt0(p.from) + ' + VAT  /  TO ' + fmt0(p.to) + ' + VAT';
         }
-        lines.push('Estimated Repair Range: ' + dealerRangeText);
+        lines.push('Estimated Repair Pricing: ' + dealerRangeText);
 
         if (isRangeOrPlus){
           var topVal = p.to ? fmt(p.to) : (fmt(p.from) + '+');
           lines.push('Estimated from: ' + fmt(p.from) + (p.to ? (' to ' + topVal) : '+') + ' (excluding VAT)');
         }
-        lines.push('Estimated Quote (ex VAT): ' + netLbl);
+        lines.push('Estimated Workshop Quote (ex VAT): ' + netLbl);
         lines.push('VAT (20%): ' + vatLbl);
         lines.push('Total (including VAT): ' + grossLbl);
 
@@ -6579,21 +6609,27 @@ body.wbr-locked{overflow:hidden}
 
       var estimateRows;
       if (p){
-        // Compose dealer range string for the summary block.
+        // Estimated Repair Pricing — stacked FROM / TO lines on range,
+        // or "Estimated From £X + VAT" on single-fixed / from-only.
         var dealerRangeHtml;
         if (p.exact){
-          dealerRangeHtml = esc(fmt0(p.from) + ' + VAT');
+          dealerRangeHtml =
+            '<span style="display:block">Estimated From ' + esc(fmt0(p.from)) + ' + VAT</span>';
         } else if (p.to === undefined){
-          dealerRangeHtml = 'FROM ' + esc(fmt0(p.from)) + (p.plus ? '+ + VAT' : ' + VAT');
+          dealerRangeHtml =
+            '<span style="display:block">Estimated From ' + esc(fmt0(p.from)) + (p.plus ? '+' : '') + ' + VAT</span>';
         } else {
-          dealerRangeHtml = 'FROM ' + esc(fmt0(p.from)) + ' + VAT &nbsp;TO&nbsp; ' + esc(fmt0(p.to)) + ' + VAT';
+          dealerRangeHtml =
+            '<span style="display:block">FROM ' + esc(fmt0(p.from)) + ' + VAT</span>' +
+            '<span style="display:block">TO '   + esc(fmt0(p.to))   + ' + VAT</span>';
         }
         var rangeNote =
-          '<div style="font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.18em;font-weight:600;margin-bottom:6px">Estimated Repair Range</div>' +
-          '<div style="font-size:.95rem;color:var(--text);font-weight:600;margin-bottom:12px;line-height:1.35">' + dealerRangeHtml + '</div>';
+          '<div style="font-size:.68rem;color:var(--muted);text-transform:uppercase;letter-spacing:.2em;font-weight:600;margin-bottom:8px">Estimated Repair Pricing</div>' +
+          '<div style="font-size:1rem;color:var(--text);font-weight:600;margin-bottom:10px;line-height:1.45">' + dealerRangeHtml + '</div>' +
+          '<div style="font-size:.74rem;color:var(--muted);line-height:1.5;margin-bottom:14px;font-weight:400">Final pricing can vary depending on vehicle condition, engine configuration, required components and inspection findings.</div>';
 
         estimateRows = rangeNote +
-          '<div class="qc-line"><span>Estimated Quote (ex VAT)</span><strong>' + esc(netLbl)   + '</strong></div>' +
+          '<div class="qc-line"><span>Estimated Workshop Quote (ex VAT)</span><strong>' + esc(netLbl)   + '</strong></div>' +
           '<div class="qc-line"><span>VAT (20%)</span><strong>'             + esc(vatLbl)   + '</strong></div>' +
           '<div class="qc-line qc-total"><span>Total (including VAT)</span><strong>' + esc(grossLbl) + '</strong></div>';
 
@@ -6788,9 +6824,9 @@ body.wbr-locked{overflow:hidden}
         else if (p.exact) estimateLine = fmt(p.from) + ' (ex VAT, VAT-inclusive total displayed)';
         else              estimateLine = 'From ' + fmt(p.from) + ' (ex VAT)';
 
-        if (p.exact)                  dealerRangeLine = fmt0(p.from) + ' + VAT';
-        else if (p.to === undefined)  dealerRangeLine = 'FROM ' + fmt0(p.from) + (p.plus ? '+ + VAT' : ' + VAT');
-        else                          dealerRangeLine = 'FROM ' + fmt0(p.from) + ' + VAT TO ' + fmt0(p.to) + ' + VAT';
+        if (p.exact)                  dealerRangeLine = 'Estimated From ' + fmt0(p.from) + ' + VAT';
+        else if (p.to === undefined)  dealerRangeLine = 'Estimated From ' + fmt0(p.from) + (p.plus ? '+' : '') + ' + VAT';
+        else                          dealerRangeLine = 'FROM ' + fmt0(p.from) + ' + VAT  /  TO ' + fmt0(p.to) + ' + VAT';
 
         repairTimeLine = (typeof p.hrsFrom === 'number' && typeof p.hrsTo === 'number')
           ? (p.hrsFrom.toFixed(1) + ' to ' + p.hrsTo.toFixed(1) + ' hours')
@@ -6833,9 +6869,9 @@ body.wbr-locked{overflow:hidden}
         'Preferred Date':          date   || 'Not provided',
 
         // -------- Quote Estimate --------
-        'Estimated Repair Range':  dealerRangeLine,
+        'Estimated Repair Pricing': dealerRangeLine,
         'Estimate Type':           estimateLine,
-        'Estimated Quote (ex VAT)': netLbl,
+        'Estimated Workshop Quote (ex VAT)': netLbl,
         'VAT (20%)':               vatLbl,
         'Total (including VAT)':   grossLbl,
         'Estimated Repair Time':   repairTimeLine,
