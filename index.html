@@ -139,13 +139,14 @@ h3{font-size:1.2rem;font-weight:600;letter-spacing:-0.02em}
 h4{font-size:1rem;font-weight:600;letter-spacing:-0.012em}
 p{color:var(--text-2);line-height:1.75;font-weight:400}
 
-/* ----- "Specialists." — the chrome-silver couture moment -----
+/* ----- "Specialists." — premium-blue couture moment -----
    Italiana for the letterforms — a high-contrast couture display
    serif that reads like Hermès / Vogue / Cartier signage. The fill
-   is a polished-chrome gradient (highlight / shadow band / highlight)
-   so the word looks like it's been milled out of brushed stainless
-   steel. A faint blue drop-shadow ties it back to the brand accent
-   without contaminating the silver fill itself. */
+   is now the brand premium blue (#5da9ff) as a soft top-to-bottom
+   gradient: a lighter sky-blue highlight at the top, the brand blue
+   in the middle, and a deeper royal blue at the bottom — keeps the
+   reflective couture finish but in the brand colour instead of
+   chrome silver. */
 .accent em{
   font-family:'Italiana','Bodoni Moda','Cormorant Garamond',serif;
   font-style:normal;          /* Italiana is naturally elegant — no italic override needed */
@@ -153,20 +154,19 @@ p{color:var(--text-2);line-height:1.75;font-weight:400}
   letter-spacing:.005em;
   padding:0 .14em 0 .08em;
   background:linear-gradient(180deg,
-    #fafafa 0%,
-    #e6e7ea 18%,
-    #d6d8dc 30%,
-    #9a9da3 50%,    /* the dark shadow band that sells the chrome */
-    #d6d8dc 70%,
-    #e6e7ea 82%,
-    #fafafa 100%);
+    #cfe3ff 0%,
+    #93c5fd 18%,
+    #5da9ff 38%,
+    #3b82f6 60%,
+    #2563eb 82%,
+    #1d4ed8 100%);
   -webkit-background-clip:text;background-clip:text;color:transparent;
-  /* Soft outline so the silver doesn't get lost against the dark bg.
-     Two-layer drop-shadow: a hard near-black edge for legibility,
-     plus a soft blue underglow that anchors it to the brand colour. */
+  /* Soft halo so the blue lifts off the dark background: a hard
+     near-black edge for legibility, plus a soft brand-blue underglow
+     that strengthens the brand colour. */
   filter:
     drop-shadow(0 1px 0 rgba(0,0,0,.55))
-    drop-shadow(0 0 28px rgba(93,169,255,.18));
+    drop-shadow(0 0 28px rgba(93,169,255,.45));
 }
 
 /* ----- 3D belt: hide on computer / laptop view (≥901px) only.
@@ -3425,13 +3425,13 @@ body.wbr-locked{overflow:hidden}
 
         <div class="qc-prices" id="qcPrices" hidden>
           <div class="qc-dealer-range" id="qcRangeBlock">
-            <div class="qc-dealer-label">Dealer Price Range</div>
+            <div class="qc-dealer-label">Estimated Repair Range</div>
             <div class="qc-dealer-value" id="qcRange">£0 + VAT</div>
-            <div class="qc-dealer-meta">Typical main-dealer pricing for this engine family</div>
+            <div class="qc-dealer-meta">Final pricing can vary depending on vehicle condition, parts availability and inspection findings.</div>
           </div>
 
           <div class="qc-total-block">
-            <div class="qc-total-label">Estimated Your Vehicle Quote</div>
+            <div class="qc-total-label">Estimated Quote</div>
             <div class="qc-total-value" id="qcGross">£0.00</div>
             <div class="qc-total-meta">Including VAT (20%)</div>
           </div>
@@ -6531,13 +6531,13 @@ body.wbr-locked{overflow:hidden}
         } else {
           dealerRangeText = 'FROM ' + fmt0(p.from) + ' + VAT TO ' + fmt0(p.to) + ' + VAT';
         }
-        lines.push('Dealer Price Range: ' + dealerRangeText);
+        lines.push('Estimated Repair Range: ' + dealerRangeText);
 
         if (isRangeOrPlus){
           var topVal = p.to ? fmt(p.to) : (fmt(p.from) + '+');
           lines.push('Estimated from: ' + fmt(p.from) + (p.to ? (' to ' + topVal) : '+') + ' (excluding VAT)');
         }
-        lines.push('Estimated Your Vehicle Quote (ex VAT): ' + netLbl);
+        lines.push('Estimated Quote (ex VAT): ' + netLbl);
         lines.push('VAT (20%): ' + vatLbl);
         lines.push('Total (including VAT): ' + grossLbl);
 
@@ -6589,11 +6589,11 @@ body.wbr-locked{overflow:hidden}
           dealerRangeHtml = 'FROM ' + esc(fmt0(p.from)) + ' + VAT &nbsp;TO&nbsp; ' + esc(fmt0(p.to)) + ' + VAT';
         }
         var rangeNote =
-          '<div style="font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.18em;font-weight:600;margin-bottom:6px">Dealer Price Range</div>' +
+          '<div style="font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.18em;font-weight:600;margin-bottom:6px">Estimated Repair Range</div>' +
           '<div style="font-size:.95rem;color:var(--text);font-weight:600;margin-bottom:12px;line-height:1.35">' + dealerRangeHtml + '</div>';
 
         estimateRows = rangeNote +
-          '<div class="qc-line"><span>Estimated Your Vehicle Quote (ex VAT)</span><strong>' + esc(netLbl)   + '</strong></div>' +
+          '<div class="qc-line"><span>Estimated Quote (ex VAT)</span><strong>' + esc(netLbl)   + '</strong></div>' +
           '<div class="qc-line"><span>VAT (20%)</span><strong>'             + esc(vatLbl)   + '</strong></div>' +
           '<div class="qc-line qc-total"><span>Total (including VAT)</span><strong>' + esc(grossLbl) + '</strong></div>';
 
@@ -6833,9 +6833,9 @@ body.wbr-locked{overflow:hidden}
         'Preferred Date':          date   || 'Not provided',
 
         // -------- Quote Estimate --------
-        'Dealer Price Range':      dealerRangeLine,
+        'Estimated Repair Range':  dealerRangeLine,
         'Estimate Type':           estimateLine,
-        'Estimated Your Vehicle Quote (ex VAT)': netLbl,
+        'Estimated Quote (ex VAT)': netLbl,
         'VAT (20%)':               vatLbl,
         'Total (including VAT)':   grossLbl,
         'Estimated Repair Time':   repairTimeLine,
