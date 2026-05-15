@@ -1452,6 +1452,37 @@ p{color:var(--text-2);line-height:1.75;font-weight:400}
 .qc-breakdown .qc-line-meta:first-of-type{margin-top:8px}
 .qc-breakdown .qc-line-meta strong{color:var(--text-2);font-weight:500}
 
+/* ---------- Service Includes (dynamic bullet list) ---------- */
+.qc-service-includes{
+  margin-top:14px;padding:14px 14px 12px;
+  border-radius:12px;
+  background:linear-gradient(135deg, rgba(93,169,255,.04) 0%, rgba(255,255,255,.012) 100%);
+  border:1px solid rgba(93,169,255,.10);
+}
+.qc-si-label{
+  font-size:.62rem;font-weight:600;letter-spacing:.24em;text-transform:uppercase;
+  color:var(--accent);margin-bottom:10px;
+}
+.qc-si-list{
+  list-style:none;padding:0;margin:0;
+  display:flex;flex-direction:column;gap:6px;
+}
+.qc-si-list li{
+  font-size:.84rem;color:var(--text-2);line-height:1.5;
+  position:relative;padding-left:18px;
+}
+.qc-si-list li::before{
+  content:"";position:absolute;left:2px;top:.6em;
+  width:5px;height:5px;border-radius:50%;
+  background:var(--accent);
+  box-shadow:0 0 6px rgba(93,169,255,.55);
+}
+@media (max-width:640px){
+  .qc-service-includes{padding:12px 12px 11px;margin-top:12px;border-radius:11px}
+  .qc-si-label{font-size:.58rem;letter-spacing:.22em;margin-bottom:8px}
+  .qc-si-list li{font-size:.78rem;padding-left:16px}
+}
+
 html{scroll-padding-top:90px}
 
 @media (max-width:640px){
@@ -3303,8 +3334,7 @@ body.wbr-locked{overflow:hidden}
                 <span>Job Type</span>
                 <select id="qJob" required>
                   <option value="">Select work…</option>
-                  <option>Belt / Wet Belt Replacement</option>
-                  <option>Wet Oil Pump Belt Replacement</option>
+                  <option>Timing Belt / Wet Belt Replacement</option>
                   <option>Timing Chain Replacement</option>
                   <option>Diagnosis / Inspection</option>
                 </select>
@@ -3460,6 +3490,14 @@ body.wbr-locked{overflow:hidden}
             <div class="qc-line"><span>VAT (20%)</span><strong id="qcVat">£0.00</strong></div>
             <div class="qc-line qc-line-meta" id="qcHrsLine" hidden><span>Estimated Repair Time</span><strong id="qcHrs">—</strong></div>
             <div class="qc-line qc-line-meta" id="qcKitLine" hidden><span>OEM Kit Cost</span><strong id="qcKit">—</strong></div>
+          </div>
+
+          <!-- Service Includes — dynamically populated from updateQuoteCard.
+               Lists the operations covered by the selected job type so
+               the customer can see exactly what their quote covers. -->
+          <div class="qc-service-includes" id="qcServiceIncludes" hidden>
+            <div class="qc-si-label">Service Includes</div>
+            <ul class="qc-si-list" id="qcServiceIncludesList"></ul>
           </div>
         </div>
 
@@ -5947,13 +5985,40 @@ body.wbr-locked{overflow:hidden}
   // wider than £100, autoQuote returns (max - £100); for tighter ranges
   // or fixed prices it returns the max / from directly.
 
+  // ---------------------------------------------------------
+  // SERVICE NAME MATCHING — "Timing Belt / Wet Belt Replacement"
+  // is the new public-facing job type. Internally PRICING still
+  // contains the two legacy service strings:
+  //   - 'Belt / Wet Belt Replacement'        (dry timing belt jobs)
+  //   - 'Wet Oil Pump Belt Replacement'      (lower / wet oil pump only)
+  // These now BOTH count as the merged "Timing Belt / Wet Belt
+  // Replacement" job — the customer never has to pick between them.
+  // When both match the same vehicle, we surface the most
+  // comprehensive (highest priced) rule and flag the result with
+  // hasWetSystem so the Service Includes block can mention the
+  // oil pump belt scope transparently.
+  function serviceMatches(ruleService, jobType){
+    if (ruleService === jobType) return true;
+    if (jobType === 'Timing Belt / Wet Belt Replacement'){
+      return ruleService === 'Belt / Wet Belt Replacement'
+          || ruleService === 'Wet Oil Pump Belt Replacement';
+    }
+    return false;
+  }
+
   function calculateNet(make, model, engine, jobType, year){
     if (!make || !model || !engine || !jobType) return null;
     var y = year ? parseInt(year, 10) : null;
 
+    // Collect EVERY rule that matches this vehicle under the chosen
+    // job type — then pick the most comprehensive (highest priced)
+    // and flag whether a wet oil pump variant was among the matches.
+    var matches = [];
+    var sawWetSystem = false;
+
     for (var i = 0; i < PRICING.length; i++){
       var r = PRICING[i];
-      if (r.service !== jobType) continue;
+      if (!serviceMatches(r.service, jobType)) continue;
       if (r.make && r.make !== make) continue;
       if (r.makes && r.makes.indexOf(make) === -1) continue;
       var engineList = r.engines || (r.engine ? [r.engine] : null);
@@ -5967,23 +6032,45 @@ body.wbr-locked{overflow:hidden}
         if (r.yearFrom !== undefined && y < r.yearFrom) continue;
         if (r.yearTo   !== undefined && y > r.yearTo)   continue;
       }
-      var p = { from: r.from };
-      if (r.to       !== undefined) p.to       = r.to;
-      if (r.plus     === true)      p.plus     = true;
-      if (r.exact    === true)      p.exact    = true;
-      if (r.noFloor  === true)      p.noFloor  = true;
-      if (r.note)                   p.note     = r.note;
-      // NEW dealer-premium fields surfaced into the resolved object so
-      // the quote card, mailto, FormSubmit payload and localStorage can
-      // all preserve them: repair hours window + OEM kit cost window.
-      if (r.hrsFrom  !== undefined) p.hrsFrom  = r.hrsFrom;
-      if (r.hrsTo    !== undefined) p.hrsTo    = r.hrsTo;
-      if (r.kitFrom  !== undefined) p.kitFrom  = r.kitFrom;
-      if (r.kitTo    !== undefined) p.kitTo    = r.kitTo;
-
-      return p;
+      matches.push(r);
+      if (r.service === 'Wet Oil Pump Belt Replacement') sawWetSystem = true;
     }
-    return null;
+
+    if (matches.length === 0) return null;
+
+    // Pick the rule with the highest `from` (and tie-break on `to`) so
+    // when a vehicle has both a dry-belt rule AND a wet-oil-pump-belt
+    // rule the customer is quoted the combined / comprehensive price.
+    matches.sort(function(a, b){
+      var aMax = (a.to !== undefined) ? a.to : a.from;
+      var bMax = (b.to !== undefined) ? b.to : b.from;
+      if (bMax !== aMax) return bMax - aMax;
+      return b.from - a.from;
+    });
+    var r = matches[0];
+
+    var p = { from: r.from };
+    if (r.to       !== undefined) p.to       = r.to;
+    if (r.plus     === true)      p.plus     = true;
+    if (r.exact    === true)      p.exact    = true;
+    if (r.noFloor  === true)      p.noFloor  = true;
+    if (r.note)                   p.note     = r.note;
+    // NEW dealer-premium fields surfaced into the resolved object so
+    // the quote card, mailto, FormSubmit payload and localStorage can
+    // all preserve them: repair hours window + OEM kit cost window.
+    if (r.hrsFrom  !== undefined) p.hrsFrom  = r.hrsFrom;
+    if (r.hrsTo    !== undefined) p.hrsTo    = r.hrsTo;
+    if (r.kitFrom  !== undefined) p.kitFrom  = r.kitFrom;
+    if (r.kitTo    !== undefined) p.kitTo    = r.kitTo;
+    // Wet-system flag — true if this engine has a lower oil pump /
+    // wet oil pump / internal oil pump / submerged oil pump belt
+    // entry under the merged service. Drives the "Oil pump belt
+    // replacement where applicable" line in Service Includes.
+    p.hasWetSystem = sawWetSystem || r.service === 'Wet Oil Pump Belt Replacement';
+    p.serviceUsed  = r.service;
+    p.jobType      = jobType;
+
+    return p;
   }
 
   // Auto-quote = the figure the customer's own vehicle quote is built on.
@@ -6025,7 +6112,7 @@ body.wbr-locked{overflow:hidden}
     var matched = {}, hasUniversal = false;
     for (var i = 0; i < PRICING.length; i++){
       var r = PRICING[i];
-      if (r.service !== service) continue;
+      if (!serviceMatches(r.service, service)) continue;
       var ms = r.makes || (r.make ? [r.make] : []);
       if (ms.length === 0){ hasUniversal = true; continue; }
       for (var j = 0; j < ms.length; j++) matched[ms[j]] = true;
@@ -6039,7 +6126,7 @@ body.wbr-locked{overflow:hidden}
     var matched = {}, hasUniversal = false;
     for (var i = 0; i < PRICING.length; i++){
       var r = PRICING[i];
-      if (r.service !== service) continue;
+      if (!serviceMatches(r.service, service)) continue;
       var ms = r.makes || (r.make ? [r.make] : []);
       if (ms.length > 0 && ms.indexOf(make) === -1) continue;
       var mds = r.models || (r.model ? [r.model] : []);
@@ -6060,7 +6147,7 @@ body.wbr-locked{overflow:hidden}
     var matched = {}, hasUniversal = false, ordered = [];
     for (var i = 0; i < PRICING.length; i++){
       var r = PRICING[i];
-      if (r.service !== service) continue;
+      if (!serviceMatches(r.service, service)) continue;
       var ms = r.makes || (r.make ? [r.make] : []);
       if (ms.length > 0 && ms.indexOf(make) === -1) continue;
       var mds = r.models || (r.model ? [r.model] : []);
@@ -6097,6 +6184,44 @@ body.wbr-locked{overflow:hidden}
       return '£' + v.toLocaleString('en-GB', { maximumFractionDigits:0 });
     }
     return fmt(v);
+  }
+
+  // Service Includes bullet list. Returns an array of strings to render
+  // inside the .qc-si-list <ul>. Branches by job type and, for the
+  // merged "Timing Belt / Wet Belt Replacement" service, optionally
+  // notes the oil pump belt scope when the resolved price object is
+  // flagged hasWetSystem.
+  function serviceIncludesFor(jobType, p){
+    if (jobType === 'Timing Belt / Wet Belt Replacement'){
+      var beltItems = [
+        'OEM timing belt kit (belt, tensioners, idlers)',
+        'Oil pump belt replacement where applicable',
+        'Pickup strainer inspection &amp; clean',
+        'Fresh engine oil and filter',
+        'Coolant refill where applicable',
+        'Timing alignment &amp; calibration check'
+      ];
+      return beltItems;
+    }
+    if (jobType === 'Timing Chain Replacement'){
+      return [
+        'OEM timing chain kit (chain, tensioners, guides, sprockets where required)',
+        'Crankshaft &amp; camshaft alignment',
+        'Fresh engine oil and filter',
+        'Coolant refill where applicable',
+        'Timing alignment &amp; calibration check',
+        'Post-fit road test'
+      ];
+    }
+    if (jobType === 'Diagnosis / Inspection'){
+      return [
+        'Workshop diagnostic inspection',
+        'Visual + listening assessment of timing system condition',
+        'Photo / short video evidence where useful',
+        'Written repair recommendation &amp; quote'
+      ];
+    }
+    return [];
   }
 
   // Format a price value for the customer-facing UI.
@@ -6225,6 +6350,8 @@ body.wbr-locked{overflow:hidden}
   var qcHrsLine = document.getElementById('qcHrsLine');
   var qcKit    = document.getElementById('qcKit');
   var qcKitLine = document.getElementById('qcKitLine');
+  var qcServiceIncludes = document.getElementById('qcServiceIncludes');
+  var qcServiceIncludesList = document.getElementById('qcServiceIncludesList');
   var qcMessage  = document.getElementById('qcMessage');
   var qcConfirm  = document.getElementById('qcConfirm');
   var qcFeedback = document.getElementById('qcFeedback');
@@ -6476,6 +6603,18 @@ body.wbr-locked{overflow:hidden}
       }
     }
 
+    // ---- Service Includes — dynamic bullet list ----
+    // Branches by selected job type, then optionally adds the
+    // "Oil pump belt replacement where applicable" line for engines
+    // flagged as wet-system in calculateNet.
+    if (qcServiceIncludes && qcServiceIncludesList){
+      var items = serviceIncludesFor(job, p);
+      qcServiceIncludesList.innerHTML = items.map(function(s){
+        return '<li>' + s + '</li>';
+      }).join('');
+      qcServiceIncludes.hidden = items.length === 0;
+    }
+
     qcPrices.hidden = false;
 
     qcStatus.textContent = 'Estimate ready';
@@ -6580,6 +6719,17 @@ body.wbr-locked{overflow:hidden}
           lines.push('OEM Kit Cost: ' + fmt0(p.kitFrom) + ' to ' + fmt0(p.kitTo));
         }
 
+        // ---- Service Includes (plain-text fallback for mailto body) ----
+        var siList = serviceIncludesFor(job, p);
+        if (siList && siList.length){
+          lines.push('');
+          lines.push('SERVICE INCLUDES');
+          siList.forEach(function(s){
+            // Strip HTML entities for the plain-text version.
+            lines.push('- ' + s.replace(/&amp;/g, '&'));
+          });
+        }
+
         if (p.note){
           lines.push('');
           lines.push('SERVICE NOTE');
@@ -6640,6 +6790,25 @@ body.wbr-locked{overflow:hidden}
         if (typeof p.kitFrom === 'number' && typeof p.kitTo === 'number'){
           estimateRows += '<div class="qc-line"><span>OEM Kit Cost</span><strong>' +
             esc(fmt0(p.kitFrom) + ' to ' + fmt0(p.kitTo)) + '</strong></div>';
+        }
+
+        // Service Includes — mirror the on-page card list inside the
+        // confirmation summary so the customer sees a definitive record
+        // of what the quote covers.
+        var siSummary = serviceIncludesFor(job, p);
+        if (siSummary && siSummary.length){
+          estimateRows +=
+            '<div style="margin-top:14px;padding:12px 13px 11px;background:rgba(93,169,255,.05);border:1px solid rgba(93,169,255,.16);border-radius:10px">' +
+              '<div style="font-size:.62rem;font-weight:600;letter-spacing:.24em;text-transform:uppercase;color:var(--accent);margin-bottom:8px">Service Includes</div>' +
+              '<ul style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:5px">' +
+                siSummary.map(function(s){
+                  return '<li style="font-size:.82rem;color:var(--text-2);line-height:1.5;position:relative;padding-left:14px">' +
+                         '<span style="position:absolute;left:2px;top:.55em;width:4px;height:4px;border-radius:50%;background:var(--accent)"></span>' +
+                         s +
+                         '</li>';
+                }).join('') +
+              '</ul>' +
+            '</div>';
         }
 
         if (p.note){
@@ -6870,6 +7039,7 @@ body.wbr-locked{overflow:hidden}
 
         // -------- Quote Estimate --------
         'Estimated Repair Pricing': dealerRangeLine,
+        'Service Includes':        (serviceIncludesFor(job, p) || []).map(function(s){ return s.replace(/&amp;/g, '&'); }).join(' • '),
         'Estimate Type':           estimateLine,
         'Estimated Workshop Quote (ex VAT)': netLbl,
         'VAT (20%)':               vatLbl,
