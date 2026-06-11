@@ -1202,6 +1202,33 @@ p{color:var(--text-2);line-height:1.75;font-weight:400}
 .section-videos{background:var(--bg-0)}
 .video-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:22px}
 @media (max-width:900px){.video-grid{grid-template-columns:1fr}}
+/* ---- Instagram embed thumbnail ----------------------------------
+   Cards use Instagram's official embed iframe so the real post +
+   caption renders live. No cropping — the iframe is given a tall
+   enough container that the full embed (header + thumbnail + caption
+   + action bar) shows naturally inside the card. */
+.vc-thumb--ig{
+  position:relative;
+  width:100%;
+  min-height:760px;
+  background:#000;
+  border-bottom:1px solid var(--line);
+}
+.vc-ig-frame{
+  display:block;
+  width:100%;
+  min-height:760px;
+  height:100%;
+  border:0;
+  background:#000;
+}
+@media (max-width:900px){
+  .vc-thumb--ig, .vc-ig-frame{min-height:720px}
+}
+@media (max-width:560px){
+  .vc-thumb--ig, .vc-ig-frame{min-height:680px}
+}
+
 .video-card{padding:0;overflow:hidden;transition:transform var(--t-med),border-color var(--t-med)}
 .video-card:hover{transform:translateY(-4px);border-color:var(--line-2)}
 .vc-thumb{position:relative;aspect-ratio:16/9;background:var(--bg-3);overflow:hidden}
@@ -3054,6 +3081,374 @@ body.wbr-locked{overflow:hidden}
   .wbr-backdrop, .wbr-shell, .wbr-over{animation:none}
   .wbr-x{transition:none}
 }
+
+/* ════════════════════════════════════════════════════════════════
+   THE TIMING SYSTEM — restrained cinematic ambience
+   ----------------------------------------------------------------
+   Stripped to a single halo + one faint scan ring + quiet dust.
+   The headline + CTA is the hero. Everything else is whisper-soft
+   atmosphere. No HUD chrome. No labels. No belt teeth flying.
+   ════════════════════════════════════════════════════════════════ */
+
+.timing-scene{
+  position:absolute;inset:0;
+  pointer-events:none;
+  overflow:hidden;
+  z-index:1;
+}
+.timing-scene > *{will-change:transform}
+
+/* Force the broken 3D wet belt off completely. It was breaking the
+   composition by sticking to the top of the hero. The new scene
+   leans on the headline as the focal point — no mechanical centre. */
+.hero-belt-3d{display:none !important}
+.hero--showroom .hero-visual::before{display:none !important}
+
+/* ---- Soft halo behind the headline ----------------------------- */
+.ts-halo{
+  position:absolute;left:50%;top:50%;
+  width:min(120vh, 1200px);height:min(120vh, 1200px);
+  transform:translate(-50%, -50%);
+  background:
+    radial-gradient(ellipse at center,
+      rgba(93,169,255,.18) 0%,
+      rgba(93,169,255,.07) 22%,
+      rgba(37,99,235,.04) 45%,
+      transparent 70%);
+  filter:blur(40px);
+  opacity:.85;
+  animation:ts-halo-breathe 14s ease-in-out infinite;
+}
+@keyframes ts-halo-breathe{
+  0%, 100% { opacity:.85; transform:translate(-50%, -50%) scale(1) }
+  50%      { opacity:1;   transform:translate(-50%, -50%) scale(1.05) }
+}
+
+/* ---- One ultra-thin scan ring + a faint second ring ------------ */
+.ts-rings{
+  position:absolute;left:50%;top:50%;
+  width:min(90vh, 1100px);height:min(90vh, 1100px);
+  transform:translate(-50%, -50%);
+  opacity:.5;
+}
+.ts-ring{
+  position:absolute;inset:0;
+  border-radius:50%;
+  border:1px solid rgba(93,169,255,.12);
+}
+.ts-ring--a{
+  animation:ts-ring-rot 80s linear infinite;
+}
+.ts-ring--c{
+  inset:24%;
+  border-color:rgba(147,197,253,.08);
+  animation:ts-ring-pulse 9s ease-in-out infinite;
+}
+@keyframes ts-ring-rot{ to{ transform:rotate(360deg) } }
+@keyframes ts-ring-pulse{
+  0%, 100% { transform:scale(1);   opacity:.45 }
+  50%      { transform:scale(1.04); opacity:.65 }
+}
+
+/* ---- Real 3D WebGL canvas (Three.js) --------------------------- */
+.ts-webgl{
+  position:absolute;
+  left:50%;top:50%;
+  width:min(80vh, 900px);
+  height:min(80vh, 900px);
+  transform:translate(-50%, -50%);
+  opacity:0;                /* faded in by JS once ready */
+  transition:opacity 1.6s cubic-bezier(.22,1,.36,1);
+  pointer-events:none;
+  z-index:0;
+  filter:drop-shadow(0 40px 80px rgba(0,0,0,.55));
+}
+.ts-webgl.is-ready{ opacity:.85 }
+/* When WebGL succeeds, hide the SVG belt fallback so they don't overlap. */
+body.has-webgl .ts-belt-svg-fallback{ display:none }
+@media (max-width:900px){
+  .ts-webgl{width:90vw;height:60vh;opacity:0}
+  .ts-webgl.is-ready{ opacity:.75 }
+}
+@media (prefers-reduced-motion:reduce){
+  .ts-webgl{display:none !important}
+}
+
+/* ---- Cinematic belt + pulleys scene ---------------------------- */
+.ts-belt-scene{
+  position:absolute;
+  left:50%;top:50%;
+  width:min(120vh, 1400px);
+  height:auto;
+  transform:translate(-50%, -50%) perspective(1200px) rotateX(2deg);
+  opacity:.35;             /* sits behind the headline */
+  pointer-events:none;
+  filter:drop-shadow(0 30px 60px rgba(0,0,0,.55));
+}
+.ts-belt-scene svg{
+  width:100%;height:auto;display:block;
+  overflow:visible;
+}
+
+/* Belt teeth — animate stroke-dashoffset to make the teeth appear
+   to scroll continuously around the loop (the belt "running"). */
+.ts-belt-scene .belt-teeth,
+.ts-belt-scene .belt-teeth-highlight{
+  animation:belt-run 6s linear infinite;
+}
+.ts-belt-scene .belt-teeth-highlight{
+  animation-delay:-.05s;     /* slight phase offset for sparkle */
+}
+@keyframes belt-run{
+  to{ stroke-dashoffset:-160; }
+}
+
+/* Travelling rim-light arc — long stride takes ~4s to clear the belt. */
+.ts-belt-scene .belt-rim-light{
+  animation:belt-rim 5.5s linear infinite;
+}
+@keyframes belt-rim{
+  0%   { stroke-dashoffset:0;     }
+  100% { stroke-dashoffset:-2420; }
+}
+
+/* Rotating pulleys — each pulley spins on its own centre.
+   The transform-origin is set inline (left = -220,0 / right = 220,0). */
+.ts-belt-scene .pulley{
+  animation:pulley-spin 4s linear infinite;
+  transform-box:fill-box;
+}
+.ts-belt-scene .pulley--left  { animation-duration:5.2s; transform-origin:-220px 0; }
+.ts-belt-scene .pulley--right { animation-duration:6.4s; transform-origin: 220px 0; }
+@keyframes pulley-spin{
+  to{ transform:rotate(360deg); }
+}
+
+/* The new belt scene replaces the rings + ghost layers, so hide any
+   leftover ring blocks if they exist in the markup. */
+.ts-belt-scene + .ts-rings,
+.timing-scene .ts-rings{display:none}
+
+@media (max-width:900px){
+  .ts-belt-scene{width:140vw;opacity:.28;transform:translate(-50%, -50%) perspective(900px) rotateX(2deg)}
+}
+@media (max-width:560px){
+  .ts-belt-scene{width:170vw;opacity:.22}
+}
+
+/* prefers-reduced-motion: freeze the moving parts so the scene
+   remains as a still illustration rather than animated. */
+@media (prefers-reduced-motion:reduce){
+  .ts-belt-scene .belt-teeth,
+  .ts-belt-scene .belt-teeth-highlight,
+  .ts-belt-scene .belt-rim-light,
+  .ts-belt-scene .pulley{ animation:none !important; }
+}
+
+/* ---- Quiet dust drift ------------------------------------------ */
+.ts-debris{
+  position:absolute;inset:0;
+}
+.ts-debris-fragment{
+  position:absolute;
+  width:1.5px;height:1.5px;
+  background:rgba(255,255,255,.4);
+  border-radius:50%;
+  box-shadow:0 0 4px rgba(93,169,255,.5);
+  animation:ts-drift-up 36s linear infinite;
+  opacity:.5;
+}
+@keyframes ts-drift-up{
+  0%   { transform:translate3d(0, 60vh, 0); opacity:0 }
+  10%  { opacity:.5 }
+  90%  { opacity:.5 }
+  100% { transform:translate3d(8px, -70vh, 0); opacity:0 }
+}
+
+/* ---- Hero copy reveal animations -------------------------------- */
+.hero--showroom .hero-copy > *{
+  opacity:0;
+  transform:translateY(14px);
+  animation:ts-copy-reveal 1s cubic-bezier(.22,1,.36,1) forwards;
+}
+.hero--showroom .hero-copy > *:nth-child(1){animation-delay:.4s}
+.hero--showroom .hero-copy > *:nth-child(2){animation-delay:.55s}
+.hero--showroom .hero-copy > *:nth-child(3){animation-delay:.75s}
+.hero--showroom .hero-copy > *:nth-child(4){animation-delay:.95s}
+.hero--showroom .hero-copy > *:nth-child(5){animation-delay:1.1s}
+@keyframes ts-copy-reveal{
+  to{ opacity:1; transform:translateY(0) }
+}
+
+/* ---- Mobile lightweight overrides ------------------------------ */
+@media (max-width:900px){
+  .ts-halo{width:140vw;height:140vw;filter:blur(28px)}
+  .ts-rings{width:110vw;height:110vw;opacity:.3}
+  .ts-debris-fragment{animation-duration:42s}
+}
+
+/* ---- prefers-reduced-motion: full freeze ----------------------- */
+@media (prefers-reduced-motion:reduce){
+  .ts-halo, .ts-ring--a, .ts-ring--c, .ts-debris-fragment,
+  .hero--showroom .hero-copy > *{
+    animation:none !important;
+  }
+  .hero--showroom .hero-copy > *{opacity:1;transform:none}
+}
+
+/* ════════════════════════════════════════════════════════════════
+   HERO WORDMARK — "Wigan Wetbelts" couture-blue treatment
+   ----------------------------------------------------------------
+   Couture display serif (Bodoni Moda) at light italic weight so the
+   wordmark reads like Hermès / Aston Martin couture signage — high
+   stroke contrast, refined elegance. Filled with a premium blue
+   gradient that runs from sky-blue at the top through the brand
+   blue and into a deep royal blue at the foot, with a soft halo
+   underglow and a slow shimmer sweep that catches across the
+   letters once every ~7 seconds. */
+/* ════════════════════════════════════════════════════════════════
+   HERO WORDMARK — PERFORMANCE / ENGINEERING BRAND VIBE
+   ----------------------------------------------------------------
+   Swapped from the Bodoni italic couture look to a confident,
+   architectural sans wordmark — the kind of typography you'd see
+   on AMG / M-Performance / Porsche specialist signage. Bold,
+   uppercase, wide-tracked, white on dark with a soft blue ambient
+   halo behind. A vertical accent bar replaces the curly italic
+   character — feels engineering / Apple Pro rather than fashion. */
+.hero-h1--timing{
+  font-family:'Outfit','Manrope',sans-serif;
+  position:relative;
+  text-align:center;
+}
+.hero-h1-brand{
+  display:block;
+  font-family:'Outfit','Manrope',sans-serif;
+  font-style:normal;
+  font-weight:800;
+  font-size:clamp(2.2rem, 6.4vw, 4.6rem);
+  letter-spacing:.04em;       /* wide architectural tracking */
+  text-transform:uppercase;
+  line-height:1;
+  padding-bottom:.04em;
+  color:#ffffff;
+  background:none;
+  -webkit-background-clip:initial;background-clip:initial;
+  filter:
+    drop-shadow(0 2px 4px rgba(0,0,0,.6))
+    drop-shadow(0 0 32px rgba(255,255,255,.18))
+    drop-shadow(0 0 80px rgba(93,169,255,.18));
+  position:relative;
+}
+/* Slow blue track-light sweep across the wordmark. Continuous
+   linear motion, wide invisible track, no snap-back. */
+.hero-h1-brand::before{
+  content:attr(data-text);
+  position:absolute;inset:0;
+  background:linear-gradient(115deg,
+    transparent 0%,
+    transparent 44%,
+    rgba(147,197,253,.45) 48%,
+    rgba(93,169,255,.9) 50%,
+    rgba(147,197,253,.45) 52%,
+    transparent 56%,
+    transparent 100%);
+  background-size:420% 100%;
+  background-position:120% 0;
+  background-repeat:no-repeat;
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  animation:hero-shimmer 7s linear infinite;
+  pointer-events:none;
+  will-change:background-position;
+}
+@keyframes hero-shimmer{
+  0%   { background-position:120% 0 }
+  100% { background-position:-220% 0 }
+}
+
+/* Vertical accent bar between the wordmark and the subhead —
+   the "spec divider" look from premium product pages. */
+.hero-h1-accent-rule{
+  display:block;
+  width:1px;height:36px;
+  margin:18px auto 18px;
+  background:linear-gradient(180deg, rgba(93,169,255,0), rgba(93,169,255,.9), rgba(93,169,255,0));
+  position:relative;
+}
+
+/* Sub-heading — engineering callout. Tighter, more confident,
+   slightly larger so it reads alongside the bigger wordmark. */
+.hero-h1-sub{
+  display:block;
+  margin-top:.2em;
+  font-family:'Outfit','Manrope',sans-serif;
+  font-size:clamp(.78rem, 1.15vw, .98rem);
+  font-weight:500;
+  letter-spacing:.5em;
+  text-transform:uppercase;
+  color:#c8d8ec;
+  filter:drop-shadow(0 0 18px rgba(93,169,255,.35));
+  position:relative;
+  padding-left:0;padding-right:0;
+}
+.hero-h1-sub::before, .hero-h1-sub::after{ content:none; }
+@media (max-width:560px){
+  .hero-h1-brand{letter-spacing:.025em}
+  .hero-h1-sub{letter-spacing:.32em;font-size:.7rem}
+  .hero-h1-accent-rule{height:28px;margin:14px auto 14px}
+}
+
+/* Depth and luxury polish — extra dark vignette at the hero edges
+   so the centre commands attention like a stage spotlight. */
+.hero--showroom::after{
+  content:"";
+  position:absolute;inset:0;
+  pointer-events:none;
+  background:
+    radial-gradient(ellipse at 50% 60%, transparent 0%, transparent 45%, rgba(0,0,0,.55) 100%);
+  z-index:2;
+}
+
+/* Refined CTA glow ring — gives the primary button a couture pulse. */
+.hero-ctas .btn-primary{
+  position:relative;
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,.08) inset,
+    0 14px 40px rgba(37,99,235,.35),
+    0 0 0 6px rgba(93,169,255,.10);
+  transition:all .4s cubic-bezier(.22,1,.36,1);
+}
+.hero-ctas .btn-primary:hover{
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,.14) inset,
+    0 22px 56px rgba(37,99,235,.55),
+    0 0 0 8px rgba(93,169,255,.15);
+  transform:translateY(-2px);
+}
+
+/* Lead paragraph polish — slightly thinner weight, more breathable. */
+.hero--showroom .lead{
+  font-weight:300;
+  letter-spacing:.005em;
+  color:#cdd6e0;
+  max-width:560px;
+  margin-left:auto;margin-right:auto;
+}
+
+/* Stats strip — refined accent line + soft luxury spacing. */
+.hero--showroom .hero-stats{
+  position:relative;
+  padding-top:32px;
+}
+.hero--showroom .hero-stats::before{
+  content:"";
+  position:absolute;left:50%;top:0;
+  width:200px;height:1px;
+  transform:translateX(-50%);
+  background:linear-gradient(90deg, transparent, rgba(93,169,255,.35), transparent);
+}
+.hero--showroom .hero-stat strong{
+  filter:drop-shadow(0 2px 10px rgba(93,169,255,.15));
+}
 </style>
 </head>
 <body>
@@ -3133,6 +3528,25 @@ body.wbr-locked{overflow:hidden}
     <div class="hero-glow b"></div>
     <div class="hero-glow c"></div>
     <div class="hero-grain"></div>
+
+    <!-- ════════════════════════════════════════════════════════════
+         THE TIMING SYSTEM — cinematic SVG belt + pulleys scene.
+         A side-on view of a wet timing belt running around three
+         pulleys (crank lower, cam upper, tensioner offset). The
+         belt teeth travel around the loop continuously, the pulleys
+         rotate, a blue rim-light glides across the outer edge.
+         Sits behind the headline at reduced opacity so the wordmark
+         still leads. Honours prefers-reduced-motion. -->
+    <div class="timing-scene" id="timingScene" data-depth-root>
+
+      <!-- Soft halo + dust ambience kept behind everything. -->
+      <div class="ts-halo" data-depth="0.3"></div>
+      <div class="ts-debris" data-depth="0.7" id="tsDebris"></div>
+
+      <!-- Belt/sprocket scenes removed. Hero is just the headline +
+           halo + dust drift now. Clean. -->
+
+    </div>
 
     <!-- Cinematic 3D wet belt visual -->
     <div class="hero-belt-3d" aria-hidden="true">
@@ -3217,15 +3631,15 @@ body.wbr-locked{overflow:hidden}
   <div class="container hero-inner">
     <div class="hero-copy">
       <span class="eyebrow"><span class="dot"></span> Wigan, Greater Manchester · Now Booking</span>
-      <!-- Editorial headline — "Specialists" sits on its own line as the
-           italic serif focal point. The line-break structure also adapts
-           cleanly on mobile because each line is its own <span>. -->
-      <h1 class="hero-h1">
-        <span class="hero-h1-line">Wet Belt &amp; Timing Chain</span>
-        <span class="hero-h1-line hero-h1-accent"><span class="accent"><em>Specialists</em></span></span>
-        <span class="hero-h1-line">in Wigan</span>
+      <!-- Hero headline rebuilt as a cinematic two-line wordmark:
+             line 1 = brand wordmark (premium white display weight)
+             line 2 = subhead with blue gradient + tracked uppercase rule. -->
+      <h1 class="hero-h1 hero-h1--timing">
+        <span class="hero-h1-line hero-h1-brand" data-text="Wigan Wetbelts">Wigan Wetbelts</span>
+        <span class="hero-h1-accent-rule" aria-hidden="true"></span>
+        <span class="hero-h1-line hero-h1-sub">Precision Timing Repairs</span>
       </h1>
-      <p class="lead">Your engine is only as healthy as the belt that drives it. We deliver dealer level diagnostics, OEM grade replacement and oil system protection, engineered with the precision modern wet belt engines demand.</p>
+      <p class="lead">Wet belt, timing belt and timing chain specialists in Wigan. Dealer level diagnostics, OEM grade components and precision timing procedures.</p>
 
       <div class="hero-ctas">
         <a href="#quote" class="btn btn-primary btn-magnetic" data-scroll>
@@ -3489,7 +3903,6 @@ body.wbr-locked{overflow:hidden}
             <div class="qc-line"><span>Workshop Price (ex. VAT)</span><strong id="qcNet">£0.00</strong></div>
             <div class="qc-line"><span>VAT (20%)</span><strong id="qcVat">£0.00</strong></div>
             <div class="qc-line qc-line-meta" id="qcHrsLine" hidden><span>Estimated Repair Time</span><strong id="qcHrs">—</strong></div>
-            <div class="qc-line qc-line-meta" id="qcKitLine" hidden><span>OEM Kit Cost</span><strong id="qcKit">—</strong></div>
           </div>
 
           <!-- Service Includes — dynamically populated from updateQuoteCard.
@@ -3685,22 +4098,15 @@ body.wbr-locked{overflow:hidden}
 
     <div class="video-grid">
       <article class="glass-card video-card reveal" data-link="https://www.instagram.com/reel/DXJuPOsDSxV/?utm_source=ig_web_copy_link&amp;igsh=MzRlODBiNWFlZA==">
-        <div class="vc-thumb" role="button" tabindex="0" aria-label="Watch Job Finished Walkthrough on Instagram">
-          <img class="vc-image" src="assets/media/job-finished-walkthrough.jpg" alt="" loading="lazy"
-               onerror="this.style.display='none'"/>
-          <div class="vc-overlay"><button class="vc-play" aria-label="Play video"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></button></div>
-          <div class="vc-art">
-            <svg viewBox="0 0 600 340" preserveAspectRatio="xMidYMid slice">
-              <defs><radialGradient id="vg1" cx=".5" cy=".4" r=".7"><stop offset="0" stop-color="#10242a"/><stop offset="1" stop-color="#05080a"/></radialGradient></defs>
-              <rect width="600" height="340" fill="url(#vg1)"/>
-              <g transform="translate(300 180)">
-                <ellipse rx="220" ry="20" fill="#000" opacity=".5"/>
-                <path d="M-150 -60 L150 -60 A60 60 0 0 1 150 60 L-150 60 A60 60 0 0 1 -150 -60 Z" fill="none" stroke="#1d2228" stroke-width="34"/>
-                <path d="M-150 -42 L150 -42 A42 42 0 0 1 150 42 L-150 42 A42 42 0 0 1 -150 -42 Z" fill="none" stroke="#000" stroke-width="14" stroke-dasharray="3 5"/>
-                <path d="M-150 -60 L150 -60 A60 60 0 0 1 150 60 L-150 60 A60 60 0 0 1 -150 -60 Z" fill="none" stroke="#5da9ff" stroke-width="3" opacity=".7"/>
-              </g>
-            </svg>
-          </div>
+        <div class="vc-thumb vc-thumb--ig" aria-label="Watch Job Finished Walkthrough on Instagram">
+          <!-- Live Instagram embed — shows the real post thumbnail
+               directly from your account. Loads lazily, no extra
+               files needed in the repo. -->
+          <iframe class="vc-ig-frame"
+                  src="https://www.instagram.com/reel/DXJuPOsDSxV/embed/captioned/"
+                  loading="lazy" scrolling="no" frameborder="0"
+                  allowtransparency="true" allow="encrypted-media"
+                  title="Job Finished Walkthrough on Instagram"></iframe>
         </div>
         <div class="vc-body">
           <span class="vc-tag">Instagram</span>
@@ -3711,23 +4117,12 @@ body.wbr-locked{overflow:hidden}
       </article>
 
       <article class="glass-card video-card reveal" data-link="https://www.instagram.com/reel/DW3qcRljQUd/?utm_source=ig_web_copy_link&amp;igsh=MzRlODBiNWFlZA==">
-        <div class="vc-thumb" role="button" tabindex="0" aria-label="Watch Peugeot 208 Wet Belt Replacement on Instagram">
-          <img class="vc-image" src="assets/media/peugeot-208-wet-belt.jpg" alt="" loading="lazy"
-               onerror="this.style.display='none'"/>
-          <div class="vc-overlay"><button class="vc-play" aria-label="Play video"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></button></div>
-          <div class="vc-art">
-            <svg viewBox="0 0 600 340" preserveAspectRatio="xMidYMid slice">
-              <defs><radialGradient id="vg2" cx=".5" cy=".4" r=".7"><stop offset="0" stop-color="#1a1410"/><stop offset="1" stop-color="#05060a"/></radialGradient></defs>
-              <rect width="600" height="340" fill="url(#vg2)"/>
-              <g transform="translate(300 170)">
-                <rect x="-150" y="-30" width="300" height="80" rx="10" fill="#0d0a08" stroke="#2a1c10" stroke-width="2"/>
-                <ellipse cx="0" cy="10" rx="120" ry="22" fill="#3a2818"/>
-                <ellipse cx="-50" cy="0" rx="35" ry="12" fill="#2a1c10"/>
-                <ellipse cx="60" cy="14" rx="40" ry="14" fill="#2a1c10"/>
-                <g fill="#5b4032"><circle cx="-90" cy="-10" r="3"/><circle cx="80" cy="-12" r="3"/><circle cx="-30" cy="36" r="2"/><circle cx="40" cy="36" r="2"/></g>
-              </g>
-            </svg>
-          </div>
+        <div class="vc-thumb vc-thumb--ig" aria-label="Watch Peugeot 208 Wet Belt Replacement on Instagram">
+          <iframe class="vc-ig-frame"
+                  src="https://www.instagram.com/reel/DW3qcRljQUd/embed/captioned/"
+                  loading="lazy" scrolling="no" frameborder="0"
+                  allowtransparency="true" allow="encrypted-media"
+                  title="Peugeot 208 Wet Belt Replacement on Instagram"></iframe>
         </div>
         <div class="vc-body">
           <span class="vc-tag">Instagram</span>
@@ -3738,25 +4133,12 @@ body.wbr-locked{overflow:hidden}
       </article>
 
       <article class="glass-card video-card reveal" data-link="https://www.instagram.com/reel/DWPUj0kjQfm/?utm_source=ig_web_copy_link&amp;igsh=MzRlODBiNWFlZA==">
-        <div class="vc-thumb" role="button" tabindex="0" aria-label="Watch Satisfying Wet Belt Replacement ASMR on Instagram">
-          <img class="vc-image" src="assets/media/wet-belt-asmr.jpg" alt="" loading="lazy"
-               onerror="this.style.display='none'"/>
-          <div class="vc-overlay"><button class="vc-play" aria-label="Play video"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></button></div>
-          <div class="vc-art">
-            <svg viewBox="0 0 600 340" preserveAspectRatio="xMidYMid slice">
-              <defs><radialGradient id="vg3" cx=".5" cy=".4" r=".7"><stop offset="0" stop-color="#0c1f1d"/><stop offset="1" stop-color="#04080a"/></radialGradient></defs>
-              <rect width="600" height="340" fill="url(#vg3)"/>
-              <g transform="translate(300 170)">
-                <circle r="100" fill="#0a0f13" stroke="#5da9ff" stroke-width="2" opacity=".7"/>
-                <circle r="60" fill="none" stroke="#5da9ff" stroke-width="1" opacity=".4"/>
-                <g stroke="#5da9ff" stroke-width="1.4" fill="none">
-                  <path d="M-90 0 L-30 0"/><path d="M30 0 L90 0"/>
-                  <path d="M0 -90 L0 -30"/><path d="M0 30 L0 90"/>
-                </g>
-                <text y="6" text-anchor="middle" font-family="Inter, sans-serif" font-size="14" fill="#5da9ff" font-weight="700">DIAGNOSTICS</text>
-              </g>
-            </svg>
-          </div>
+        <div class="vc-thumb vc-thumb--ig" aria-label="Watch Satisfying Wet Belt Replacement ASMR on Instagram">
+          <iframe class="vc-ig-frame"
+                  src="https://www.instagram.com/reel/DWPUj0kjQfm/embed/captioned/"
+                  loading="lazy" scrolling="no" frameborder="0"
+                  allowtransparency="true" allow="encrypted-media"
+                  title="Satisfying Wet Belt Replacement ASMR on Instagram"></iframe>
         </div>
         <div class="vc-body">
           <span class="vc-tag">Instagram</span>
@@ -3994,33 +4376,119 @@ body.wbr-locked{overflow:hidden}
        belts and dry timing belts.) Global £750 floor still applies.
     ================================================================ */
 
-    /* ----- Ford EcoBoost / EcoBlue ----- */
+    /* ================================================================
+       FORD — Timing Belt / Wet Belt block. Proof-checked engine matrix
+       covering every Ford Fiesta and Focus engine variant across all
+       generations (Fiesta Mk6 2008-2017, Mk7 2017-2023; Focus Mk2
+       2008-2011, Mk3 2011-2018, Mk4 2018-2025), plus the rest of the
+       Ford EcoBoost / EcoBlue range. Year windows ensure each engine
+       only appears for the generation that actually used it.
+
+       Timing system per engine:
+       - 1.0 EcoBoost / EcoBoost mHEV (Fox)        = WET BELT
+       - 1.5 EcoBlue Diesel                        = WET BELT + lower oil pump belt
+       - 1.4 Duratec / 1.6 Duratec / 1.6 Ti-VCT    = dry timing belt (Mk2 Focus, Mk6 Fiesta)
+       - 1.8 / 2.0 Duratec HE Petrol               = dry timing belt (Mk2 Focus)
+       - 1.4 TDCi / 1.6 TDCi / 1.8 TDCi / 2.0 TDCi = dry timing belt (Duratorq/PSA DV6)
+       Engines NOT listed here are chain-driven and live in the Ford
+       chain block further down (1.25 / 1.1 Ti-VCT / 1.5 EcoBoost /
+       1.6 EcoBoost / 2.0 GDI / 2.3 EcoBoost / 1.5 TDCi / 2.5 Volvo). */
+
+    /* ===== FORD FIESTA — Belt / Wet Belt engines =====
+       Workshop pricing standardised at £957 + VAT across every
+       Fiesta timing/wet belt engine, per Wigan Wetbelts spec. */
+
+    /* Fiesta 1.0 EcoBoost (Fox wet belt) — Mk6 facelift + Mk7. */
     { service:'Belt / Wet Belt Replacement', make:'Ford', models:['Fiesta'],
-      engines:['1.0 EcoBoost','1.0 EcoBoost Hybrid'], from:957 },
-    /* Focus split: 1.0 EcoBoost = £1020, Hybrid stays at £1100. */
+      engines:['1.0 EcoBoost'], yearFrom:2013, yearTo:2023, from:957 },
+    /* Fiesta 1.0 EcoBoost Hybrid mHEV — Mk7 only. */
+    { service:'Belt / Wet Belt Replacement', make:'Ford', models:['Fiesta'],
+      engines:['1.0 EcoBoost Hybrid'], yearFrom:2020, yearTo:2023, from:957 },
+    /* Fiesta 1.4 TDCi Diesel (Duratorq DLD-414) — Mk6 only. */
+    { service:'Belt / Wet Belt Replacement', make:'Ford', models:['Fiesta'],
+      engines:['1.4 TDCi'], yearFrom:2008, yearTo:2012, from:957 },
+    /* Fiesta 1.6 TDCi Diesel (Peugeot DV6 dry belt) — Mk6. */
+    { service:'Belt / Wet Belt Replacement', make:'Ford', models:['Fiesta'],
+      engines:['1.6 TDCi'], yearFrom:2008, yearTo:2017, from:957 },
+
+    /* ===== FORD FOCUS — Belt / Wet Belt engines =====
+       Workshop pricing standardised at £1020 + VAT across every
+       Focus timing/wet belt engine, per Wigan Wetbelts spec. */
+
+    /* Focus 1.0 EcoBoost (Fox wet belt) — Mk3 + Mk4. */
     { service:'Belt / Wet Belt Replacement', make:'Ford', models:['Focus'],
-      engines:['1.0 EcoBoost'], from:1020 },
+      engines:['1.0 EcoBoost'], yearFrom:2012, yearTo:2025, from:1020 },
+    /* Focus 1.0 EcoBoost Hybrid mHEV — Mk4 only. */
     { service:'Belt / Wet Belt Replacement', make:'Ford', models:['Focus'],
-      engines:['1.0 EcoBoost Hybrid'], from:1100 },
+      engines:['1.0 EcoBoost Hybrid'], yearFrom:2020, yearTo:2025, from:1020 },
+    /* Focus 1.5 EcoBlue Diesel (wet belt + lower oil pump). */
+    { service:'Belt / Wet Belt Replacement', make:'Ford', models:['Focus'],
+      engines:['1.5 EcoBlue'], yearFrom:2018, yearTo:2025, from:1020 },
+    /* Focus Mk2 1.4 Duratec Petrol — entry-level. */
+    { service:'Belt / Wet Belt Replacement', make:'Ford', models:['Focus'],
+      engines:['1.4 Duratec'], yearFrom:2008, yearTo:2011, from:1020 },
+    /* Focus 1.6 Duratec Ti-VCT Petrol — Mk2 (chain on Mk3). */
+    { service:'Belt / Wet Belt Replacement', make:'Ford', models:['Focus'],
+      engines:['1.6 Duratec Ti-VCT'], yearFrom:2008, yearTo:2011, from:1020 },
+    /* Focus 1.6 Duratec Petrol (non-VCT). */
+    { service:'Belt / Wet Belt Replacement', make:'Ford', models:['Focus'],
+      engines:['1.6 Duratec'], yearFrom:2008, yearTo:2011, from:1020 },
+    /* Focus 1.8 Duratec HE Petrol — Mk2. */
+    { service:'Belt / Wet Belt Replacement', make:'Ford', models:['Focus'],
+      engines:['1.8 Duratec'], yearFrom:2008, yearTo:2011, from:1020 },
+    /* Focus 2.0 Duratec HE Petrol — Mk2. */
+    { service:'Belt / Wet Belt Replacement', make:'Ford', models:['Focus'],
+      engines:['2.0 Duratec'], yearFrom:2008, yearTo:2011, from:1020 },
+    /* Focus 1.6 TDCi Diesel (Peugeot DV6 dry belt) — Mk2 + Mk3 pre-EcoBlue. */
+    { service:'Belt / Wet Belt Replacement', make:'Ford', models:['Focus'],
+      engines:['1.6 TDCi'], yearFrom:2008, yearTo:2014, from:1020 },
+    /* Focus 1.8 TDCi Diesel (Duratorq Endura) — Mk2. */
+    { service:'Belt / Wet Belt Replacement', make:'Ford', models:['Focus'],
+      engines:['1.8 TDCi'], yearFrom:2008, yearTo:2011, from:1020 },
+    /* Focus 2.0 TDCi Diesel (Duratorq DW10) — Mk2 + Mk3 pre-EcoBlue. */
+    { service:'Belt / Wet Belt Replacement', make:'Ford', models:['Focus'],
+      engines:['2.0 TDCi'], yearFrom:2008, yearTo:2017, from:1020 },
+
+    /* ===== Other Ford passenger + light commercial belt models ===== */
+
+    /* Puma 1.0 EcoBoost mHEV (wet belt). */
     { service:'Belt / Wet Belt Replacement', make:'Ford', models:['Puma'],
-      engines:['1.0 EcoBoost Hybrid'], from:850 },
+      engines:['1.0 EcoBoost Hybrid'], yearFrom:2019, yearTo:2026, from:850 },
+    /* C-Max 1.0 EcoBoost (Mk3 Focus platform). */
     { service:'Belt / Wet Belt Replacement', make:'Ford', models:['C Max'],
-      engines:['1.0 EcoBoost'], from:957 },
-    { service:'Belt / Wet Belt Replacement', make:'Ford', models:['D Max'],
-      engines:['1.0 EcoBoost'], from:957 },
+      engines:['1.0 EcoBoost'], yearFrom:2012, yearTo:2019, from:957 },
+    /* B-Max 1.0 EcoBoost. */
+    { service:'Belt / Wet Belt Replacement', make:'Ford', models:['B Max'],
+      engines:['1.0 EcoBoost'], yearFrom:2012, yearTo:2017, from:957 },
+    /* EcoSport 1.0 EcoBoost. */
     { service:'Belt / Wet Belt Replacement', make:'Ford', models:['EcoSport'],
-      engines:['1.0 EcoBoost'], from:1100 },
+      engines:['1.0 EcoBoost'], yearFrom:2014, yearTo:2022, from:1100 },
+    /* Mondeo 1.6 TDCi / 2.0 TDCi (pre-EcoBlue Duratorq belt-driven). */
+    { service:'Belt / Wet Belt Replacement', make:'Ford', models:['Mondeo'],
+      engines:['1.6 TDCi'], yearFrom:2008, yearTo:2014, from:720, noFloor:true },
+    { service:'Belt / Wet Belt Replacement', make:'Ford', models:['Mondeo'],
+      engines:['2.0 TDCi'], yearFrom:2008, yearTo:2014, from:820 },
+    /* Galaxy / S-Max 2.0 TDCi (Duratorq belt). */
+    { service:'Belt / Wet Belt Replacement', make:'Ford', models:['Galaxy','S Max'],
+      engines:['2.0 TDCi'], yearFrom:2008, yearTo:2014, from:820 },
+    /* ===== Ford Transit family — flat £957 + VAT =====
+       Workshop pricing standardised at £957 + VAT across every
+       Transit-family timing/wet belt engine, per Wigan Wetbelts spec. */
+
+    /* Transit Courier 1.0 EcoBoost wet belt. */
     { service:'Belt / Wet Belt Replacement', make:'Ford', models:['Transit Courier'],
-      engines:['1.0 EcoBoost'], from:1100 },
-    { service:'Belt / Wet Belt Replacement', make:'Ford',
-      models:['Focus','Transit Connect'],
-      engines:['1.5 EcoBlue'], from:1050, to:1150 },
+      engines:['1.0 EcoBoost'], yearFrom:2014, yearTo:2026, from:957 },
+    /* Transit Connect 1.5 EcoBlue wet belt. */
+    { service:'Belt / Wet Belt Replacement', make:'Ford', models:['Transit Connect'],
+      engines:['1.5 EcoBlue'], yearFrom:2018, yearTo:2026, from:957 },
+    /* Transit Custom 2.0 EcoBlue FWD / RWD. */
     { service:'Belt / Wet Belt Replacement', make:'Ford', models:['Transit Custom FWD'],
-      engines:['2.0 EcoBlue'], from:850 },
+      engines:['2.0 EcoBlue'], yearFrom:2016, yearTo:2026, from:957 },
     { service:'Belt / Wet Belt Replacement', make:'Ford', models:['Transit Custom RWD'],
-      engines:['2.0 EcoBlue'], from:959 },
+      engines:['2.0 EcoBlue'], yearFrom:2016, yearTo:2026, from:957 },
+    /* Ranger 2.0 EcoBlue (wet belt 2019+). */
     { service:'Belt / Wet Belt Replacement', make:'Ford', models:['Ranger'],
-      engines:['2.0 EcoBlue'], from:1050 },
+      engines:['2.0 EcoBlue'], yearFrom:2019, yearTo:2026, from:1050 },
 
     /* (PureTech belt entries removed — Stellantis PureTech is a WET belt.
         Customer-facing PureTech now lives under Wet Oil Pump Belt
@@ -4042,11 +4510,17 @@ body.wbr-locked{overflow:hidden}
        Chain: 1KR-FE, EP3/EP6 Prince, EP6 THP, DT17/DT20 V6
        ============================================================ */
 
-    /* ----- 1.1 / 1.4 / 1.6 TU 8V/16V Petrol — £590 ----- */
+    /* ===== Peugeot Belt / Wet Belt — £680 to £750 + VAT range =====
+       Workshop pricing standardised across most Peugeot models +
+       engines, per Wigan Wetbelts spec. Commercials (Boxer/Expert)
+       remain on their higher dealer-premium rate further down.
+       noFloor:true bypasses any legacy wet-belt floor clamp. */
+
+    /* ----- 1.1 / 1.4 / 1.6 TU 8V/16V Petrol — £680 ----- */
     { service:'Belt / Wet Belt Replacement', make:'Peugeot',
       models:['106','206','306','307'],
       engines:['1.1 TU Petrol','1.4 TU Petrol','1.6 TU Petrol'],
-      yearFrom:2008, yearTo:2012, from:590, noFloor:true },
+      yearFrom:2008, yearTo:2012, from:680, noFloor:true },
 
     /* ----- 1.6 HDi Diesel (DV6) — £680 ----- */
     { service:'Belt / Wet Belt Replacement', make:'Peugeot',
@@ -4060,12 +4534,12 @@ body.wbr-locked{overflow:hidden}
       engines:['2.0 HDi'],
       yearFrom:2008, yearTo:2017, from:740, noFloor:true },
 
-    /* ----- 1.5 BlueHDi Diesel (DV5) — £790
+    /* ----- 1.5 BlueHDi Diesel (DV5) — £750
        External dry belt paired with an internal cam-linking chain. */
     { service:'Belt / Wet Belt Replacement', make:'Peugeot',
       models:['208','308','2008','3008','5008','Partner'],
       engines:['1.5 BlueHDi'],
-      yearFrom:2018, yearTo:2026, from:790 },
+      yearFrom:2018, yearTo:2026, from:750 },
 
     /* ----- 2.0 / 2.2 / 2.3 HDi Commercial Diesel (PUMA/DW/BlueHDi) — £980 ----- */
     { service:'Belt / Wet Belt Replacement', make:'Peugeot',
@@ -4898,12 +5372,22 @@ body.wbr-locked{overflow:hidden}
                'D2 2.0 Diesel','D3 2.0 Diesel','D4 2.0 Diesel','D5 2.0 Diesel'],
       yearFrom:2014, yearTo:2026, from:1250 },
 
-    /* ----- Vauxhall 1.2 Turbo & Non-Turbo EcoTec Petrol (Stellantis
-       PureTech EB2, 2019-2023) wet oil pump belt (£1150) -----
-       High flat-rate specifically accounts for the labour required to
-       flush out rubber debris from the oil tracks on this platform. */
+    /* ----- Vauxhall Corsa 1.2 PureTech (Stellantis EB2 wet belt) — £680 -----
+       Corsa-specific workshop rate, set per Wigan Wetbelts pricing. Fixed
+       price (no upper bound) so the customer sees a clean "Estimated From
+       £680 + VAT" figure rather than a range. noFloor:true bypasses any
+       legacy £750 wet-belt clamp so the £680 quotes as supplied. */
+    { service:'Belt / Wet Belt Replacement', make:'Vauxhall',
+      models:['Corsa'],
+      engines:['1.2 PureTech','1.2 Turbo PureTech'],
+      yearFrom:2019, yearTo:2023, from:680, noFloor:true },
+
+    /* ----- Vauxhall 1.2 PureTech (rest of range) — £1150 -----
+       Astra/Crossland/Mokka/Grandland keep their higher dealer-premium
+       rate because the larger engine bays and additional ancillaries add
+       labour over the Corsa fitment. */
     { service:'Wet Oil Pump Belt Replacement', make:'Vauxhall',
-      models:['Corsa','Astra','Crossland','Mokka','Grandland'],
+      models:['Astra','Crossland','Mokka','Grandland'],
       engines:['1.2 PureTech','1.2 Turbo PureTech'],
       yearFrom:2019, yearTo:2023, from:1150 },
 
@@ -4941,11 +5425,11 @@ body.wbr-locked{overflow:hidden}
       models:['Qashqai','Juke','Note'],
       engines:['1.5 dCi'], yearFrom:2014, yearTo:2020, from:1100 },
 
-    /* ----- Peugeot 1.2 PureTech Stellantis EB2 wet belt (£757) ----- */
+    /* ----- Peugeot 1.2 PureTech Stellantis EB2 wet belt — £750 (in spec range) ----- */
     { service:'Wet Oil Pump Belt Replacement', make:'Peugeot',
       models:['108','208','308','2008','3008','408','5008','Partner'],
       engines:['1.2 PureTech'],
-      yearFrom:2012, yearTo:2026, from:757 },
+      yearFrom:2012, yearTo:2026, from:750, noFloor:true },
 
     /* ----- Kia 1.6 CRDi Smartstream U3 wet oil pump belt (£1150) ----- */
     { service:'Wet Oil Pump Belt Replacement', make:'Kia',
@@ -5331,17 +5815,103 @@ body.wbr-locked{overflow:hidden}
       engines:['2.8 VR6','3.2 VR6'],
       yearFrom:2008, yearTo:2012, from:2400 },
 
-    /* ----- Ford chain ----- */
+    /* ================================================================
+       FORD — Timing Chain block. Proof-checked engine matrix covering
+       every chain-driven Ford Fiesta and Focus engine variant across
+       all generations, plus the rest of the Ford chain-driven range.
+       Year windows tie each engine to the generation that fitted it.
+
+       Engines NOT listed here are belt-driven (live in the Ford belt
+       block above). The general rule of thumb:
+       - Duratec petrol smaller than 2.0L AFTER 2011 (Mk3+ Focus)  = chain
+       - EcoBoost ≥1.5L (excl. Fox 1.0 wet belt)                   = chain
+       - 1.5 TDCi (post-2014 facelift of Sigma)                    = chain
+       - 1.5/1.6 EcoBoost / 2.3 EcoBoost / 2.5 Volvo / 2.0 GDI     = chain
+       - 1.5 / 1.6 / 1.25 Duratec / Ti-VCT (Sigma/Yamaha SI4)      = chain  */
+
+    /* ===== FORD FIESTA — Timing Chain engines ===== */
+
+    /* Fiesta 1.25 Duratec Petrol (Sigma chain) — Mk6, 60/82bhp. */
+    { service:'Timing Chain Replacement', make:'Ford', models:['Fiesta'],
+      engines:['1.25 Duratec'], yearFrom:2008, yearTo:2017, from:880 },
+    /* Fiesta 1.4 Duratec 16V Petrol (Sigma chain) — Mk6, 96bhp. */
+    { service:'Timing Chain Replacement', make:'Ford', models:['Fiesta'],
+      engines:['1.4 Duratec'], yearFrom:2008, yearTo:2017, from:950 },
+    /* Fiesta 1.6 Duratec Ti-VCT Petrol (Sigma chain) — Mk6, 120bhp. */
+    { service:'Timing Chain Replacement', make:'Ford', models:['Fiesta'],
+      engines:['1.6 Duratec Ti-VCT'], yearFrom:2008, yearTo:2017, from:980 },
+    /* Fiesta 1.6 Ti-VCT Hybrid (Atkinson auto, Sigma chain) — Mk6. */
+    { service:'Timing Chain Replacement', make:'Ford', models:['Fiesta'],
+      engines:['1.6 Ti-VCT Hybrid'], yearFrom:2010, yearTo:2017, from:980 },
+    /* Fiesta 1.6 EcoBoost ST180/ST200 (chain) — Mk6 ST. */
+    { service:'Timing Chain Replacement', make:'Ford', models:['Fiesta'],
+      engines:['1.6 EcoBoost ST'], yearFrom:2013, yearTo:2017, from:1250 },
+    /* Fiesta 1.1 Ti-VCT Petrol (Sigma 3-cyl chain) — Mk7. */
+    { service:'Timing Chain Replacement', make:'Ford', models:['Fiesta'],
+      engines:['1.1 Ti-VCT'], yearFrom:2017, yearTo:2023, from:880 },
+    /* Fiesta 1.5 EcoBoost ST200 (chain) — Mk7 ST. */
+    { service:'Timing Chain Replacement', make:'Ford', models:['Fiesta'],
+      engines:['1.5 EcoBoost ST'], yearFrom:2018, yearTo:2023, from:1280 },
+    /* Fiesta 1.5 TDCi Diesel (post-2010 Sigma chain). */
+    { service:'Timing Chain Replacement', make:'Ford', models:['Fiesta'],
+      engines:['1.5 TDCi'], yearFrom:2010, yearTo:2023, from:1100 },
+
+    /* ===== FORD FOCUS — Timing Chain engines ===== */
+
+    /* Focus 1.6 Duratec Ti-VCT Petrol (Sigma chain) — Mk3 only. */
+    { service:'Timing Chain Replacement', make:'Ford', models:['Focus'],
+      engines:['1.6 Duratec Ti-VCT'], yearFrom:2011, yearTo:2018, from:980 },
+    /* Focus 1.5 EcoBoost Petrol (Yamaha SI4 chain) — Mk3 facelift + Mk4. */
+    { service:'Timing Chain Replacement', make:'Ford', models:['Focus'],
+      engines:['1.5 EcoBoost'], yearFrom:2014, yearTo:2025, from:1280 },
+    /* Focus 1.6 EcoBoost Petrol (chain) — Mk3, 150/182bhp. */
+    { service:'Timing Chain Replacement', make:'Ford', models:['Focus'],
+      engines:['1.6 EcoBoost'], yearFrom:2011, yearTo:2018, from:1250 },
+    /* Focus 2.0 GDI / Ti-VCT Petrol (chain) — Mk3, 158bhp. */
+    { service:'Timing Chain Replacement', make:'Ford', models:['Focus'],
+      engines:['2.0 GDI Petrol'], yearFrom:2011, yearTo:2018, from:1100 },
+    /* Focus 2.3 EcoBoost (chain) — Mk3 RS + Mk4 ST (consolidates
+       the previous standalone "Focus ST" model row). */
+    { service:'Timing Chain Replacement', make:'Ford', models:['Focus'],
+      engines:['2.3 EcoBoost'], yearFrom:2015, yearTo:2025, from:1450 },
+    /* Focus 2.5 ST Turbo Petrol (Volvo B5254T3 chain) — Mk2 ST. */
+    { service:'Timing Chain Replacement', make:'Ford', models:['Focus'],
+      engines:['2.5 ST Turbo'], yearFrom:2008, yearTo:2010, from:1380 },
+    /* Focus 2.5 RS Turbo Petrol (Volvo B5254T4 chain) — Mk2 RS500. */
+    { service:'Timing Chain Replacement', make:'Ford', models:['Focus'],
+      engines:['2.5 RS Turbo'], yearFrom:2009, yearTo:2011, from:1480 },
+    /* Focus 1.5 TDCi Diesel (post-2014 chain). */
+    { service:'Timing Chain Replacement', make:'Ford', models:['Focus'],
+      engines:['1.5 TDCi'], yearFrom:2014, yearTo:2018, from:1100 },
+    /* Focus 2.0 EcoBlue Diesel (chain) — Mk4. */
+    { service:'Timing Chain Replacement', make:'Ford', models:['Focus'],
+      engines:['2.0 EcoBlue'], yearFrom:2018, yearTo:2025, from:1180 },
+
+    /* ===== Other Ford chain models ===== */
+
+    /* Transit 2.2 TDCi Duratorq (Puma chain) — heavy commercial. */
     { service:'Timing Chain Replacement', make:'Ford', models:['Transit'],
-      engines:['2.2 TDCi'], from:1200, to:2500 },
+      engines:['2.2 TDCi'], yearFrom:2008, yearTo:2016, from:1200, to:2500 },
+    /* Transit 2.0 EcoBlue Diesel (chain) — current Transit. */
+    { service:'Timing Chain Replacement', make:'Ford', models:['Transit'],
+      engines:['2.0 EcoBlue'], yearFrom:2016, yearTo:2026, from:1300, to:2200 },
+    /* Ranger 3.2 TDCi 5-cyl (Puma chain). */
     { service:'Timing Chain Replacement', make:'Ford', models:['Ranger'],
-      engines:['3.2 TDCi'], from:1200, to:2500 },
+      engines:['3.2 TDCi'], yearFrom:2011, yearTo:2022, from:1200, to:2500 },
+    /* Mondeo 2.2 TDCi (Puma chain) — Mk4. */
     { service:'Timing Chain Replacement', make:'Ford', models:['Mondeo'],
-      engines:['2.2 TDCi'], from:1200, to:2500 },
-    { service:'Timing Chain Replacement', make:'Ford', models:['Focus ST'],
-      engines:['2.3 EcoBoost'], from:1200, to:2500 },
+      engines:['2.2 TDCi'], yearFrom:2008, yearTo:2014, from:1200, to:2500 },
+    /* Mondeo 1.5 EcoBoost / 2.0 EcoBoost / 2.5 Ti-VCT (chain) — Mk5. */
+    { service:'Timing Chain Replacement', make:'Ford', models:['Mondeo'],
+      engines:['1.5 EcoBoost','2.0 EcoBoost'], yearFrom:2014, yearTo:2022, from:1280 },
+    { service:'Timing Chain Replacement', make:'Ford', models:['Mondeo'],
+      engines:['2.5 Ti-VCT Hybrid'], yearFrom:2014, yearTo:2022, from:1180 },
+    /* Mustang 5.0 V8 Coyote (chain) — engine-out service. */
     { service:'Timing Chain Replacement', make:'Ford', models:['Mustang'],
-      engines:['5.0 V8'], from:1200, to:2500 },
+      engines:['5.0 V8'], yearFrom:2015, yearTo:2026, from:1800, to:2800 },
+    /* Mustang 2.3 EcoBoost (chain). */
+    { service:'Timing Chain Replacement', make:'Ford', models:['Mustang'],
+      engines:['2.3 EcoBoost'], yearFrom:2015, yearTo:2023, from:1450 },
 
     /* ----- Volvo TIMING CHAIN — pre-VEA chain engines only.
        Engine family → price:
@@ -6348,8 +6918,9 @@ body.wbr-locked{overflow:hidden}
   var qcRangeBlock = document.getElementById('qcRangeBlock');
   var qcHrs    = document.getElementById('qcHrs');
   var qcHrsLine = document.getElementById('qcHrsLine');
-  var qcKit    = document.getElementById('qcKit');
-  var qcKitLine = document.getElementById('qcKitLine');
+  // OEM Kit Cost UI removed per workshop request — kitFrom/kitTo
+  // values still live in PRICING for future use, but no longer
+  // surfaced anywhere customer-facing.
   var qcServiceIncludes = document.getElementById('qcServiceIncludes');
   var qcServiceIncludesList = document.getElementById('qcServiceIncludesList');
   var qcMessage  = document.getElementById('qcMessage');
@@ -6592,17 +7163,6 @@ body.wbr-locked{overflow:hidden}
       }
     }
 
-    // ---- OEM kit cost ----
-    if (qcKitLine && qcKit){
-      if (typeof p.kitFrom === 'number' && typeof p.kitTo === 'number'){
-        qcKit.textContent = fmt0(p.kitFrom) + ' to ' + fmt0(p.kitTo);
-        qcKitLine.hidden = false;
-      } else {
-        qcKit.textContent = '—';
-        qcKitLine.hidden = true;
-      }
-    }
-
     // ---- Service Includes — dynamic bullet list ----
     // Branches by selected job type, then optionally adds the
     // "Oil pump belt replacement where applicable" line for engines
@@ -6714,10 +7274,6 @@ body.wbr-locked{overflow:hidden}
         if (typeof p.hrsFrom === 'number' && typeof p.hrsTo === 'number'){
           lines.push('Estimated Repair Time: ' + p.hrsFrom.toFixed(1) + ' to ' + p.hrsTo.toFixed(1) + ' hours');
         }
-        // ---- OEM Kit Cost ----
-        if (typeof p.kitFrom === 'number' && typeof p.kitTo === 'number'){
-          lines.push('OEM Kit Cost: ' + fmt0(p.kitFrom) + ' to ' + fmt0(p.kitTo));
-        }
 
         // ---- Service Includes (plain-text fallback for mailto body) ----
         var siList = serviceIncludesFor(job, p);
@@ -6786,10 +7342,6 @@ body.wbr-locked{overflow:hidden}
         if (typeof p.hrsFrom === 'number' && typeof p.hrsTo === 'number'){
           estimateRows += '<div class="qc-line"><span>Estimated Repair Time</span><strong>' +
             esc(p.hrsFrom.toFixed(1) + ' to ' + p.hrsTo.toFixed(1) + ' hrs') + '</strong></div>';
-        }
-        if (typeof p.kitFrom === 'number' && typeof p.kitTo === 'number'){
-          estimateRows += '<div class="qc-line"><span>OEM Kit Cost</span><strong>' +
-            esc(fmt0(p.kitFrom) + ' to ' + fmt0(p.kitTo)) + '</strong></div>';
         }
 
         // Service Includes — mirror the on-page card list inside the
@@ -7015,27 +7567,51 @@ body.wbr-locked{overflow:hidden}
       // grouped as: Customer → Vehicle → Job → Estimate → Notes → Source.
       // Keys use human-readable labels (with spaces) so the FormSubmit
       // `table` template renders them directly as the row labels.
+      // ---- Phone-first scannable subject line ----
+      // The subject line is the first thing the workshop sees in their
+      // phone's lock-screen notification. We pack the critical info
+      // (name, reg, job type) into it so the team can triage at a
+      // glance without opening the message.
+      var quickReg = (reg && reg.toUpperCase()) || 'NO REG';
+      var quickName = name || 'No name';
+      var quickJobShort = (function(){
+        if (!job) return 'Enquiry';
+        if (job.indexOf('Timing Belt') !== -1)  return 'Timing/Wet Belt';
+        if (job.indexOf('Timing Chain') !== -1) return 'Timing Chain';
+        if (job.indexOf('Diagnosis')   !== -1) return 'Diagnosis';
+        return job;
+      })();
+      var phoneSubject = 'QUOTE: ' + quickName + ' · ' + quickReg + ' · ' + quickJobShort;
+
+      // ---- Phone-first scannable body ----
+      // First column = single-glance summary fields (name / phone / reg /
+      // job / preferred date), so anyone opening the email on a phone
+      // gets the actionable info in the first half-screen. Detailed
+      // fields (vehicle spec, quote breakdown, service includes etc.)
+      // follow afterwards for the full record.
       var payload = {
         // Hidden FormSubmit configuration
-        _subject:       'New Wigan Wetbelts Quote Enquiry',
+        _subject:       phoneSubject,
         _template:      'table',
         _captcha:       'false',
         _autoresponse:  customerAutoReply,
 
-        // -------- Customer Details --------
-        'Customer Name':           name,
-        'Phone Number':            phone,
+        // -------- QUICK SUMMARY (phone-first, top of email) --------
+        'Name':                    name,
+        'Phone':                   phone,
+        'Registration':            quickReg,
+        'Job Type':                job  || 'Not provided',
+        'Preferred Date':          date || 'Not provided',
+
+        // -------- Contact Details --------
         'Email Address':           email || 'Not provided',
         'Preferred Contact Method': contact,
 
         // -------- Vehicle Details --------
-        'Vehicle Registration':    reg,
         'Year':                    year   || 'Not provided',
         'Make':                    make   || 'Not provided',
         'Model':                   model  || 'Not provided',
         'Engine':                  engine || 'Not provided',
-        'Job Type':                job    || 'Not provided',
-        'Preferred Date':          date   || 'Not provided',
 
         // -------- Quote Estimate --------
         'Estimated Repair Pricing': dealerRangeLine,
@@ -7045,7 +7621,6 @@ body.wbr-locked{overflow:hidden}
         'VAT (20%)':               vatLbl,
         'Total (including VAT)':   grossLbl,
         'Estimated Repair Time':   repairTimeLine,
-        'OEM Kit Cost':            kitCostLine,
         'Service Note':            (p && p.note) ? p.note : '—',
 
         // -------- Customer Message + Source --------
@@ -8228,6 +8803,129 @@ body.wbr-locked{overflow:hidden}
   // Expose API for the success-message launcher.
   window.WBR = { open: open, close: close };
   loadBest();
+})();
+</script>
+<!-- ════════════════════════════════════════════════════════════════
+     THE TIMING SYSTEM — runtime engine.
+     ----------------------------------------------------------------
+     Self-contained IIFE. Does NOT touch the quote system, VEHICLES,
+     PRICING, FormSubmit, the Wet Belt Run game, localStorage or any
+     other live JS. It only:
+       1) Spawns floating-particle DOM nodes for teeth / droplets /
+          bolts / debris with randomised positions + delays.
+       2) Adds 3D mouse parallax to the depth bands on desktop.
+       3) Adds gentle scroll-driven transform on the hero scene
+          while it's in view (pauses when scrolled past).
+       4) Honours prefers-reduced-motion (no particles, no parallax).
+     ════════════════════════════════════════════════════════════════ -->
+<script>
+(function(){
+  'use strict';
+
+  var reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion:reduce)').matches;
+  var scene   = document.getElementById('timingScene');
+  if (!scene) return;
+  if (reduced) return;   // freeze fully — CSS already pinned the static layout
+
+  var isMobile = window.matchMedia('(max-width:900px)').matches;
+  var isSmall  = window.matchMedia('(max-width:560px)').matches;
+
+  // ---------- Quiet dust drift only ----------
+  // The new restrained scene has just one particle layer — small,
+  // sparse dust drifting slowly upward. Counts kept low so the scene
+  // reads as ambience, not "stuff happening".
+  var dustCount = isSmall ? 12 : isMobile ? 18 : 28;
+
+  (function spawnDust(){
+    var c = document.getElementById('tsDebris');
+    if (!c) return;
+    var frag = document.createDocumentFragment();
+    for (var i = 0; i < dustCount; i++){
+      var node = document.createElement('span');
+      node.className = 'ts-debris-fragment';
+      node.style.left = (Math.random() * 100).toFixed(2) + '%';
+      node.style.animationDuration = (28 + Math.random() * 18).toFixed(1) + 's';
+      node.style.animationDelay = (-Math.random() * 36).toFixed(1) + 's';
+      frag.appendChild(node);
+    }
+    c.appendChild(frag);
+  })();
+
+  // ---------- Mouse parallax (desktop only) ----------
+  // Each layer with [data-depth] shifts by depth * mouseOffset. The
+  // depth values are set inline on the layers — 0.3 = far / slow,
+  // 1.4 = near / fast. We update CSS variables instead of inline
+  // transforms so the running keyframe animations on the particles
+  // don't get clobbered.
+  if (!isMobile){
+    var layers = scene.querySelectorAll('[data-depth]');
+    var targetX = 0, targetY = 0, curX = 0, curY = 0;
+    var rafId = null;
+
+    function tick(){
+      // Eased follow — smooth out the cursor jitter.
+      curX += (targetX - curX) * 0.05;
+      curY += (targetY - curY) * 0.05;
+      for (var i = 0; i < layers.length; i++){
+        var d = parseFloat(layers[i].getAttribute('data-depth')) || 0.5;
+        var tx = (curX * d * 18).toFixed(2);
+        var ty = (curY * d * 14).toFixed(2);
+        layers[i].style.transform = 'translate3d(' + tx + 'px,' + ty + 'px,0)';
+      }
+      rafId = requestAnimationFrame(tick);
+    }
+
+    window.addEventListener('mousemove', function(e){
+      // Normalised -1 .. 1 cursor position from viewport centre.
+      targetX = (e.clientX / window.innerWidth)  * 2 - 1;
+      targetY = (e.clientY / window.innerHeight) * 2 - 1;
+    }, { passive:true });
+
+    rafId = requestAnimationFrame(tick);
+  }
+
+  // ---------- Scroll-driven hero motion ----------
+  // While the hero is in view, push the scene background up + fade it
+  // out smoothly so the next section transitions cinematically. We
+  // ALSO pause expensive particle animations once the hero is out of
+  // view to spare battery on mobile.
+  var heroSection = document.getElementById('home');
+  if (heroSection && 'IntersectionObserver' in window){
+    var inView = true;
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(entry){
+        inView = entry.isIntersecting;
+        scene.style.animationPlayState = inView ? 'running' : 'paused';
+        // Cascade pause-state to particles via a class.
+        scene.classList.toggle('ts-paused', !inView);
+      });
+    }, { threshold:[0, 0.1, 0.5, 1] });
+    io.observe(heroSection);
+
+    // Cheap scroll-linked offset for the scene (no rAF needed — pointer-events:none).
+    var lastY = 0;
+    window.addEventListener('scroll', function(){
+      if (!inView) return;
+      var y = window.scrollY || window.pageYOffset || 0;
+      // Throttle: only update if scroll moved noticeably.
+      if (Math.abs(y - lastY) < 4) return;
+      lastY = y;
+      // Translate the scene up gently; fade as user scrolls past hero.
+      var hh = heroSection.offsetHeight || window.innerHeight;
+      var progress = Math.min(1, y / hh);
+      scene.style.opacity = (1 - progress * 0.85).toFixed(3);
+      scene.style.transform = 'translate3d(0,' + (-progress * 30).toFixed(1) + 'px,0)';
+    }, { passive:true });
+  }
+
+  // Inject a tiny stylesheet rule so .ts-paused freezes the scene
+  // (halo, scan rings, dust) when the hero leaves the viewport.
+  var style = document.createElement('style');
+  style.textContent =
+    '.ts-paused .ts-halo,.ts-paused .ts-ring--a,.ts-paused .ts-ring--c,' +
+    '.ts-paused .ts-debris-fragment{animation-play-state:paused !important}';
+  document.head.appendChild(style);
+
 })();
 </script>
 </body>
