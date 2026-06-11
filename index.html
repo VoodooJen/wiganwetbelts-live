@@ -7628,6 +7628,37 @@ body.has-webgl .ts-belt-svg-fallback{ display:none }
         'Website Source':          'Wigan Wetbelts Instant Quote'
       };
 
+      // ── Mirror the quote to the admin-panel localStorage so it
+      //   appears in the workshop's "Recent enquiries" feed. Works
+      //   only when the customer is on the same browser as the
+      //   workshop's admin tab — for true cross-device sync this
+      //   needs Supabase wiring up.
+      try {
+        var adminKey = 'wwbAdminData.v1';
+        var adminData = { quotes:[], bookings:[] };
+        try { adminData = JSON.parse(localStorage.getItem(adminKey) || '{"quotes":[],"bookings":[]}'); } catch(_){}
+        if (!adminData.quotes) adminData.quotes = [];
+        if (!adminData.bookings) adminData.bookings = [];
+        adminData.quotes.unshift({
+          id:        'Q-' + Date.now(),
+          created:   new Date().toISOString(),
+          name:      name,
+          phone:     phone,
+          email:     email || '',
+          contact:   contact,
+          reg:       (reg||'').toUpperCase(),
+          year:      year || '',
+          make:      make || '',
+          model:     model || '',
+          engine:    engine || '',
+          job:       job || '',
+          prefDate:  (date ? new Date(date) : new Date()).toISOString(),
+          quote:     (p && typeof p.from === 'number') ? (p.to ? Math.round((p.from+p.to)/2) : p.from) : 0,
+          status:    'new'
+        });
+        localStorage.setItem(adminKey, JSON.stringify(adminData));
+      } catch(_){}
+
       console.log('Submitting enquiry to FormSubmit', { url: FORMSUBMIT_URL, payload: payload });
 
       try {
