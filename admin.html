@@ -950,11 +950,8 @@ table.data .reg-cell{
         <div class="panel">
           <div class="panel-head"><h3>Service mix</h3></div>
           <div class="donut-wrap">
-            <svg viewBox="0 0 120 120">
+            <svg viewBox="0 0 120 120" id="donutSvg">
               <circle class="donut-bg" cx="60" cy="60" r="50"/>
-              <circle class="donut-seg" cx="60" cy="60" r="50" stroke="#5da9ff" stroke-dasharray="170 314" stroke-dashoffset="0"/>
-              <circle class="donut-seg" cx="60" cy="60" r="50" stroke="#22d3c5" stroke-dasharray="86 314" stroke-dashoffset="-170"/>
-              <circle class="donut-seg" cx="60" cy="60" r="50" stroke="#a855f7" stroke-dasharray="58 314" stroke-dashoffset="-256"/>
             </svg>
             <div class="donut-center">
               <div class="donut-num" id="donutNum">0</div>
@@ -1416,11 +1413,45 @@ table.data .reg-cell{
     }
   });
 
+  // ── PERSISTENCE (localStorage) ───────────────────────────────────
+  // All bookings + manually-entered quotes are saved to localStorage
+  // so they survive a page refresh / browser restart. Once Supabase
+  // is wired up this replaces with the real-time DB.
+  var DATA_KEY = 'wwbAdminData.v1';
+  function loadData(){
+    try {
+      var raw = localStorage.getItem(DATA_KEY);
+      if (!raw) return false;
+      var data = JSON.parse(raw);
+      state.quotes   = (data.quotes   || []).map(function(q){
+        q.created  = new Date(q.created);
+        q.prefDate = new Date(q.prefDate);
+        return q;
+      });
+      state.bookings = (data.bookings || []).map(function(b){
+        b.date = new Date(b.date);
+        return b;
+      });
+      return true;
+    } catch(_){ return false; }
+  }
+  function saveData(){
+    try {
+      localStorage.setItem(DATA_KEY, JSON.stringify({
+        quotes:   state.quotes,
+        bookings: state.bookings
+      }));
+    } catch(_){}
+  }
+
   // ── BOOT (after sign-in) ─────────────────────────────────────────
   function boot(){
-    // Load data (mock for now; Supabase later)
-    state.quotes   = generateMock();
-    state.bookings = generateBookings(state.quotes);
+    // FRESH START — empty state ready for real quotes + bookings.
+    // Restore anything previously saved to localStorage.
+    state.quotes   = [];
+    state.bookings = [];
+    loadData();
+
     var now = new Date();
     state.cal.year  = now.getFullYear();
     state.cal.month = now.getMonth();
@@ -1445,7 +1476,34 @@ table.data .reg-cell{
     $('#statPipeline').textContent = fmt0(pipeline);
     $('#statAvgQuote').textContent = fmt0(avg);
     $('#donutNum').textContent = quotes30;
-    $('#newQuotesBadge').textContent = q.filter(function(x){return x.status==='new';}).length;
+    var newBadge = q.filter(function(x){return x.status==='new';}).length;
+    var badgeEl = $('#newQuotesBadge');
+    badgeEl.textContent = newBadge;
+    badgeEl.style.display = newBadge ? '' : 'none';
+
+    // Redraw donut from real data (or hide segments if empty).
+    var donut = $('#donutSvg');
+    var existingSegs = donut.querySelectorAll('.donut-seg');
+    existingSegs.forEach(function(s){ s.remove(); });
+    if (quotes30 > 0){
+      var jobCounts = {};
+      q.forEach(function(qq){ jobCounts[shortJob(qq.job)] = (jobCounts[shortJob(qq.job)]||0) + 1; });
+      var donutEntries = Object.entries(jobCounts).sort(function(a,b){return b[1]-a[1];});
+      var palette = ['#5da9ff','#22d3c5','#a855f7','#f59e0b','#ec4899'];
+      var circumference = 314;
+      var offset = 0;
+      donutEntries.forEach(function(e, i){
+        var seg = document.createElementNS('http://www.w3.org/2000/svg','circle');
+        seg.setAttribute('class','donut-seg');
+        seg.setAttribute('cx','60'); seg.setAttribute('cy','60'); seg.setAttribute('r','50');
+        seg.setAttribute('stroke', palette[i % palette.length]);
+        var len = (e[1] / quotes30) * circumference;
+        seg.setAttribute('stroke-dasharray', len.toFixed(2) + ' ' + circumference);
+        seg.setAttribute('stroke-dashoffset', (-offset).toFixed(2));
+        donut.appendChild(seg);
+        offset += len;
+      });
+    }
 
     // Trend chart — daily counts for last 30 days
     var days = new Array(30).fill(0);
@@ -1456,42 +1514,49 @@ table.data .reg-cell{
     });
     renderChart(days);
 
-    // Recent feed (last 5)
+    // Recent feed (last 5) — or a friendly empty state.
     var feed = $('#recentFeed');
-    feed.innerHTML = q.slice(0, 5).map(function(qq){
-      var dotClass = qq.status==='new' ? 'purple' : qq.status==='booked' ? 'cyan' : qq.status==='completed' ? '' : 'amber';
-      return '<div class="feed-item" data-qid="'+qq.id+'">'
-        + '<div class="feed-dot '+dotClass+'"></div>'
-        + '<div class="feed-info">'
-        +   '<div class="feed-name">'+escapeHtml(qq.name)+'</div>'
-        +   '<div class="feed-meta">'+escapeHtml(qq.make+' '+qq.model+' · '+shortJob(qq.job))+'</div>'
-        + '</div>'
-        + '<div class="feed-time">'+relTime(qq.created)+'</div>'
-      + '</div>';
-    }).join('');
+    if (!q.length){
+      feed.innerHTML = '<div style="text-align:center;padding:28px 14px;color:var(--muted);font-size:.85rem;line-height:1.55">No quotes yet.<br><small style="font-size:.78rem;color:var(--muted-2)">Your first enquiry from the public site will appear here.</small></div>';
+    } else {
+      feed.innerHTML = q.slice(0, 5).map(function(qq){
+        var dotClass = qq.status==='new' ? 'purple' : qq.status==='booked' ? 'cyan' : qq.status==='completed' ? '' : 'amber';
+        return '<div class="feed-item" data-qid="'+qq.id+'">'
+          + '<div class="feed-dot '+dotClass+'"></div>'
+          + '<div class="feed-info">'
+          +   '<div class="feed-name">'+escapeHtml(qq.name)+'</div>'
+          +   '<div class="feed-meta">'+escapeHtml(qq.make+' '+qq.model+' · '+shortJob(qq.job))+'</div>'
+          + '</div>'
+          + '<div class="feed-time">'+relTime(qq.created)+'</div>'
+        + '</div>';
+      }).join('');
+    }
 
     // Service legend
     var byJob = {};
     q.forEach(function(qq){ byJob[shortJob(qq.job)] = (byJob[shortJob(qq.job)] || 0) + 1; });
     var entries = Object.keys(byJob).map(function(k){ return [k, byJob[k]]; }).sort(function(a,b){ return b[1]-a[1]; });
-    var max = Math.max.apply(null, entries.map(function(e){return e[1];})) || 1;
-    var colorPool = ['#5da9ff','#22d3c5','#a855f7','#f59e0b','#ec4899'];
-    $('#svcLegend').innerHTML = entries.map(function(e, i){
-      var pct = Math.round(e[1] / max * 100);
-      var color = colorPool[i % colorPool.length];
-      return '<div class="svc-row"><div class="svc-bar-wrap">'
-        + '<div class="svc-bar-head"><div class="svc-dot" style="background:'+color+'"></div>'
-        + '<div class="svc-name">'+escapeHtml(e[0])+'</div>'
-        + '<div class="svc-num">'+e[1]+'</div></div>'
-        + '<div class="svc-bar"><div class="svc-bar-fill" style="background:'+color+';width:0%"></div></div>'
-        + '</div></div>';
-    }).join('');
-    // Animate bars next frame so transition fires
-    requestAnimationFrame(function(){
-      $$('.svc-bar-fill').forEach(function(b, i){
-        b.style.width = Math.round(entries[i][1] / max * 100) + '%';
+    if (!entries.length){
+      $('#svcLegend').innerHTML = '<div style="text-align:center;padding:18px 8px;color:var(--muted);font-size:.84rem">Empty — quotes will be grouped here as they come in.</div>';
+    } else {
+      var max = Math.max.apply(null, entries.map(function(e){return e[1];})) || 1;
+      var colorPool = ['#5da9ff','#22d3c5','#a855f7','#f59e0b','#ec4899'];
+      $('#svcLegend').innerHTML = entries.map(function(e, i){
+        var color = colorPool[i % colorPool.length];
+        return '<div class="svc-row"><div class="svc-bar-wrap">'
+          + '<div class="svc-bar-head"><div class="svc-dot" style="background:'+color+'"></div>'
+          + '<div class="svc-name">'+escapeHtml(e[0])+'</div>'
+          + '<div class="svc-num">'+e[1]+'</div></div>'
+          + '<div class="svc-bar"><div class="svc-bar-fill" style="background:'+color+';width:0%"></div></div>'
+          + '</div></div>';
+      }).join('');
+      // Animate bars next frame so transition fires
+      requestAnimationFrame(function(){
+        $$('.svc-bar-fill').forEach(function(b, i){
+          b.style.width = Math.round(entries[i][1] / max * 100) + '%';
+        });
       });
-    });
+    }
   }
 
   // ── ANIMATED COUNTER ─────────────────────────────────────────────
@@ -1558,7 +1623,10 @@ table.data .reg-cell{
       return true;
     });
     if (!rows.length){
-      $('#quotesTbody').innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:40px">No matching quotes.</td></tr>';
+      var msg = state.quotes.length
+        ? 'No quotes match these filters.'
+        : 'No quotes yet — your first enquiry from the public site will appear here automatically.';
+      $('#quotesTbody').innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:60px 20px;font-size:.92rem;line-height:1.5">' + msg + '</td></tr>';
       return;
     }
     $('#quotesTbody').innerHTML = rows.map(function(q){
@@ -1727,7 +1795,9 @@ table.data .reg-cell{
       var q = state.quotes.find(function(qq){ return qq.id === $('#bookingModal').dataset.quoteId; });
       if (q) q.status = 'booked';
     }
+    saveData();
     closeBooking();
+    toast('Booking saved.');
     // Jump to the calendar view + month of the booking
     state.cal.year  = date.getFullYear();
     state.cal.month = date.getMonth();
@@ -1764,7 +1834,10 @@ table.data .reg-cell{
     if (state.cust.make) custs = custs.filter(function(c){ return c.make === state.cust.make; });
 
     if (!custs.length){
-      $('#custTbody').innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:40px">No customers match.</td></tr>';
+      var msg = Object.keys(map).length
+        ? 'No customers match these filters.'
+        : 'No customers yet — they’ll appear here as soon as quotes start coming in.';
+      $('#custTbody').innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:60px 20px;font-size:.92rem;line-height:1.5">' + msg + '</td></tr>';
       return;
     }
     $('#custTbody').innerHTML = custs.map(function(c){
@@ -1782,13 +1855,15 @@ table.data .reg-cell{
   $('#custMakeFilter').addEventListener('change', function(e){ state.cust.make = e.target.value; renderCustomers(); });
 
   // ── REFRESH ──────────────────────────────────────────────────────
+  // Pulls fresh state from localStorage / Supabase (once wired) and
+  // re-renders every view.
   $('#refreshBtn').addEventListener('click', function(){
-    state.quotes = generateMock();
-    state.bookings = generateBookings(state.quotes);
+    loadData();
     renderDashboard();
     renderQuotesTable();
     renderCalendar();
     renderCustomers();
+    toast('Refreshed.');
   });
 
   // ── DRAWER ACTIONS ──────────────────────────────────────────────
@@ -1802,9 +1877,11 @@ table.data .reg-cell{
     var action = btn.getAttribute('data-action');
     if (action === 'contact'){
       q.status = 'contacted';
+      saveData();
       closeDrawer();
       renderDashboard();
       renderQuotesTable();
+      toast('Marked as contacted.');
     } else if (action === 'book'){
       closeDrawer();
       openBooking(q.prefDate, q);
