@@ -1274,12 +1274,12 @@ table.data .reg-cell{
   var ADMIN_EMAIL    = 'wiganwetbelts@gmail.com';
   var ADMIN_PASSWORD = 'Jadedog12..';
 
-  // ── Supabase configuration (optional, for full real-time auth) ──
-  // While these are blank, the admin panel uses the simple email +
-  // password gate above. Once you wire up Supabase (see the chat
-  // setup notes), Supabase auth takes over automatically.
-  window.SUPABASE_URL  = ''; // e.g. 'https://abcd1234.supabase.co'
-  window.SUPABASE_ANON = ''; // e.g. 'eyJhbGciOi…' (the public anon key)
+  // ── Supabase configuration (LIVE) ───────────────────────────────
+  // Connected to the Wigan Wetbelts production project. The
+  // publishable key is safe to ship in client code (Row Level
+  // Security in the database enforces what each role can do).
+  window.SUPABASE_URL  = 'https://ukwakszeslxkxcyosigp.supabase.co';
+  window.SUPABASE_ANON = 'sb_publishable_QuwBESO6L6SwTK7a2kB6fw_bXDQElMo';
 
   // ── State ────────────────────────────────────────────────────────
   var state = {
@@ -2046,22 +2046,194 @@ table.data .reg-cell{
     }
   });
 
-  // ── SUPABASE BOOTSTRAP (when configured) ─────────────────────────
-  // When you fill in SUPABASE_URL + SUPABASE_ANON above, load the JS
-  // client from CDN and wire auth + a realtime subscription to the
-  // `quotes` table. Until then, the script tag is skipped entirely.
-  if (window.SUPABASE_URL && window.SUPABASE_ANON){
-    var s = document.createElement('script');
-    s.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
-    s.type = 'module';
-    s.onload = function(){
-      // The CDN exposes createClient as a default export — initialise:
-      import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm').then(function(mod){
-        window.supabase = mod.createClient(window.SUPABASE_URL, window.SUPABASE_ANON);
-      });
+  // ═══════════════════════════════════════════════════════════════
+  // SUPABASE LIVE DATA LAYER
+  // ───────────────────────────────────────────────────────────────
+  // Loads the Supabase JS client from CDN, then replaces the local
+  // boot/load/save functions with versions that talk to Postgres
+  // via Supabase. Also subscribes to realtime so new public quotes
+  // appear in the admin feed instantly without a refresh.
+  // ═══════════════════════════════════════════════════════════════
+
+  // ── Field mappers (Supabase snake_case ↔ admin camelCase) ──────
+  function fromSupabaseQuote(r){
+    return {
+      id:        r.id,
+      created:   new Date(r.created_at),
+      name:      r.name || '',
+      phone:     r.phone || '',
+      email:     r.email || '',
+      contact:   r.contact || '',
+      reg:       r.reg || '',
+      year:      r.year || '',
+      make:      r.make || '',
+      model:     r.model || '',
+      engine:    r.engine || '',
+      job:       r.job || '',
+      prefDate:  r.pref_date ? new Date(r.pref_date) : new Date(r.created_at),
+      quote:     Number(r.quote_amount) || 0,
+      status:    r.status || 'new',
+      notes:     r.notes || ''
     };
-    document.head.appendChild(s);
   }
+  function fromSupabaseBooking(r){
+    return {
+      id:      r.id,
+      quoteId: r.quote_id,
+      date:    new Date(r.scheduled_date),
+      title:   r.customer_name + ' · ' + (r.vehicle || ''),
+      time:    r.scheduled_time || '',
+      job:     r.job || '',
+      status:  r.status || 'booked',
+      reg:     r.reg || '',
+      phone:   r.phone || '',
+      notes:   r.notes || ''
+    };
+  }
+  function toSupabaseBooking(b){
+    return {
+      quote_id:       b.quoteId || null,
+      scheduled_date: (b.date instanceof Date) ? b.date.toISOString().slice(0,10) : b.date,
+      scheduled_time: b.time || null,
+      customer_name:  (b.title || '').split(' · ')[0] || 'Unnamed',
+      vehicle:        (b.title || '').split(' · ')[1] || '',
+      job:            b.job || 'Timing Belt / Wet Belt Replacement',
+      reg:            b.reg || '',
+      phone:          b.phone || '',
+      notes:          b.notes || '',
+      status:         b.status || 'booked'
+    };
+  }
+
+  var SB_READY = false;
+  var sbReadyPromise = null;
+
+  // ── Boot Supabase client (loads JS module from CDN) ────────────
+  function loadSupabase(){
+    if (sbReadyPromise) return sbReadyPromise;
+    sbReadyPromise = import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm')
+      .then(function(mod){
+        window.supabase = mod.createClient(window.SUPABASE_URL, window.SUPABASE_ANON, {
+          auth: { persistSession: true, autoRefreshToken: true }
+        });
+        SB_READY = true;
+        return window.supabase;
+      })
+      .catch(function(err){
+        console.error('Supabase load failed', err);
+        toast('Could not connect to database — using offline mode.', true);
+      });
+    return sbReadyPromise;
+  }
+
+  // ── Async data load from Supabase (replaces localStorage cache) ─
+  function loadFromSupabase(){
+    if (!window.supabase) return Promise.resolve();
+    return Promise.all([
+      window.supabase.from('quotes').select('*').order('created_at', { ascending:false }).limit(500),
+      window.supabase.from('bookings').select('*').order('scheduled_date', { ascending:true })
+    ]).then(function(results){
+      var quotesRes = results[0], bookingsRes = results[1];
+      if (quotesRes.error)   console.warn('quotes load error', quotesRes.error);
+      if (bookingsRes.error) console.warn('bookings load error', bookingsRes.error);
+      state.quotes   = (quotesRes.data   || []).map(fromSupabaseQuote);
+      state.bookings = (bookingsRes.data || []).map(fromSupabaseBooking);
+      saveData();   // mirror to localStorage as offline cache
+      renderDashboard();
+      renderQuotesTable();
+      renderCalendar();
+      renderCustomers();
+    });
+  }
+
+  // ── Realtime subscription (new quotes appear instantly) ────────
+  function subscribeRealtime(){
+    if (!window.supabase) return;
+    window.supabase
+      .channel('quotes-changes')
+      .on('postgres_changes',
+          { event:'*', schema:'public', table:'quotes' },
+          function(payload){
+            // INSERT — new quote from public form
+            if (payload.eventType === 'INSERT' && payload.new){
+              state.quotes.unshift(fromSupabaseQuote(payload.new));
+              saveData();
+              renderDashboard();
+              renderQuotesTable();
+              toast('New quote from ' + (payload.new.name || 'customer'));
+            }
+            // UPDATE — status change from this or another tab
+            if (payload.eventType === 'UPDATE' && payload.new){
+              var idx = state.quotes.findIndex(function(q){ return q.id === payload.new.id; });
+              if (idx !== -1) state.quotes[idx] = fromSupabaseQuote(payload.new);
+              saveData();
+              renderDashboard();
+              renderQuotesTable();
+            }
+          })
+      .subscribe();
+
+    window.supabase
+      .channel('bookings-changes')
+      .on('postgres_changes',
+          { event:'*', schema:'public', table:'bookings' },
+          function(payload){
+            if (payload.eventType === 'INSERT' && payload.new){
+              state.bookings.push(fromSupabaseBooking(payload.new));
+              saveData(); renderCalendar();
+            }
+          })
+      .subscribe();
+  }
+
+  // ── Wrap save handlers so changes also push to Supabase ────────
+  var _origSaveData = saveData;
+  saveData = function(){ _origSaveData(); /* localStorage mirror still runs */ };
+
+  // Intercept booking save in modal — push to Supabase
+  document.getElementById('bookingForm').addEventListener('submit', function(){
+    if (!window.supabase) return;
+    var last = state.bookings[state.bookings.length - 1];
+    if (!last || last._synced) return;
+    window.supabase.from('bookings').insert(toSupabaseBooking(last)).select().then(function(res){
+      if (res.error){ console.warn('booking insert error', res.error); return; }
+      // Replace local UUID with the one Supabase assigned
+      if (res.data && res.data[0]){
+        last.id = res.data[0].id;
+        last._synced = true;
+        saveData();
+      }
+    });
+  }, true);   // capture phase so it fires AFTER state push
+
+  // Intercept Mark Contacted → update Supabase
+  document.addEventListener('click', function(e){
+    var btn = e.target.closest('[data-action="contact"]');
+    if (!btn || !window.supabase) return;
+    setTimeout(function(){
+      var qid = btn.getAttribute('data-qid');
+      window.supabase.from('quotes').update({ status:'contacted' }).eq('id', qid).then(function(res){
+        if (res.error) console.warn('status update error', res.error);
+      });
+    }, 30);
+  });
+
+  // ── Boot Supabase + load data after sign-in ───────────────────
+  // Wrap the original showApp so once the user signs in we start
+  // pulling real data from Postgres instead of localStorage.
+  var _origShowApp = showApp;
+  showApp = function(name, email){
+    _origShowApp(name, email);
+    loadSupabase().then(function(){
+      if (window.supabase){
+        loadFromSupabase();
+        subscribeRealtime();
+      }
+    });
+  };
+
+  // Kick off Supabase load early (so login form is ready when used).
+  loadSupabase();
 
 })();
 </script>

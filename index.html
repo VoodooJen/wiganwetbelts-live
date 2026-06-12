@@ -7628,11 +7628,51 @@ body.has-webgl .ts-belt-svg-fallback{ display:none }
         'Website Source':          'Wigan Wetbelts Instant Quote'
       };
 
+      // ── Push the quote into Supabase so it appears in the
+      //   workshop's admin panel instantly, on any device. Uses
+      //   the publishable key + the "Anyone can submit a quote"
+      //   RLS policy; existing rows are unreadable from the
+      //   public site (admin role required). Fails silently to
+      //   localStorage if Supabase is unavailable.
+      (function pushToSupabase(){
+        var SB_URL  = 'https://ukwakszeslxkxcyosigp.supabase.co';
+        var SB_ANON = 'sb_publishable_QuwBESO6L6SwTK7a2kB6fw_bXDQElMo';
+        var quoteAmount = (p && typeof p.from === 'number')
+          ? (p.to ? Math.round((p.from + p.to) / 2) : p.from)
+          : null;
+        var row = {
+          name:         name,
+          phone:        phone,
+          email:        email || null,
+          contact:      contact || null,
+          reg:          (reg||'').toUpperCase(),
+          year:         year ? parseInt(year, 10) : null,
+          make:         make || null,
+          model:        model || null,
+          engine:       engine || null,
+          job:          job || null,
+          pref_date:    date || null,
+          quote_amount: quoteAmount,
+          status:       'new',
+          source:       'website',
+          notes:        msg || null
+        };
+        try {
+          fetch(SB_URL + '/rest/v1/quotes', {
+            method:'POST',
+            headers:{
+              'apikey': SB_ANON,
+              'Authorization': 'Bearer ' + SB_ANON,
+              'Content-Type': 'application/json',
+              'Prefer': 'return=minimal'
+            },
+            body: JSON.stringify(row)
+          }).catch(function(){});  // silent fail — email still goes out
+        } catch(_){}
+      })();
+
       // ── Mirror the quote to the admin-panel localStorage so it
-      //   appears in the workshop's "Recent enquiries" feed. Works
-      //   only when the customer is on the same browser as the
-      //   workshop's admin tab — for true cross-device sync this
-      //   needs Supabase wiring up.
+      //   also shows on this device's admin tab (offline cache).
       try {
         var adminKey = 'wwbAdminData.v1';
         var adminData = { quotes:[], bookings:[] };
