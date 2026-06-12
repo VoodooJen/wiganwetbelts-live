@@ -2,7 +2,10 @@
 <html lang="en-GB">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#04060a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="robots" content="noindex,nofollow">
 <title>Wigan Wetbelts · Admin Control</title>
 <link rel="icon" href="favicon.ico">
@@ -68,7 +71,7 @@
 *{box-sizing:border-box;margin:0;padding:0}
 *:focus-visible{outline:2px solid var(--blue);outline-offset:3px;border-radius:6px}
 
-html,body{height:100%;min-height:100%}
+html,body{height:100%;min-height:100%;width:100%}
 body{
   font-family:'Outfit',system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
   font-weight:400;
@@ -78,6 +81,11 @@ body{
   overflow-x:hidden;
   -webkit-font-smoothing:antialiased;
   -moz-osx-font-smoothing:grayscale;
+  margin:0;
+  /* Use dynamic viewport so the URL bar collapse on iPhone Safari
+     doesn't cause layout shift. Falls back to vh on older browsers. */
+  min-height:100vh;
+  min-height:100dvh;
 }
 
 /* Ambient particle background — pure CSS, performant. */
@@ -272,7 +280,18 @@ label{display:block;font-size:.74rem;font-weight:600;letter-spacing:.16em;text-t
    ───────────────────────────────────────────────────────────────── */
 
 #appView{display:none;position:relative;z-index:1;min-height:100vh}
-body.signed-in #appView{display:grid;grid-template-columns:260px 1fr;min-height:100vh}
+body.signed-in #appView{
+  display:grid;
+  /* minmax(0,1fr) prevents the main column from blowing out on
+     wide / fullscreen displays. width:100% + max-width:none lock
+     the grid to the viewport edges so the sidebar always anchors
+     left and the main content fills the remaining space. */
+  grid-template-columns:260px minmax(0, 1fr);
+  min-height:100vh;
+  min-height:100dvh;
+  width:100%;
+  max-width:none;
+}
 body.signed-in #loginView{display:none}
 
 /* Sidebar */
@@ -353,8 +372,12 @@ body.signed-in #loginView{display:none}
 /* Main */
 .main{
   padding:28px 32px 60px;
-  max-width:1500px;width:100%;
+  width:100%;
+  min-width:0;             /* allow the column to shrink/contain children */
   position:relative;
+  /* Centre the inner content on very wide screens so it doesn't sprawl */
+  margin:0 auto;
+  max-width:1800px;
 }
 
 .topbar{display:flex;align-items:center;gap:18px;margin-bottom:24px}
@@ -751,40 +774,76 @@ table.data .reg-cell{
   .settings-grid{grid-template-columns:1fr}
 }
 @media (max-width:900px){
-  body.signed-in #appView{grid-template-columns:1fr}
+  body.signed-in #appView{
+    grid-template-columns:1fr;
+    /* On mobile we don't reserve column space for the sidebar —
+       it slides in over the content as a drawer instead. */
+  }
   .sidebar{
     position:fixed;left:0;top:0;bottom:0;
-    width:280px;
+    width:min(86vw, 320px);
     z-index:65;
-    transform:translateX(-100%);
+    transform:translateX(-105%);
     transition:transform var(--t-med);
     box-shadow:0 0 60px rgba(0,0,0,.7);
+    overflow-y:auto;
+    /* iPhone notch / home indicator safe area */
+    padding-top:max(24px, env(safe-area-inset-top));
+    padding-bottom:max(14px, env(safe-area-inset-bottom));
   }
   body.sidebar-open .sidebar{transform:translateX(0)}
   .sb-backdrop{
     position:fixed;inset:0;background:rgba(0,0,0,.55);
     backdrop-filter:blur(4px);
+    -webkit-backdrop-filter:blur(4px);
     z-index:64;opacity:0;pointer-events:none;
     transition:opacity var(--t-med);
   }
   body.sidebar-open .sb-backdrop{opacity:1;pointer-events:auto}
   .nav-burger{display:inline-flex !important}
-  .main{padding:20px 16px 60px}
-  .topbar h1{font-size:1.25rem}
-  .cal-day{min-height:72px;padding:6px;font-size:.78rem}
-  .cal-day-num{font-size:.74rem}
-  .cal-event{font-size:.62rem;padding:2px 4px}
-  .stat-grid{grid-template-columns:repeat(2,1fr);gap:12px}
-  .stat-card{padding:16px}
-  .stat-value{font-size:1.6rem}
-  .grid-2, .grid-3{grid-template-columns:1fr;gap:14px}
-  .filter-bar{padding:12px;flex-direction:column;align-items:stretch;gap:10px}
+  .main{
+    padding:18px 16px 80px;
+    padding-top:max(18px, env(safe-area-inset-top));
+    padding-left:max(16px, env(safe-area-inset-left));
+    padding-right:max(16px, env(safe-area-inset-right));
+    padding-bottom:max(80px, env(safe-area-inset-bottom));
+    max-width:none;
+  }
+  .topbar h1{font-size:1.2rem}
+  .topbar-meta{margin-left:auto}
+  .topbar-time{display:none}   /* clock is too long on mobile */
+  .cal-day{min-height:64px;padding:5px;font-size:.74rem}
+  .cal-day-num{font-size:.7rem}
+  .cal-event{font-size:.6rem;padding:2px 4px}
+  .cal-head{flex-wrap:wrap}
+  .cal-head h2{font-size:1.05rem;flex:1 1 100%;order:-1;margin-bottom:8px}
+  .stat-grid{grid-template-columns:repeat(2,1fr);gap:10px}
+  .stat-card{padding:14px}
+  .stat-value{font-size:1.45rem}
+  .stat-label{font-size:.62rem}
+  .grid-2, .grid-3{grid-template-columns:1fr;gap:12px}
+  .filter-bar{padding:10px;flex-direction:column;align-items:stretch;gap:8px}
   .filter-bar > .search, .filter-bar select{width:100%;max-width:none}
-  table.data{font-size:.78rem;display:block;overflow-x:auto}
-  table.data thead th{padding:10px 12px;font-size:.62rem}
-  table.data tbody td{padding:10px 12px}
+  table.data{font-size:.76rem;display:block;overflow-x:auto;-webkit-overflow-scrolling:touch}
+  table.data thead th{padding:10px 10px;font-size:.6rem}
+  table.data tbody td{padding:10px 10px}
   .drawer{width:100vw}
+  .modal{width:calc(100vw - 24px);max-height:calc(100vh - 80px)}
+  /* Bigger tap targets for touch */
+  .sb-link{padding:13px 14px;font-size:.92rem}
+  .btn{padding:13px 20px;font-size:.9rem}
+  .btn-sm{padding:10px 16px;font-size:.84rem}
+  .nav-burger{width:42px;height:42px}
+  /* Prevent iPhone Safari from zooming the page when an input is
+     tapped. Safari only zooms when font-size < 16px. */
+  input[type=text],input[type=email],input[type=password],input[type=tel],
+  input[type=number],input[type=search],input[type=date],input[type=time],
+  select,textarea{font-size:16px !important;padding:14px 14px}
+  .filter-bar select{font-size:16px !important}
 }
+
+/* Lock body scroll when sidebar is open so the page doesn't shift */
+body.sidebar-open{overflow:hidden}
 
 /* Hamburger button — hidden on desktop, shown above mobile breakpoint */
 .nav-burger{
