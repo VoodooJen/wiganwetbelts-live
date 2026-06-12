@@ -281,27 +281,34 @@ label{display:block;font-size:.74rem;font-weight:600;letter-spacing:.16em;text-t
 
 #appView{display:none;position:relative;z-index:1;min-height:100vh}
 body.signed-in #appView{
-  display:grid;
-  /* minmax(0,1fr) prevents the main column from blowing out on
-     wide / fullscreen displays. width:100% + max-width:none lock
-     the grid to the viewport edges so the sidebar always anchors
-     left and the main content fills the remaining space. */
-  grid-template-columns:260px minmax(0, 1fr);
+  /* Use flex instead of grid — sidebar fixed-width at left, main
+     flex:1 fills the rest. This is more bulletproof across the
+     widest range of screens and browsers than a CSS grid. */
+  display:flex !important;
+  flex-direction:row !important;
+  width:100vw !important;
   min-height:100vh;
   min-height:100dvh;
-  width:100%;
-  max-width:none;
+  margin:0;
+  padding:0;
 }
 body.signed-in #loginView{display:none}
 
-/* Sidebar */
+/* Sidebar — flex item, fixed width on desktop */
 .sidebar{
   background:linear-gradient(180deg,rgba(7,11,17,.85),rgba(4,6,10,.85));
   border-right:1px solid var(--line);
   padding:24px 18px;
   display:flex;flex-direction:column;
-  position:sticky;top:0;height:100vh;
+  position:sticky;top:0;
+  height:100vh;height:100dvh;
+  width:260px;
+  min-width:260px;
+  max-width:260px;
+  flex-shrink:0;
   backdrop-filter:blur(20px);
+  -webkit-backdrop-filter:blur(20px);
+  box-sizing:border-box;
 }
 .sidebar-brand{display:flex;align-items:center;gap:11px;margin-bottom:32px;padding:0 8px}
 .sidebar-brand-mark{
@@ -369,16 +376,19 @@ body.signed-in #loginView{display:none}
 .sb-user-name{font-size:.82rem;font-weight:600}
 .sb-user-email{font-size:.7rem;color:var(--muted);margin-top:1px}
 
-/* Main */
+/* Main — flex:1 fill remaining space, never centred */
 .main{
   padding:28px 32px 60px;
-  width:100%;
+  flex:1 1 0%;
   min-width:0;             /* allow the column to shrink/contain children */
+  width:auto;
+  max-width:none;
   position:relative;
-  /* Centre the inner content on very wide screens so it doesn't sprawl */
-  margin:0 auto;
-  max-width:1800px;
+  box-sizing:border-box;
 }
+/* Inner-content cap on very wide screens — controlled by an inner
+   wrapper, not by .main itself, so the column edges stay sharp. */
+.main > .view{max-width:1500px;margin:0 auto}
 
 .topbar{display:flex;align-items:center;gap:18px;margin-bottom:24px}
 .topbar h1{font-size:1.6rem;font-weight:700;letter-spacing:-.02em}
@@ -775,18 +785,23 @@ table.data .reg-cell{
 }
 @media (max-width:900px){
   body.signed-in #appView{
-    grid-template-columns:1fr;
-    /* On mobile we don't reserve column space for the sidebar —
-       it slides in over the content as a drawer instead. */
+    /* On mobile the sidebar slides in OVER the main content as a
+       drawer, so main fills 100% of the width by itself. */
+    flex-direction:column !important;
   }
   .sidebar{
-    position:fixed;left:0;top:0;bottom:0;
-    width:min(86vw, 320px);
+    position:fixed !important;
+    left:0;top:0;bottom:0;
+    width:min(86vw, 320px) !important;
+    min-width:0 !important;
+    max-width:320px !important;
+    height:100vh !important;height:100dvh !important;
     z-index:65;
     transform:translateX(-105%);
     transition:transform var(--t-med);
     box-shadow:0 0 60px rgba(0,0,0,.7);
     overflow-y:auto;
+    flex-shrink:0;
     /* iPhone notch / home indicator safe area */
     padding-top:max(24px, env(safe-area-inset-top));
     padding-bottom:max(14px, env(safe-area-inset-bottom));
