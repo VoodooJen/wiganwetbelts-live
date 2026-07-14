@@ -787,3 +787,45 @@ body.intro-lock{ overflow:hidden; }
   .reg-row{ flex-direction:column; }
   .reg-find{ padding:13px 22px; }
 }
+
+
+/* ---------- theme toggle ---------- */
+.theme-toggle{
+  width:42px; height:42px; border-radius:50%; border:1px solid var(--line-2);
+  background:var(--surface); color:var(--text); display:inline-flex; flex:0 0 auto;
+  align-items:center; justify-content:center; transition:border-color .18s, background .18s;
+}
+.theme-toggle:hover{ border-color:var(--accent-line); }
+.theme-toggle .ico-sun{ display:block; }
+.theme-toggle .ico-moon{ display:none; }
+html[data-theme="light"] .theme-toggle .ico-sun{ display:none; }
+html[data-theme="light"] .theme-toggle .ico-moon{ display:block; }
+
+/* ---------- light mode ---------- */
+html[data-theme="light"]{
+  --bg:#eef2f6; --bg-2:#e6ecf2; --surface:#ffffff; --surface-2:#f3f7fa;
+  --line:rgba(9,30,50,.10); --line-2:rgba(9,30,50,.18);
+  --text:#0c1622; --text-2:#45576a; --muted:#77828e;
+  --accent:#0f6bc5; --accent-2:#0a3f77;
+  --accent-dim:rgba(15,107,197,.10); --accent-line:rgba(15,107,197,.35);
+}
+html[data-theme="light"] #nav.scrolled{ background:rgba(255,255,255,.9); }
+html[data-theme="light"] .btn-primary{ color:#ffffff; box-shadow:0 6px 24px rgba(15,107,197,.28); }
+html[data-theme="light"] .btn-primary:hover{ box-shadow:0 8px 30px rgba(15,107,197,.4); }
+html[data-theme="light"] ::selection{ background:var(--accent); color:#ffffff; }
+
+/* cinematic areas stay dark in light mode: video heroes, motion tiles, map card, intro, game */
+html[data-theme="light"] #intro,
+html[data-theme="light"] #home,
+html[data-theme="light"] #motion,
+html[data-theme="light"] .map-card,
+html[data-theme="light"] #wbrModal{
+  --bg:#07090c; --bg-2:#0b0e12; --surface:#10141a; --surface-2:#151a21;
+  --line:rgba(255,255,255,.07); --line-2:rgba(255,255,255,.13);
+  --text:#f2f3f5; --text-2:#aab1ba; --muted:#707883;
+  --accent:#9ed1ff; --accent-2:#e6f3ff;
+  --accent-dim:rgba(158,208,255,.12); --accent-line:rgba(158,208,255,.28);
+}
+html[data-theme="light"] #home .btn-primary,
+html[data-theme="light"] #motion .btn-primary,
+html[data-theme="light"] #wbrModal .btn-primary{ color:#06121f; box-shadow:0 6px 24px rgba(158,208,255,.25); }

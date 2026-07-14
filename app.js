@@ -1429,3 +1429,32 @@ function restoreBackup(){
 restoreBackup();
 
 })();
+
+
+/* ============================================================
+   Theme toggle. Dark by default, light on request, remembered
+   in localStorage. The head snippet applies the saved theme
+   before first paint; this wires up the button.
+   ============================================================ */
+(function(){
+  var KEY = 'wwb.theme';
+  var root = document.documentElement;
+  var meta = document.querySelector('meta[name="theme-color"]');
+  function apply(t){
+    if (t === 'light') root.setAttribute('data-theme','light');
+    else root.removeAttribute('data-theme');
+    if (meta) meta.setAttribute('content', t === 'light' ? '#eef2f6' : '#07090c');
+    var b = document.getElementById('themeToggle');
+    if (b) b.setAttribute('aria-pressed', t === 'light' ? 'true' : 'false');
+  }
+  var saved = null;
+  try { saved = localStorage.getItem(KEY); } catch(e){}
+  var theme = saved || ((window.matchMedia && matchMedia('(prefers-color-scheme: light)').matches) ? 'light' : 'dark');
+  apply(theme);
+  var btn = document.getElementById('themeToggle');
+  if (btn) btn.addEventListener('click', function(){
+    theme = (root.getAttribute('data-theme') === 'light') ? 'dark' : 'light';
+    try { localStorage.setItem(KEY, theme); } catch(e){}
+    apply(theme);
+  });
+})();
