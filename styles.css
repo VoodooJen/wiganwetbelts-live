@@ -826,6 +826,8 @@ html[data-theme="light"] #wbrModal{
   --accent:#9ed1ff; --accent-2:#e6f3ff;
   --accent-dim:rgba(158,208,255,.12); --accent-line:rgba(158,208,255,.28);
 }
+html[data-theme="light"] #home{ background:#07090c; }
+html[data-theme="light"] #intro{ background:#07090c; }
 html[data-theme="light"] #home .btn-primary,
 html[data-theme="light"] #motion .btn-primary,
 html[data-theme="light"] #wbrModal .btn-primary{ color:#06121f; box-shadow:0 6px 24px rgba(158,208,255,.25); }
