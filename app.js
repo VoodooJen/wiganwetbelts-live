@@ -1469,6 +1469,23 @@ restoreBackup();
 })();
 
 
+/* ---------------- mobile autoplay rescue ----------------
+   iOS blocks video autoplay in Low Power Mode and sometimes on first load.
+   On the first touch or tap anywhere, nudge any paused looping videos to play. */
+(function(){
+  function kickVideos(){
+    document.querySelectorAll('video.loopvid').forEach(function(v){
+      if (v.paused){ var p = v.play(); if (p && p.catch) p.catch(function(){}); }
+    });
+  }
+  ['touchstart','click'].forEach(function(evt){
+    document.addEventListener(evt, kickVideos, { once: true, passive: true });
+  });
+  document.addEventListener('visibilitychange', function(){
+    if (!document.hidden) kickVideos();
+  });
+})();
+
 /* ============================================================
    Theme toggle. Dark by default, light on request, remembered
    in localStorage. The head snippet applies the saved theme
