@@ -28,7 +28,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css?v=5">
+<link rel="stylesheet" href="styles.css?v=6">
 <script>(function(){try{var t=localStorage.getItem('wwb.theme');if(!t&&window.matchMedia&&matchMedia('(prefers-color-scheme: light)').matches)t='light';if(t==='light')document.documentElement.setAttribute('data-theme','light');}catch(e){}})();</script>
 
 <script type="application/ld+json">
@@ -187,7 +187,10 @@
             <div class="q-field full">
               <label for="qReg">Vehicle Registration <b>*</b></label>
               <div class="reg-row">
-                <input id="qReg" type="text" autocomplete="off" placeholder="e.g. WN66 ABC" maxlength="10">
+                <div class="reg-plate">
+                  <span class="reg-band" aria-hidden="true">UK</span>
+                  <input id="qReg" type="text" autocomplete="off" placeholder="WN66 ABC" maxlength="10" aria-label="Vehicle registration">
+                </div>
                 <button type="button" class="btn btn-primary reg-find" id="qRegFind">Find my vehicle</button>
               </div>
               <small id="qRegStatus">Enter your reg and we'll look up the vehicle details for you.</small>
@@ -743,7 +746,7 @@
 window.REG_LOOKUP_ENDPOINT = 'https://www.voodoofiles.co.uk/api/wwb-reg-lookup';
 </script>
 <script src="data.js?v=3"></script>
-<script src="app.js?v=3"></script>
+<script src="app.js?v=4"></script>
 <script src="game.js?v=3"></script>
 </body>
 </html>

@@ -1248,8 +1248,7 @@ function narrowEngine(cc, fuel){
   return false;
 }
 
-if (qRegFind){
-  qRegFind.addEventListener('click', function(){
+function doRegLookup(){
     var reg = (qReg && qReg.value.trim().toUpperCase().replace(/\s+/g, '')) || '';
     if (!/^[A-Z0-9]{2,8}$/.test(reg)){
       regStatus('Please enter a valid registration first.', 'err');
@@ -1330,7 +1329,45 @@ if (qRegFind){
         qRegFind.disabled = false;
         regStatus('Registration lookup isn’t available here. Please select your vehicle manually.', 'warn');
       });
+}
+if (qRegFind){ qRegFind.addEventListener('click', doRegLookup); }
+
+/* ---------------- auto lookup: fires when a complete reg is typed ----------------
+   Only fires on a full valid UK plate format, once per reg, after a short pause,
+   and only when the job type is chosen (the make list depends on it). The manual
+   button always works regardless. */
+var REG_COMPLETE = [
+  /^[A-Z]{2}[0-9]{2}[A-Z]{3}$/,   /* current: WN66 ABC */
+  /^[A-Z][0-9]{1,3}[A-Z]{3}$/,    /* prefix:  R123 ABC */
+  /^[A-Z]{3}[0-9]{1,3}[A-Z]$/     /* suffix:  ABC 123R */
+];
+var lastAutoReg = null;
+var regAutoTimer = null;
+function regIsComplete(r){
+  for (var i = 0; i < REG_COMPLETE.length; i++){ if (REG_COMPLETE[i].test(r)) return true; }
+  return false;
+}
+function maybeAutoLookup(){
+  if (!qReg) return;
+  var reg = qReg.value.trim().toUpperCase().replace(/\s+/g, '');
+  if (!regIsComplete(reg) || reg === lastAutoReg) return;
+  if (!qJob || !qJob.value){
+    regStatus('Reg looks good. Choose the job type above and we’ll find your vehicle automatically.', 'warn');
+    return;
+  }
+  lastAutoReg = reg;
+  doRegLookup();
+}
+if (qReg){
+  qReg.addEventListener('input', function(){
+    var up = qReg.value.toUpperCase();
+    if (up !== qReg.value) qReg.value = up;
+    if (regAutoTimer) clearTimeout(regAutoTimer);
+    regAutoTimer = setTimeout(maybeAutoLookup, 700);
   });
+}
+if (qJob){
+  qJob.addEventListener('change', function(){ setTimeout(maybeAutoLookup, 80); });
 }
 
 /* ---------------- date picker: min = today + 14 days ---------------- */
