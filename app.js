@@ -1260,6 +1260,7 @@ function doRegLookup(){
       qJob && qJob.focus();
       return;
     }
+    lastAutoReg = reg;
     regStatus('Looking up ' + reg + '…', '');
     qRegFind.disabled = true;
 
@@ -1367,7 +1368,7 @@ if (qReg){
   });
 }
 if (qJob){
-  qJob.addEventListener('change', function(){ setTimeout(maybeAutoLookup, 80); });
+  qJob.addEventListener('change', function(){ lastAutoReg = null; setTimeout(maybeAutoLookup, 80); });
 }
 
 /* ---------------- date picker: min = today + 14 days ---------------- */
