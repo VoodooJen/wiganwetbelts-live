@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, viewport-fit=cover" />
 <meta name="robots" content="noindex, nofollow" />
 <meta name="theme-color" content="#07090c" />
-<title>Quotes Admin | Wigan Wetbelts</title>
+<title>Admin | Wigan Wetbelts</title>
 <link rel="icon" type="image/x-icon" href="favicon.ico" />
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -15,19 +15,18 @@
   --text:#f2f3f5; --text-2:#aab1ba; --muted:#707883;
   --accent:#9ed1ff; --accent-2:#e6f3ff;
   --accent-dim:rgba(158,208,255,.12); --accent-line:rgba(158,208,255,.28);
-  --ok:#4ade80; --warn:#f87171; --amber:#fbbf24;
+  --ok:#4ade80; --warn:#f87171; --amber:#fbbf24; --purple:#c084fc;
   --radius:16px; --radius-s:10px;
   --font-d:"Space Grotesk","Inter",sans-serif; --font-t:"Inter",system-ui,sans-serif;
 }
 *{ margin:0; padding:0; box-sizing:border-box; }
 body{ background:var(--bg); color:var(--text); font-family:var(--font-t); font-size:16px; line-height:1.55; -webkit-font-smoothing:antialiased; min-height:100vh; }
-h1,h2,h3{ font-family:var(--font-d); font-weight:600; letter-spacing:-.01em; }
+h1,h2,h3,h4{ font-family:var(--font-d); font-weight:600; letter-spacing:-.01em; }
 button{ font-family:inherit; cursor:pointer; }
 input,select,textarea{ font-family:inherit; font-size:.95rem; color:var(--text); background:var(--bg-2); border:1px solid var(--line-2); border-radius:var(--radius-s); padding:12px 14px; outline:none; width:100%; }
 input:focus,textarea:focus{ border-color:var(--accent-line); }
-.wrap{ max-width:1080px; margin:0 auto; padding:0 18px; }
+.wrap{ max-width:1120px; margin:0 auto; padding:0 18px; }
 
-/* login */
 #loginView{ display:flex; align-items:center; justify-content:center; min-height:100vh; padding:20px; }
 .login-card{ width:100%; max-width:400px; background:var(--surface); border:1px solid var(--line-2); border-radius:var(--radius); padding:34px 30px; }
 .brand-logo{ display:block; width:220px; margin:0 auto 22px; }
@@ -37,47 +36,71 @@ input:focus,textarea:focus{ border-color:var(--accent-line); }
 #loginErr{ display:none; margin-top:14px; font-size:.86rem; color:var(--warn); text-align:center; }
 #loginErr.show{ display:block; }
 
-.btn{ display:inline-flex; align-items:center; justify-content:center; gap:8px; border-radius:999px; border:1px solid transparent; font-weight:600; font-size:.92rem; padding:13px 22px; transition:all .16s ease; }
-.btn-primary{ background:linear-gradient(180deg, var(--accent-2), var(--accent)); color:#06121f; width:100%; margin-top:22px; }
+.btn{ display:inline-flex; align-items:center; justify-content:center; gap:8px; border-radius:999px; border:1px solid transparent; font-weight:600; font-size:.92rem; padding:13px 22px; transition:all .16s ease; white-space:nowrap; }
+.btn-primary{ background:linear-gradient(180deg, var(--accent-2), var(--accent)); color:#06121f; }
 .btn-primary:disabled{ opacity:.55; cursor:default; }
 .btn-ghost{ background:transparent; border-color:var(--line-2); color:var(--text-2); padding:9px 16px; font-size:.84rem; }
 .btn-ghost:hover{ border-color:var(--accent-line); color:var(--text); }
+.btn-ghost.on{ background:var(--accent-dim); border-color:var(--accent); color:var(--accent); }
+.login-card .btn-primary{ width:100%; margin-top:22px; }
 
-/* app shell */
-#appView{ display:none; padding-bottom:80px; }
+#appView{ display:none; padding-bottom:90px; }
 .topbar{ position:sticky; top:0; z-index:10; background:rgba(10,11,13,.92); backdrop-filter:blur(12px); border-bottom:1px solid var(--line); }
-.topbar-inner{ display:flex; align-items:center; justify-content:space-between; gap:12px; padding:12px 0; }
-.topbar svg{ width:150px; height:auto; display:block; }
-.topbar-actions{ display:flex; gap:8px; align-items:center; }
+.topbar-inner{ display:flex; align-items:center; justify-content:space-between; gap:10px; padding:12px 0; flex-wrap:wrap; }
+.topbar svg{ width:140px; height:auto; display:block; }
+.topbar-actions{ display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+.topbar-actions select{ width:auto; padding:8px 10px; font-size:.8rem; border-radius:999px; }
 
-.stats{ display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin:18px 0; }
+#alertBar{ display:none; margin:16px 0 0; background:rgba(248,113,113,.1); border:1px solid rgba(248,113,113,.4); border-radius:var(--radius-s); padding:13px 17px; font-size:.92rem; color:#fecaca; align-items:center; gap:10px; justify-content:space-between; flex-wrap:wrap; }
+#alertBar.show{ display:flex; animation:alertPulse 2.4s ease-in-out infinite; }
+#alertBar b{ color:#fff; }
+@keyframes alertPulse{ 0%,100%{ border-color:rgba(248,113,113,.4); } 50%{ border-color:rgba(248,113,113,.9); } }
+
+.section-label{ font-size:.7rem; font-weight:700; letter-spacing:.2em; text-transform:uppercase; color:var(--muted); margin:22px 0 10px; }
+.stats{ display:grid; grid-template-columns:repeat(4,1fr); gap:10px; }
 .stat{ background:var(--surface); border:1px solid var(--line); border-radius:var(--radius-s); padding:14px 16px; }
-.stat b{ display:block; font-family:var(--font-d); font-size:1.35rem; color:var(--accent); }
-.stat span{ font-size:.72rem; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); }
+.stat b{ display:block; font-family:var(--font-d); font-size:1.3rem; color:var(--accent); }
+.stat b.green{ color:var(--ok); }
+.stat b.amber{ color:var(--amber); }
+.stat b.red{ color:var(--warn); }
+.stat span{ font-size:.7rem; letter-spacing:.09em; text-transform:uppercase; color:var(--muted); }
+.stat small{ display:block; font-size:.72rem; color:var(--text-2); margin-top:2px; }
 
-.controls{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-bottom:16px; }
+.charts{ display:grid; grid-template-columns:2fr 1fr; gap:10px; }
+.chart-card{ background:var(--surface); border:1px solid var(--line); border-radius:var(--radius-s); padding:16px 18px; }
+.chart-card h4{ font-size:.86rem; margin-bottom:12px; color:var(--text-2); }
+.chart-card canvas{ width:100% !important; }
+.jobbars{ display:flex; flex-direction:column; gap:9px; }
+.jobbar span{ display:flex; justify-content:space-between; font-size:.78rem; color:var(--text-2); margin-bottom:3px; }
+.jobbar i{ display:block; height:7px; border-radius:4px; background:linear-gradient(90deg, var(--accent), var(--accent-2)); }
+
+.controls{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin:14px 0 14px; }
 .tabs{ display:flex; gap:6px; flex-wrap:wrap; }
 .tab{ background:var(--surface); border:1px solid var(--line-2); color:var(--text-2); border-radius:999px; padding:8px 15px; font-size:.82rem; font-weight:500; }
 .tab.active{ background:var(--accent-dim); border-color:var(--accent); color:var(--accent); font-weight:600; }
 #search{ flex:1 1 200px; min-width:170px; padding:10px 14px; }
 
-/* quote cards */
 #list{ display:flex; flex-direction:column; gap:10px; }
-.qcard{ background:var(--surface); border:1px solid var(--line); border-radius:var(--radius-s); padding:16px 18px; cursor:pointer; transition:border-color .15s; display:grid; grid-template-columns:1fr auto; gap:4px 12px; }
-.qcard:hover{ border-color:var(--accent-line); }
+.qcard{ background:var(--surface); border:1px solid var(--line); border-radius:var(--radius-s); padding:15px 18px; transition:border-color .15s; }
+.qcard.overdue{ border-color:rgba(248,113,113,.5); }
+.qcard-top{ display:grid; grid-template-columns:1fr auto; gap:4px 12px; cursor:pointer; }
 .qcard .who{ font-weight:600; font-size:1rem; }
 .qcard .veh{ font-size:.85rem; color:var(--text-2); }
 .qcard .meta{ font-size:.78rem; color:var(--muted); }
 .qcard .amt{ font-family:var(--font-d); font-weight:700; color:var(--accent); text-align:right; font-size:1.05rem; }
+.wait{ display:inline-block; font-size:.7rem; font-weight:700; border-radius:999px; padding:2px 9px; margin-left:6px; background:rgba(251,191,36,.12); color:var(--amber); border:1px solid rgba(251,191,36,.35); }
+.wait.bad{ background:rgba(248,113,113,.12); color:var(--warn); border-color:rgba(248,113,113,.4); }
 .pill{ display:inline-block; font-size:.68rem; font-weight:700; letter-spacing:.12em; text-transform:uppercase; border-radius:999px; padding:4px 11px; border:1px solid; justify-self:end; }
 .st-new{ color:var(--accent); border-color:var(--accent-line); background:var(--accent-dim); }
 .st-contacted{ color:var(--amber); border-color:rgba(251,191,36,.4); background:rgba(251,191,36,.1); }
-.st-booked{ color:#c084fc; border-color:rgba(192,132,252,.4); background:rgba(192,132,252,.1); }
+.st-booked{ color:var(--purple); border-color:rgba(192,132,252,.4); background:rgba(192,132,252,.1); }
 .st-completed{ color:var(--ok); border-color:rgba(74,222,128,.4); background:rgba(74,222,128,.08); }
 .st-declined{ color:var(--muted); border-color:var(--line-2); background:var(--bg-2); }
+.qcard-actions{ display:flex; gap:8px; margin-top:11px; flex-wrap:wrap; }
+.mini{ font-size:.78rem; padding:7px 14px; border-radius:999px; border:1px solid var(--line-2); background:var(--bg-2); color:var(--text-2); }
+.mini:hover{ border-color:var(--accent-line); color:var(--text); }
 .empty{ text-align:center; color:var(--muted); padding:60px 0; font-size:.92rem; }
 
-/* detail overlay */
 #overlay{ display:none; position:fixed; inset:0; z-index:50; background:rgba(4,6,9,.7); backdrop-filter:blur(4px); }
 #overlay.open{ display:flex; align-items:flex-end; justify-content:center; }
 .sheet{ width:100%; max-width:640px; max-height:88vh; overflow:auto; background:var(--surface); border:1px solid var(--line-2); border-radius:18px 18px 0 0; padding:26px 24px 34px; }
@@ -92,9 +115,13 @@ input:focus,textarea:focus{ border-color:var(--accent-line); }
 .sheet label{ display:block; font-size:.72rem; font-weight:600; letter-spacing:.14em; text-transform:uppercase; color:var(--text-2); margin:6px 0 6px; }
 .sheet textarea{ min-height:88px; resize:vertical; }
 .sheet-actions{ display:flex; gap:10px; margin-top:16px; }
-.sheet-actions .btn-primary{ width:auto; margin-top:0; flex:1; }
-#saveMsg{ font-size:.84rem; color:var(--ok); margin-top:10px; min-height:1.2em; }
-@media (max-width:640px){ .stats{ grid-template-columns:repeat(2,1fr); } .grid2{ grid-template-columns:1fr; } }
+.sheet-actions .btn-primary{ flex:1; }
+#saveMsg{ font-size:.84rem; margin-top:10px; min-height:1.2em; }
+@media (max-width:760px){
+  .stats{ grid-template-columns:repeat(2,1fr); }
+  .charts{ grid-template-columns:1fr; }
+  .grid2{ grid-template-columns:1fr; }
+}
 </style>
 </head>
 <body>
@@ -108,7 +135,7 @@ input:focus,textarea:focus{ border-color:var(--accent-line); }
       <text x="140" y="125" text-anchor="middle" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="700" font-size="62" letter-spacing="6" fill="#ffffff">WIGAN</text>
       <text x="500" y="125" text-anchor="middle" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="700" font-size="62" letter-spacing="6" fill="#000000">WETBELTS</text>
     </svg>
-    <h1>Quotes Admin</h1>
+    <h1>Workshop Admin</h1>
     <p>Staff sign in. Customer quotes stay private.</p>
     <label for="email">Email</label>
     <input id="email" type="email" autocomplete="username" />
@@ -129,6 +156,14 @@ input:focus,textarea:focus{ border-color:var(--accent-line); }
         <text x="500" y="125" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-weight="700" font-size="62" letter-spacing="6" fill="#000">WETBELTS</text>
       </svg>
       <div class="topbar-actions">
+        <button class="btn btn-ghost" id="soundBtn" title="Alert sound for unreplied quotes">Sound on</button>
+        <select id="soundEvery" title="How often the alert repeats">
+          <option value="2">Every 2s</option>
+          <option value="5" selected>Every 5s</option>
+          <option value="15">Every 15s</option>
+          <option value="60">Every minute</option>
+        </select>
+        <button class="btn btn-ghost" id="csvBtn">Export CSV</button>
         <button class="btn btn-ghost" id="refreshBtn">Refresh</button>
         <button class="btn btn-ghost" id="logoutBtn">Log out</button>
       </div>
@@ -136,13 +171,37 @@ input:focus,textarea:focus{ border-color:var(--accent-line); }
   </div>
 
   <div class="wrap">
-    <div class="stats">
-      <div class="stat"><b id="stNew">0</b><span>New</span></div>
-      <div class="stat"><b id="stWeek">0</b><span>This week</span></div>
-      <div class="stat"><b id="stBooked">0</b><span>Booked</span></div>
-      <div class="stat"><b id="stValue">£0</b><span>Open value</span></div>
+    <div id="alertBar">
+      <span id="alertText"></span>
+      <button class="btn btn-ghost" id="alertJump">Show me</button>
     </div>
 
+    <div class="section-label">Right now</div>
+    <div class="stats">
+      <div class="stat"><b id="stNew" class="red">0</b><span>Waiting for reply</span><small id="stOldest"></small></div>
+      <div class="stat"><b id="stWeek">0</b><span>Quotes this week</span><small id="stWeekPrev"></small></div>
+      <div class="stat"><b id="stBooked" class="amber">0</b><span>Booked in</span><small id="stBookedVal"></small></div>
+      <div class="stat"><b id="stPipe">£0</b><span>Pipeline value</span><small>new + contacted, ex VAT</small></div>
+    </div>
+
+    <div class="section-label">Money</div>
+    <div class="stats">
+      <div class="stat"><b id="stMonthBooked" class="green">£0</b><span>Won this month</span><small id="stMonthPrev"></small></div>
+      <div class="stat"><b id="stCompletedAll" class="green">£0</b><span>Completed all time</span><small id="stCompletedN"></small></div>
+      <div class="stat"><b id="stConv">0%</b><span>Conversion rate</span><small>booked + completed of decided</small></div>
+      <div class="stat"><b id="stAvg">£0</b><span>Average quote</span><small>ex VAT</small></div>
+    </div>
+
+    <div class="section-label">Trend</div>
+    <div class="charts">
+      <div class="chart-card"><h4>Quotes and value, last 10 weeks</h4><canvas id="trendChart" height="170"></canvas></div>
+      <div class="chart-card">
+        <h4>Where quotes stand</h4><canvas id="statusChart" height="150"></canvas>
+        <h4 style="margin-top:16px;">Top jobs by value</h4><div class="jobbars" id="jobBars"></div>
+      </div>
+    </div>
+
+    <div class="section-label" id="quotesAnchor">Quotes</div>
     <div class="controls">
       <div class="tabs" id="tabs">
         <button class="tab active" data-st="">All</button>
@@ -154,22 +213,21 @@ input:focus,textarea:focus{ border-color:var(--accent-line); }
       </div>
       <input id="search" type="search" placeholder="Search name, reg or phone" />
     </div>
-
     <div id="list"></div>
   </div>
 </div>
 
-<div id="overlay">
-  <div class="sheet" id="sheet"></div>
-</div>
+<div id="overlay"><div class="sheet" id="sheet"></div></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
 <script>
 (function(){
 'use strict';
 var SB_URL = 'https://ukwakszeslxkxcyosigp.supabase.co';
 var SB_KEY = 'sb_publishable_QuwBESO6L6SwTK7a2kB6fw_bXDQElMo';
-var sb = window.supabase.createClient(SB_URL, SB_KEY);
+var DEMO = /[?&]demo=1/.test(location.search);
+var sb = DEMO ? null : window.supabase.createClient(SB_URL, SB_KEY);
 
 var STATUSES = ['new','contacted','booked','completed','declined'];
 var loginView = document.getElementById('loginView');
@@ -178,33 +236,99 @@ var listEl = document.getElementById('list');
 var quotes = [];
 var filterStatus = '';
 var searchTerm = '';
-var current = null;
+var trendChart = null, statusChart = null;
+var baseTitle = document.title;
 
 function esc(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
-function money(n){ return (n || n === 0) ? '£' + Number(n).toLocaleString('en-GB') : ''; }
-function fmtDate(d){
-  if (!d) return '';
-  var dt = new Date(d);
-  if (isNaN(dt)) return String(d);
-  return dt.toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' });
-}
-function fmtDateTime(d){
-  if (!d) return '';
-  var dt = new Date(d);
-  return dt.toLocaleDateString('en-GB', { day:'numeric', month:'short' }) + ' ' +
-         dt.toLocaleTimeString('en-GB', { hour:'2-digit', minute:'2-digit' });
+function money(n){ return (n || n === 0) ? '£' + Math.round(Number(n)).toLocaleString('en-GB') : ''; }
+function fmtDate(d){ if (!d) return ''; var dt = new Date(d); return isNaN(dt) ? String(d) : dt.toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' }); }
+function fmtDateTime(d){ if (!d) return ''; var dt = new Date(d); return dt.toLocaleDateString('en-GB', { day:'numeric', month:'short' }) + ' ' + dt.toLocaleTimeString('en-GB', { hour:'2-digit', minute:'2-digit' }); }
+function hoursSince(d){ return d ? (Date.now() - new Date(d).getTime()) / 3600000 : 0; }
+function waitLabel(h){ if (h < 1) return Math.max(1, Math.round(h * 60)) + 'm'; if (h < 48) return Math.round(h) + 'h'; return Math.round(h / 24) + 'd'; }
+function real(q){ return (q.source || '') !== 'test'; }
+function isOpen(q){ var s = q.status || 'new'; return s === 'new' || s === 'contacted' || s === 'booked'; }
+function ukIntl(phone){
+  var p = String(phone || '').replace(/[^0-9+]/g, '');
+  if (p.indexOf('+') === 0) return p.slice(1);
+  if (p.indexOf('0') === 0) return '44' + p.slice(1);
+  return p;
 }
 
-/* ---------- auth ---------- */
-function showApp(){ loginView.style.display = 'none'; appView.style.display = 'block'; loadQuotes(); }
+/* ================= alert sound ================= */
+var audioCtx = null;
+var soundOn = true;
+var soundTimer = null;
+try { soundOn = localStorage.getItem('wwbAdmin.sound') !== 'off'; } catch(e){}
+var soundBtn = document.getElementById('soundBtn');
+var soundEvery = document.getElementById('soundEvery');
+try { var se = localStorage.getItem('wwbAdmin.soundEvery'); if (se) soundEvery.value = se; } catch(e){}
+function syncSoundBtn(){ soundBtn.textContent = soundOn ? 'Sound on' : 'Sound off'; soundBtn.classList.toggle('on', soundOn); }
+syncSoundBtn();
+soundBtn.addEventListener('click', function(){
+  soundOn = !soundOn;
+  try { localStorage.setItem('wwbAdmin.sound', soundOn ? 'on' : 'off'); } catch(e){}
+  syncSoundBtn();
+  restartSoundLoop();
+  if (soundOn) chime();
+});
+soundEvery.addEventListener('change', function(){
+  try { localStorage.setItem('wwbAdmin.soundEvery', soundEvery.value); } catch(e){}
+  restartSoundLoop();
+});
+function ensureCtx(){
+  if (!audioCtx){
+    var AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) return null;
+    audioCtx = new AC();
+  }
+  if (audioCtx.state === 'suspended') audioCtx.resume().catch(function(){});
+  return audioCtx;
+}
+document.addEventListener('click', function(){ ensureCtx(); }, { once:true });
+function chime(){
+  var ctx = ensureCtx();
+  if (!ctx || ctx.state !== 'running') return;
+  [[880, 0], [1174.7, 0.14]].forEach(function(nf){
+    var o = ctx.createOscillator();
+    var g = ctx.createGain();
+    o.type = 'sine'; o.frequency.value = nf[0];
+    var t = ctx.currentTime + nf[1];
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(0.18, t + 0.02);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + 0.5);
+    o.connect(g); g.connect(ctx.destination);
+    o.start(t); o.stop(t + 0.55);
+  });
+}
+function newCount(){ return quotes.filter(function(q){ return real(q) && (q.status || 'new') === 'new'; }).length; }
+function restartSoundLoop(){
+  if (soundTimer){ clearInterval(soundTimer); soundTimer = null; }
+  if (!soundOn) return;
+  soundTimer = setInterval(function(){
+    if (appView.style.display === 'block' && newCount() > 0) chime();
+  }, Math.max(2, parseInt(soundEvery.value, 10) || 5) * 1000);
+}
+
+/* tab title flash */
+setInterval(function(){
+  var n = newCount();
+  if (appView.style.display !== 'block' || n === 0){ document.title = baseTitle; return; }
+  document.title = (document.title === baseTitle) ? ('(' + n + ' NEW) ' + baseTitle) : baseTitle;
+}, 1500);
+
+/* ================= auth ================= */
+function showApp(){ loginView.style.display = 'none'; appView.style.display = 'block'; loadQuotes(); startRealtime(); restartSoundLoop(); }
 function showLogin(){ loginView.style.display = 'flex'; appView.style.display = 'none'; }
 
-sb.auth.getSession().then(function(res){
-  if (res.data && res.data.session) showApp(); else showLogin();
-});
-
-document.getElementById('loginBtn').addEventListener('click', doLogin);
-document.getElementById('password').addEventListener('keydown', function(e){ if (e.key === 'Enter') doLogin(); });
+if (DEMO){
+  showApp();
+} else {
+  sb.auth.getSession().then(function(res){
+    if (res.data && res.data.session) showApp(); else showLogin();
+  });
+  document.getElementById('loginBtn').addEventListener('click', doLogin);
+  document.getElementById('password').addEventListener('keydown', function(e){ if (e.key === 'Enter') doLogin(); });
+}
 function doLogin(){
   var btn = document.getElementById('loginBtn');
   var err = document.getElementById('loginErr');
@@ -215,51 +339,205 @@ function doLogin(){
     password: document.getElementById('password').value
   }).then(function(res){
     btn.disabled = false; btn.textContent = 'Sign in';
-    if (res.error){
-      err.textContent = 'Sign in failed. Check your email and password.';
-      err.classList.add('show');
-      return;
-    }
+    if (res.error){ err.textContent = 'Sign in failed. Check your email and password.'; err.classList.add('show'); return; }
+    ensureCtx();
     showApp();
   });
 }
 document.getElementById('logoutBtn').addEventListener('click', function(){
+  if (DEMO){ location.href = 'admin.html'; return; }
   sb.auth.signOut().then(showLogin);
 });
 
-/* ---------- data ---------- */
+/* ================= data ================= */
+function demoQuotes(){
+  var now = Date.now(), H = 3600000, D = 24 * H;
+  function q(daysAgo, name, reg, yr, mk, md, en, job, amt, st){
+    return { id: Math.random().toString(36).slice(2), created_at: new Date(now - daysAgo * D).toISOString(),
+      name: name, phone: '07700900123', email: 'demo@example.com', contact: 'Phone Call', reg: reg, year: yr,
+      make: mk, model: md, engine: en, job: job, quote_amount: amt, status: st, source: 'website',
+      pref_date: new Date(now + 10 * D).toISOString().slice(0, 10), notes: '', admin_notes: '' };
+  }
+  return [
+    q(0.1, 'Sophie Turner', 'WN18XYZ', 2019, 'Ford', 'Fiesta', '1.0 EcoBoost', 'Timing Belt / Wet Belt Replacement', 640, 'new'),
+    q(1.4, 'Liam Ward', 'MA66KLM', 2016, 'Peugeot', '208', '1.2 PureTech', 'Timing Belt / Wet Belt Replacement', 590, 'new'),
+    q(2, 'Dan Rigby', 'DG21ABC', 2021, 'Vauxhall', 'Corsa', '1.2 Turbo PureTech', 'Timing Belt / Wet Belt Replacement', 610, 'contacted'),
+    q(5, 'Amy Clarke', 'YK14DEF', 2014, 'BMW', '320d', '2.0d N47', 'Timing Chain Replacement', 1150, 'booked'),
+    q(9, 'Pete Molloy', 'PL68GHJ', 2018, 'Ford', 'Transit Custom FWD', '2.0 EcoBlue', 'Timing Belt / Wet Belt Replacement', 940, 'booked'),
+    q(12, 'Gemma Lowe', 'GL65MNP', 2015, 'Citroen', 'C3', '1.2 PureTech', 'Timing Belt / Wet Belt Replacement', 580, 'completed'),
+    q(19, 'Ryan Beck', 'RB19QRS', 2019, 'Volkswagen', 'Golf', '1.5 TSI Evo', 'Timing Belt / Wet Belt Replacement', 720, 'completed'),
+    q(24, 'Carl Hughes', 'CH11TUV', 2011, 'Audi', 'A3', '1.8 TFSI', 'Timing Chain Replacement', 1240, 'completed'),
+    q(33, 'Nadia Iqbal', 'NI67WXY', 2017, 'Ford', 'Focus', '1.0 EcoBoost', 'Timing Belt / Wet Belt Replacement', 650, 'completed'),
+    q(41, 'Tom Barnes', 'TB15ZAB', 2015, 'Mercedes', 'A180', '1.5d', 'Timing Chain Replacement', 1080, 'declined'),
+    q(48, 'Jess Whittle', 'JW20CDE', 2020, 'Toyota', 'Aygo', '1.0 VVT-i', 'Diagnosis / Inspection', 95, 'completed'),
+    q(55, 'Mark Ellison', 'ME09FGH', 2009, 'BMW', '118d', '2.0d', 'Timing Chain Replacement', 990, 'completed')
+  ];
+}
+
 function loadQuotes(){
-  listEl.innerHTML = '<div class="empty">Loading quotes…</div>';
-  sb.from('quotes').select('*').order('created_at', { ascending:false }).limit(500)
+  if (DEMO){
+    quotes = demoQuotes();
+    renderAll();
+    return;
+  }
+  sb.from('quotes').select('*').order('created_at', { ascending:false }).limit(1000)
     .then(function(res){
       if (res.error){
         listEl.innerHTML = '<div class="empty">Could not load quotes. ' + esc(res.error.message) + '</div>';
         return;
       }
       quotes = res.data || [];
-      renderStats();
-      renderList();
+      renderAll();
     });
 }
 document.getElementById('refreshBtn').addEventListener('click', loadQuotes);
-setInterval(function(){ if (appView.style.display === 'block' && !document.getElementById('overlay').classList.contains('open')) loadQuotes(); }, 90000);
+setInterval(function(){
+  if (appView.style.display === 'block' && !document.getElementById('overlay').classList.contains('open')) loadQuotes();
+}, 60000);
 
-function renderStats(){
-  var now = Date.now();
-  var week = 7 * 24 * 3600 * 1000;
-  var stNew = 0, stWeek = 0, stBooked = 0, openVal = 0;
-  quotes.forEach(function(q){
-    if (q.status === 'new') stNew++;
-    if (q.status === 'booked') stBooked++;
-    if (q.created_at && (now - new Date(q.created_at).getTime()) < week) stWeek++;
-    if ((q.status === 'new' || q.status === 'contacted' || q.status === 'booked') && q.quote_amount) openVal += Number(q.quote_amount);
-  });
-  document.getElementById('stNew').textContent = stNew;
-  document.getElementById('stWeek').textContent = stWeek;
-  document.getElementById('stBooked').textContent = stBooked;
-  document.getElementById('stValue').textContent = money(openVal);
+function startRealtime(){
+  if (DEMO || !sb) return;
+  try {
+    sb.channel('quotes-live')
+      .on('postgres_changes', { event:'INSERT', schema:'public', table:'quotes' }, function(){
+        loadQuotes();
+        chime(); chime();
+      })
+      .subscribe();
+  } catch(e){}
 }
 
+/* ================= analytics ================= */
+function renderAll(){ renderStats(); renderCharts(); renderList(); renderAlert(); }
+
+function renderAlert(){
+  var open = quotes.filter(function(q){ return real(q) && (q.status || 'new') === 'new'; });
+  var bar = document.getElementById('alertBar');
+  if (!open.length){ bar.classList.remove('show'); return; }
+  var oldest = open.reduce(function(a, b){ return new Date(a.created_at) < new Date(b.created_at) ? a : b; });
+  document.getElementById('alertText').innerHTML =
+    '<b>' + open.length + (open.length === 1 ? ' quote' : ' quotes') + ' waiting for a reply.</b> Oldest has waited ' +
+    esc(waitLabel(hoursSince(oldest.created_at))) + '. Fast replies win these jobs.';
+  bar.classList.add('show');
+}
+document.getElementById('alertJump').addEventListener('click', function(){
+  filterStatus = 'new';
+  Array.prototype.forEach.call(document.querySelectorAll('#tabs .tab'), function(x){ x.classList.toggle('active', x.getAttribute('data-st') === 'new'); });
+  renderList();
+  document.getElementById('quotesAnchor').scrollIntoView({ behavior:'smooth' });
+});
+
+function renderStats(){
+  var rq = quotes.filter(real);
+  var now = new Date();
+  var wkMs = 7 * 24 * 3600000;
+  var monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+  var prevMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+
+  var news = rq.filter(function(q){ return (q.status || 'new') === 'new'; });
+  var weekN = rq.filter(function(q){ return (now - new Date(q.created_at)) < wkMs; }).length;
+  var prevWeekN = rq.filter(function(q){ var a = now - new Date(q.created_at); return a >= wkMs && a < 2 * wkMs; }).length;
+  var booked = rq.filter(function(q){ return q.status === 'booked'; });
+  var pipeline = rq.filter(function(q){ return (q.status || 'new') === 'new' || q.status === 'contacted'; })
+    .reduce(function(s, q){ return s + (Number(q.quote_amount) || 0); }, 0);
+
+  var won = function(q){ return q.status === 'booked' || q.status === 'completed'; };
+  var monthWon = rq.filter(function(q){ return won(q) && new Date(q.created_at) >= monthStart; })
+    .reduce(function(s, q){ return s + (Number(q.quote_amount) || 0); }, 0);
+  var prevMonthWon = rq.filter(function(q){ var d = new Date(q.created_at); return won(q) && d >= prevMonthStart && d < monthStart; })
+    .reduce(function(s, q){ return s + (Number(q.quote_amount) || 0); }, 0);
+  var completed = rq.filter(function(q){ return q.status === 'completed'; });
+  var completedVal = completed.reduce(function(s, q){ return s + (Number(q.quote_amount) || 0); }, 0);
+  var decided = rq.filter(function(q){ return q.status === 'booked' || q.status === 'completed' || q.status === 'declined'; });
+  var conv = decided.length ? Math.round(100 * decided.filter(won).length / decided.length) : 0;
+  var amounts = rq.filter(function(q){ return Number(q.quote_amount) > 0; });
+  var avg = amounts.length ? amounts.reduce(function(s, q){ return s + Number(q.quote_amount); }, 0) / amounts.length : 0;
+
+  var oldest = news.length ? news.reduce(function(a, b){ return new Date(a.created_at) < new Date(b.created_at) ? a : b; }) : null;
+  document.getElementById('stNew').textContent = news.length;
+  document.getElementById('stNew').className = news.length ? 'red' : 'green';
+  document.getElementById('stOldest').textContent = oldest ? ('oldest waiting ' + waitLabel(hoursSince(oldest.created_at))) : 'all replied to';
+  document.getElementById('stWeek').textContent = weekN;
+  document.getElementById('stWeekPrev').textContent = prevWeekN + ' the week before';
+  document.getElementById('stBooked').textContent = booked.length;
+  document.getElementById('stBookedVal').textContent = money(booked.reduce(function(s, q){ return s + (Number(q.quote_amount) || 0); }, 0)) + ' ex VAT';
+  document.getElementById('stPipe').textContent = money(pipeline);
+  document.getElementById('stMonthBooked').textContent = money(monthWon);
+  document.getElementById('stMonthPrev').textContent = money(prevMonthWon) + ' last month';
+  document.getElementById('stCompletedAll').textContent = money(completedVal);
+  document.getElementById('stCompletedN').textContent = completed.length + ' jobs';
+  document.getElementById('stConv').textContent = conv + '%';
+  document.getElementById('stAvg').textContent = money(avg);
+}
+
+function renderCharts(){
+  if (typeof Chart === 'undefined') return;
+  var rq = quotes.filter(real);
+  var weeks = [];
+  var now = new Date();
+  var monday = new Date(now); monday.setHours(0,0,0,0); monday.setDate(monday.getDate() - ((monday.getDay() + 6) % 7));
+  for (var i = 9; i >= 0; i--){
+    var start = new Date(monday.getTime() - i * 7 * 24 * 3600000);
+    weeks.push({ start:start, label: start.toLocaleDateString('en-GB', { day:'numeric', month:'short' }), n:0, val:0 });
+  }
+  rq.forEach(function(q){
+    var d = new Date(q.created_at);
+    weeks.forEach(function(w, wi){
+      var end = new Date(w.start.getTime() + 7 * 24 * 3600000);
+      if (d >= w.start && d < end){ w.n++; w.val += Number(q.quote_amount) || 0; }
+    });
+  });
+  var ctx1 = document.getElementById('trendChart').getContext('2d');
+  if (trendChart) trendChart.destroy();
+  trendChart = new Chart(ctx1, {
+    data: {
+      labels: weeks.map(function(w){ return w.label; }),
+      datasets: [
+        { type:'bar', label:'Quotes', data: weeks.map(function(w){ return w.n; }), backgroundColor:'rgba(158,208,255,.35)', borderColor:'rgba(158,208,255,.9)', borderWidth:1, yAxisID:'y' },
+        { type:'line', label:'Value £', data: weeks.map(function(w){ return w.val; }), borderColor:'#4ade80', backgroundColor:'rgba(74,222,128,.15)', tension:.3, yAxisID:'y1' }
+      ]
+    },
+    options: {
+      responsive:true,
+      plugins:{ legend:{ labels:{ color:'#aab1ba', font:{ size:11 } } } },
+      scales:{
+        x:{ ticks:{ color:'#707883', font:{ size:10 } }, grid:{ color:'rgba(255,255,255,.05)' } },
+        y:{ beginAtZero:true, ticks:{ color:'#707883', precision:0 }, grid:{ color:'rgba(255,255,255,.05)' } },
+        y1:{ beginAtZero:true, position:'right', ticks:{ color:'#4ade80', callback:function(v){ return '£' + v.toLocaleString('en-GB'); } }, grid:{ display:false } }
+      }
+    }
+  });
+
+  var counts = {};
+  STATUSES.forEach(function(s){ counts[s] = 0; });
+  rq.forEach(function(q){ counts[q.status || 'new']++; });
+  var ctx2 = document.getElementById('statusChart').getContext('2d');
+  if (statusChart) statusChart.destroy();
+  statusChart = new Chart(ctx2, {
+    type:'doughnut',
+    data:{
+      labels: STATUSES,
+      datasets:[{ data: STATUSES.map(function(s){ return counts[s]; }),
+        backgroundColor:['rgba(158,208,255,.7)','rgba(251,191,36,.7)','rgba(192,132,252,.7)','rgba(74,222,128,.7)','rgba(112,120,131,.5)'],
+        borderColor:'#10141a', borderWidth:2 }]
+    },
+    options:{ plugins:{ legend:{ position:'right', labels:{ color:'#aab1ba', font:{ size:11 }, boxWidth:12 } } } }
+  });
+
+  var jobs = {};
+  rq.forEach(function(q){
+    if (!q.job || !(Number(q.quote_amount) > 0)) return;
+    if (q.status !== 'booked' && q.status !== 'completed') return;
+    jobs[q.job] = (jobs[q.job] || 0) + Number(q.quote_amount);
+  });
+  var top = Object.keys(jobs).map(function(k){ return [k, jobs[k]]; }).sort(function(a, b){ return b[1] - a[1]; }).slice(0, 4);
+  var max = top.length ? top[0][1] : 1;
+  document.getElementById('jobBars').innerHTML = top.length ? top.map(function(j){
+    return '<div class="jobbar"><span><em style="font-style:normal;">' + esc(j[0]) + '</em><b>' + money(j[1]) + '</b></span><i style="width:' + Math.max(6, Math.round(100 * j[1] / max)) + '%"></i></div>';
+  }).join('') : '<div style="color:var(--muted); font-size:.82rem;">Nothing booked or completed yet.</div>';
+}
+
+/* ================= list ================= */
 function matches(q){
   if (filterStatus && (q.status || 'new') !== filterStatus) return false;
   if (searchTerm){
@@ -268,32 +546,49 @@ function matches(q){
   }
   return true;
 }
-
 function renderList(){
   var rows = quotes.filter(matches);
-  if (!rows.length){
-    listEl.innerHTML = '<div class="empty">No quotes here yet. New quotes from the website appear automatically.</div>';
-    return;
-  }
-  listEl.innerHTML = rows.map(function(q, i){
+  if (!rows.length){ listEl.innerHTML = '<div class="empty">No quotes here yet. New quotes from the website appear automatically.</div>'; return; }
+  listEl.innerHTML = rows.map(function(q){
+    var st = q.status || 'new';
     var veh = [q.year, q.make, q.model, q.engine].filter(Boolean).join(' ');
-    return '<div class="qcard" data-id="' + esc(q.id) + '">' +
-      '<div>' +
-        '<div class="who">' + esc(q.name || 'No name') + (q.reg ? ' · ' + esc(q.reg) : '') + '</div>' +
-        '<div class="veh">' + esc(veh || 'Vehicle not specified') + (q.job ? ' · ' + esc(q.job) : '') + '</div>' +
-        '<div class="meta">' + esc(fmtDateTime(q.created_at)) + (q.pref_date ? ' · wants ' + esc(fmtDate(q.pref_date)) : '') + '</div>' +
+    var h = hoursSince(q.created_at);
+    var overdue = st === 'new' && h >= 24;
+    var waitChip = st === 'new' ? '<span class="wait' + (overdue ? ' bad' : '') + '">waiting ' + esc(waitLabel(h)) + '</span>' : '';
+    var wa = ukIntl(q.phone);
+    var waMsg = encodeURIComponent('Hi ' + (q.name || '').split(' ')[0] + ', it’s Wigan Wetbelts about the ' + (q.job || 'timing') + ' quote for your ' + [q.make, q.model].filter(Boolean).join(' ') + '. When suits a quick chat?');
+    return '<div class="qcard' + (overdue ? ' overdue' : '') + '" data-id="' + esc(q.id) + '">' +
+      '<div class="qcard-top" data-open="1">' +
+        '<div>' +
+          '<div class="who">' + esc(q.name || 'No name') + (q.reg ? ' · ' + esc(q.reg) : '') + waitChip + '</div>' +
+          '<div class="veh">' + esc(veh || 'Vehicle not specified') + (q.job ? ' · ' + esc(q.job) : '') + '</div>' +
+          '<div class="meta">' + esc(fmtDateTime(q.created_at)) + (q.pref_date ? ' · wants ' + esc(fmtDate(q.pref_date)) : '') + (real(q) ? '' : ' · TEST') + '</div>' +
+        '</div>' +
+        '<div style="display:flex; flex-direction:column; align-items:flex-end; gap:6px;">' +
+          '<span class="amt">' + money(q.quote_amount) + '</span>' +
+          '<span class="pill st-' + esc(st) + '">' + esc(st) + '</span>' +
+        '</div>' +
       '</div>' +
-      '<div style="display:flex; flex-direction:column; align-items:flex-end; gap:6px;">' +
-        '<span class="amt">' + money(q.quote_amount) + '</span>' +
-        '<span class="pill st-' + esc(q.status || 'new') + '">' + esc(q.status || 'new') + '</span>' +
+      '<div class="qcard-actions">' +
+        (q.phone ? '<a class="mini" href="tel:' + esc(q.phone) + '">Call</a>' : '') +
+        (wa ? '<a class="mini" target="_blank" rel="noopener" href="https://wa.me/' + esc(wa) + '?text=' + waMsg + '">WhatsApp</a>' : '') +
+        (st === 'new' ? '<button class="mini" data-contacted="1">Mark contacted</button>' : '') +
+        '<button class="mini" data-open="1">Details</button>' +
       '</div>' +
     '</div>';
   }).join('');
   Array.prototype.forEach.call(listEl.querySelectorAll('.qcard'), function(card){
-    card.addEventListener('click', function(){ openDetail(card.getAttribute('data-id')); });
+    var id = card.getAttribute('data-id');
+    Array.prototype.forEach.call(card.querySelectorAll('[data-open]'), function(el){
+      el.addEventListener('click', function(){ openDetail(id); });
+    });
+    var mc = card.querySelector('[data-contacted]');
+    if (mc) mc.addEventListener('click', function(e){
+      e.stopPropagation();
+      updateQuote(id, { status:'contacted' }, mc);
+    });
   });
 }
-
 document.getElementById('tabs').addEventListener('click', function(e){
   var t = e.target.closest('.tab');
   if (!t) return;
@@ -307,28 +602,59 @@ document.getElementById('search').addEventListener('input', function(e){
   renderList();
 });
 
-/* ---------- detail ---------- */
+function updateQuote(id, patch, btn){
+  var q = quotes.find(function(x){ return String(x.id) === String(id); });
+  if (!q) return;
+  patch.updated_at = new Date().toISOString();
+  if (DEMO){
+    Object.assign(q, patch); renderAll(); return;
+  }
+  if (btn){ btn.disabled = true; btn.textContent = 'Saving…'; }
+  sb.from('quotes').update(patch).eq('id', id).then(function(res){
+    if (btn){ btn.disabled = false; }
+    if (!res.error){ Object.assign(q, patch); renderAll(); }
+    else if (btn){ btn.textContent = 'Failed, retry'; }
+  });
+}
+
+/* ================= CSV export ================= */
+document.getElementById('csvBtn').addEventListener('click', function(){
+  var cols = ['created_at','name','phone','email','reg','year','make','model','engine','job','quote_amount','status','pref_date','notes','admin_notes'];
+  var lines = [cols.join(',')];
+  quotes.forEach(function(q){
+    lines.push(cols.map(function(c){
+      var v = q[c] == null ? '' : String(q[c]);
+      return '"' + v.replace(/"/g, '""') + '"';
+    }).join(','));
+  });
+  var blob = new Blob([lines.join('\n')], { type:'text/csv' });
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'wiganwetbelts-quotes-' + new Date().toISOString().slice(0, 10) + '.csv';
+  a.click();
+  URL.revokeObjectURL(a.href);
+});
+
+/* ================= detail ================= */
 var overlay = document.getElementById('overlay');
 overlay.addEventListener('click', function(e){ if (e.target === overlay) closeDetail(); });
-
+function kv(label, val, isHtml){
+  return '<div class="kv"><span>' + label + '</span><b>' + (isHtml ? (val || 'Not provided') : esc(val || 'Not provided')) + '</b></div>';
+}
 function openDetail(id){
-  current = quotes.find(function(q){ return String(q.id) === String(id); });
-  if (!current) return;
-  var q = current;
+  var q = quotes.find(function(x){ return String(x.id) === String(id); });
+  if (!q) return;
   var veh = [q.year, q.make, q.model, q.engine].filter(Boolean).join(' ');
   var sheet = document.getElementById('sheet');
   sheet.innerHTML =
     '<h2>' + esc(q.name || 'No name') + '</h2>' +
     '<div class="veh2">' + esc(veh || 'Vehicle not specified') + '</div>' +
     '<div class="grid2">' +
-      kv('Reg', q.reg) +
-      kv('Job', q.job) +
-      kv('Estimate', money(q.quote_amount) + ' ex VAT') +
-      kv('Preferred date', fmtDate(q.pref_date)) +
+      kv('Reg', q.reg) + kv('Job', q.job) +
+      kv('Estimate', money(q.quote_amount) + ' ex VAT') + kv('Preferred date', fmtDate(q.pref_date)) +
       kv('Phone', q.phone ? '<a href="tel:' + esc(q.phone) + '">' + esc(q.phone) + '</a>' : '', true) +
       kv('Email', q.email ? '<a href="mailto:' + esc(q.email) + '">' + esc(q.email) + '</a>' : '', true) +
-      kv('Preferred contact', q.contact) +
-      kv('Received', fmtDateTime(q.created_at)) +
+      kv('Preferred contact', q.contact) + kv('Received', fmtDateTime(q.created_at)) +
       kv('Customer message', q.notes) +
     '</div>' +
     '<label>Status</label>' +
@@ -343,7 +669,6 @@ function openDetail(id){
     '</div>' +
     '<div id="saveMsg"></div>';
   overlay.classList.add('open');
-
   var chosen = q.status || 'new';
   Array.prototype.forEach.call(sheet.querySelectorAll('[data-set]'), function(b){
     b.addEventListener('click', function(){
@@ -355,32 +680,25 @@ function openDetail(id){
   document.getElementById('closeBtn').addEventListener('click', closeDetail);
   document.getElementById('saveBtn').addEventListener('click', function(){
     var btn = this;
+    var msg = document.getElementById('saveMsg');
     btn.disabled = true; btn.textContent = 'Saving…';
-    sb.from('quotes').update({
-      status: chosen,
-      admin_notes: document.getElementById('adminNotes').value || null,
-      updated_at: new Date().toISOString()
-    }).eq('id', q.id).then(function(res){
+    var patch = { status: chosen, admin_notes: document.getElementById('adminNotes').value || null, updated_at: new Date().toISOString() };
+    if (DEMO){
+      Object.assign(q, patch); renderAll();
       btn.disabled = false; btn.textContent = 'Save changes';
-      var msg = document.getElementById('saveMsg');
-      if (res.error){
-        msg.style.color = 'var(--warn)';
-        msg.textContent = 'Save failed: ' + res.error.message;
-        return;
-      }
-      msg.style.color = 'var(--ok)';
-      msg.textContent = 'Saved.';
-      q.status = chosen;
-      q.admin_notes = document.getElementById('adminNotes').value || null;
-      renderStats(); renderList();
+      msg.style.color = 'var(--ok)'; msg.textContent = 'Saved (demo mode, nothing stored).';
+      return;
+    }
+    sb.from('quotes').update(patch).eq('id', q.id).then(function(res){
+      btn.disabled = false; btn.textContent = 'Save changes';
+      if (res.error){ msg.style.color = 'var(--warn)'; msg.textContent = 'Save failed: ' + res.error.message; return; }
+      msg.style.color = 'var(--ok)'; msg.textContent = 'Saved.';
+      Object.assign(q, patch);
+      renderAll();
     });
   });
-
-  function kv(label, val, isHtml){
-    return '<div class="kv"><span>' + label + '</span><b>' + (isHtml ? (val || 'Not provided') : esc(val || 'Not provided')) + '</b></div>';
-  }
 }
-function closeDetail(){ overlay.classList.remove('open'); current = null; }
+function closeDetail(){ overlay.classList.remove('open'); }
 })();
 </script>
 </body>
