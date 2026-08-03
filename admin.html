@@ -93,7 +93,7 @@ input:focus,textarea:focus{ border-color:var(--accent-line); }
 .pill{ display:inline-block; font-size:.68rem; font-weight:700; letter-spacing:.12em; text-transform:uppercase; border-radius:999px; padding:4px 11px; border:1px solid; justify-self:end; }
 .st-new{ color:var(--accent); border-color:var(--accent-line); background:var(--accent-dim); }
 .st-contacted{ color:var(--amber); border-color:rgba(251,191,36,.4); background:rgba(251,191,36,.1); }
-.st-booked{ color:var(--purple); border-color:rgba(192,132,252,.4); background:rgba(192,132,252,.1); }
+.st-converted{ color:var(--purple); border-color:rgba(192,132,252,.4); background:rgba(192,132,252,.1); }
 .st-completed{ color:var(--ok); border-color:rgba(74,222,128,.4); background:rgba(74,222,128,.08); }
 .st-declined{ color:var(--muted); border-color:var(--line-2); background:var(--bg-2); }
 .qcard-actions{ display:flex; gap:8px; margin-top:11px; flex-wrap:wrap; }
@@ -156,6 +156,7 @@ input:focus,textarea:focus{ border-color:var(--accent-line); }
         <text x="500" y="125" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-weight="700" font-size="62" letter-spacing="6" fill="#000">WETBELTS</text>
       </svg>
       <div class="topbar-actions">
+        <span id="freshStamp" style="font-size:.72rem; color:var(--muted);">Live</span>
         <button class="btn btn-ghost" id="soundBtn" title="Alert sound for unreplied quotes">Sound on</button>
         <select id="soundEvery" title="How often the alert repeats">
           <option value="2">Every 2s</option>
@@ -180,14 +181,14 @@ input:focus,textarea:focus{ border-color:var(--accent-line); }
     <div class="stats">
       <div class="stat"><b id="stNew" class="red">0</b><span>Waiting for reply</span><small id="stOldest"></small></div>
       <div class="stat"><b id="stWeek">0</b><span>Quotes this week</span><small id="stWeekPrev"></small></div>
-      <div class="stat"><b id="stBooked" class="amber">0</b><span>Booked in</span><small id="stBookedVal"></small></div>
+      <div class="stat"><b id="stBooked" class="amber">0</b><span>Converted</span><small id="stBookedVal"></small></div>
       <div class="stat"><b id="stPipe">£0</b><span>Pipeline value</span><small>new + contacted, ex VAT</small></div>
     </div>
 
     <div class="section-label">Money</div>
     <div class="stats">
       <div class="stat"><b id="stMonthBooked" class="green">£0</b><span>Won this month</span><small id="stMonthPrev"></small></div>
-      <div class="stat"><b id="stCompletedAll" class="green">£0</b><span>Completed all time</span><small id="stCompletedN"></small></div>
+      <div class="stat"><b id="stProfit" class="green">£0</b><span>Profit this month</span><small id="stProfitSub">enter job price and parts on converted quotes</small></div>
       <div class="stat"><b id="stConv">0%</b><span>Conversion rate</span><small>booked + completed of decided</small></div>
       <div class="stat"><b id="stAvg">£0</b><span>Average quote</span><small>ex VAT</small></div>
     </div>
@@ -207,7 +208,7 @@ input:focus,textarea:focus{ border-color:var(--accent-line); }
         <button class="tab active" data-st="">All</button>
         <button class="tab" data-st="new">New</button>
         <button class="tab" data-st="contacted">Contacted</button>
-        <button class="tab" data-st="booked">Booked</button>
+        <button class="tab" data-st="converted">Converted</button>
         <button class="tab" data-st="completed">Completed</button>
         <button class="tab" data-st="declined">Declined</button>
       </div>
@@ -226,10 +227,9 @@ input:focus,textarea:focus{ border-color:var(--accent-line); }
 'use strict';
 var SB_URL = 'https://ukwakszeslxkxcyosigp.supabase.co';
 var SB_KEY = 'sb_publishable_QuwBESO6L6SwTK7a2kB6fw_bXDQElMo';
-var DEMO = /[?&]demo=1/.test(location.search);
-var sb = DEMO ? null : window.supabase.createClient(SB_URL, SB_KEY);
+var sb = window.supabase.createClient(SB_URL, SB_KEY);
 
-var STATUSES = ['new','contacted','booked','completed','declined'];
+var STATUSES = ['new','contacted','converted','completed','declined'];
 var loginView = document.getElementById('loginView');
 var appView = document.getElementById('appView');
 var listEl = document.getElementById('list');
@@ -286,18 +286,25 @@ function ensureCtx(){
 }
 document.addEventListener('click', function(){ ensureCtx(); }, { once:true });
 function chime(){
+  /* Dual tone car horn, two short blasts. */
   var ctx = ensureCtx();
   if (!ctx || ctx.state !== 'running') return;
-  [[880, 0], [1174.7, 0.14]].forEach(function(nf){
-    var o = ctx.createOscillator();
-    var g = ctx.createGain();
-    o.type = 'sine'; o.frequency.value = nf[0];
-    var t = ctx.currentTime + nf[1];
-    g.gain.setValueAtTime(0.0001, t);
-    g.gain.exponentialRampToValueAtTime(0.18, t + 0.02);
-    g.gain.exponentialRampToValueAtTime(0.0001, t + 0.5);
-    o.connect(g); g.connect(ctx.destination);
-    o.start(t); o.stop(t + 0.55);
+  var lp = ctx.createBiquadFilter();
+  lp.type = 'lowpass'; lp.frequency.value = 1500; lp.Q.value = 0.8;
+  lp.connect(ctx.destination);
+  [0, 0.34].forEach(function(start){
+    [420, 505].forEach(function(freq){
+      var o = ctx.createOscillator();
+      var g = ctx.createGain();
+      o.type = 'sawtooth'; o.frequency.value = freq;
+      var t = ctx.currentTime + start;
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.exponentialRampToValueAtTime(0.11, t + 0.025);
+      g.gain.setValueAtTime(0.11, t + 0.2);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + 0.28);
+      o.connect(g); g.connect(lp);
+      o.start(t); o.stop(t + 0.3);
+    });
   });
 }
 function newCount(){ return quotes.filter(function(q){ return real(q) && (q.status || 'new') === 'new'; }).length; }
@@ -320,15 +327,11 @@ setInterval(function(){
 function showApp(){ loginView.style.display = 'none'; appView.style.display = 'block'; loadQuotes(); startRealtime(); restartSoundLoop(); }
 function showLogin(){ loginView.style.display = 'flex'; appView.style.display = 'none'; }
 
-if (DEMO){
-  showApp();
-} else {
-  sb.auth.getSession().then(function(res){
-    if (res.data && res.data.session) showApp(); else showLogin();
-  });
-  document.getElementById('loginBtn').addEventListener('click', doLogin);
-  document.getElementById('password').addEventListener('keydown', function(e){ if (e.key === 'Enter') doLogin(); });
-}
+sb.auth.getSession().then(function(res){
+  if (res.data && res.data.session) showApp(); else showLogin();
+});
+document.getElementById('loginBtn').addEventListener('click', doLogin);
+document.getElementById('password').addEventListener('keydown', function(e){ if (e.key === 'Enter') doLogin(); });
 function doLogin(){
   var btn = document.getElementById('loginBtn');
   var err = document.getElementById('loginErr');
@@ -345,41 +348,11 @@ function doLogin(){
   });
 }
 document.getElementById('logoutBtn').addEventListener('click', function(){
-  if (DEMO){ location.href = 'admin.html'; return; }
   sb.auth.signOut().then(showLogin);
 });
 
 /* ================= data ================= */
-function demoQuotes(){
-  var now = Date.now(), H = 3600000, D = 24 * H;
-  function q(daysAgo, name, reg, yr, mk, md, en, job, amt, st){
-    return { id: Math.random().toString(36).slice(2), created_at: new Date(now - daysAgo * D).toISOString(),
-      name: name, phone: '07700900123', email: 'demo@example.com', contact: 'Phone Call', reg: reg, year: yr,
-      make: mk, model: md, engine: en, job: job, quote_amount: amt, status: st, source: 'website',
-      pref_date: new Date(now + 10 * D).toISOString().slice(0, 10), notes: '', admin_notes: '' };
-  }
-  return [
-    q(0.1, 'Sophie Turner', 'WN18XYZ', 2019, 'Ford', 'Fiesta', '1.0 EcoBoost', 'Timing Belt / Wet Belt Replacement', 640, 'new'),
-    q(1.4, 'Liam Ward', 'MA66KLM', 2016, 'Peugeot', '208', '1.2 PureTech', 'Timing Belt / Wet Belt Replacement', 590, 'new'),
-    q(2, 'Dan Rigby', 'DG21ABC', 2021, 'Vauxhall', 'Corsa', '1.2 Turbo PureTech', 'Timing Belt / Wet Belt Replacement', 610, 'contacted'),
-    q(5, 'Amy Clarke', 'YK14DEF', 2014, 'BMW', '320d', '2.0d N47', 'Timing Chain Replacement', 1150, 'booked'),
-    q(9, 'Pete Molloy', 'PL68GHJ', 2018, 'Ford', 'Transit Custom FWD', '2.0 EcoBlue', 'Timing Belt / Wet Belt Replacement', 940, 'booked'),
-    q(12, 'Gemma Lowe', 'GL65MNP', 2015, 'Citroen', 'C3', '1.2 PureTech', 'Timing Belt / Wet Belt Replacement', 580, 'completed'),
-    q(19, 'Ryan Beck', 'RB19QRS', 2019, 'Volkswagen', 'Golf', '1.5 TSI Evo', 'Timing Belt / Wet Belt Replacement', 720, 'completed'),
-    q(24, 'Carl Hughes', 'CH11TUV', 2011, 'Audi', 'A3', '1.8 TFSI', 'Timing Chain Replacement', 1240, 'completed'),
-    q(33, 'Nadia Iqbal', 'NI67WXY', 2017, 'Ford', 'Focus', '1.0 EcoBoost', 'Timing Belt / Wet Belt Replacement', 650, 'completed'),
-    q(41, 'Tom Barnes', 'TB15ZAB', 2015, 'Mercedes', 'A180', '1.5d', 'Timing Chain Replacement', 1080, 'declined'),
-    q(48, 'Jess Whittle', 'JW20CDE', 2020, 'Toyota', 'Aygo', '1.0 VVT-i', 'Diagnosis / Inspection', 95, 'completed'),
-    q(55, 'Mark Ellison', 'ME09FGH', 2009, 'BMW', '118d', '2.0d', 'Timing Chain Replacement', 990, 'completed')
-  ];
-}
-
 function loadQuotes(){
-  if (DEMO){
-    quotes = demoQuotes();
-    renderAll();
-    return;
-  }
   sb.from('quotes').select('*').order('created_at', { ascending:false }).limit(1000)
     .then(function(res){
       if (res.error){
@@ -387,16 +360,19 @@ function loadQuotes(){
         return;
       }
       quotes = res.data || [];
+      quotes.forEach(function(q){ if (q.status === 'booked') q.status = 'converted'; });
+      var st = document.getElementById('freshStamp');
+      if (st) st.textContent = 'Live · updated ' + new Date().toLocaleTimeString('en-GB');
       renderAll();
     });
 }
 document.getElementById('refreshBtn').addEventListener('click', loadQuotes);
 setInterval(function(){
   if (appView.style.display === 'block' && !document.getElementById('overlay').classList.contains('open')) loadQuotes();
-}, 60000);
+}, 30000);
 
 function startRealtime(){
-  if (DEMO || !sb) return;
+  if (!sb) return;
   try {
     sb.channel('quotes-live')
       .on('postgres_changes', { event:'INSERT', schema:'public', table:'quotes' }, function(){
@@ -437,18 +413,24 @@ function renderStats(){
   var news = rq.filter(function(q){ return (q.status || 'new') === 'new'; });
   var weekN = rq.filter(function(q){ return (now - new Date(q.created_at)) < wkMs; }).length;
   var prevWeekN = rq.filter(function(q){ var a = now - new Date(q.created_at); return a >= wkMs && a < 2 * wkMs; }).length;
-  var booked = rq.filter(function(q){ return q.status === 'booked'; });
+  var booked = rq.filter(function(q){ return q.status === 'converted'; });
   var pipeline = rq.filter(function(q){ return (q.status || 'new') === 'new' || q.status === 'contacted'; })
     .reduce(function(s, q){ return s + (Number(q.quote_amount) || 0); }, 0);
 
-  var won = function(q){ return q.status === 'booked' || q.status === 'completed'; };
+  var won = function(q){ return q.status === 'converted' || q.status === 'completed'; };
+  function wonValue(q){ return Number(q.final_price) > 0 ? Number(q.final_price) : (Number(q.quote_amount) || 0); }
   var monthWon = rq.filter(function(q){ return won(q) && new Date(q.created_at) >= monthStart; })
-    .reduce(function(s, q){ return s + (Number(q.quote_amount) || 0); }, 0);
+    .reduce(function(s, q){ return s + wonValue(q); }, 0);
   var prevMonthWon = rq.filter(function(q){ var d = new Date(q.created_at); return won(q) && d >= prevMonthStart && d < monthStart; })
-    .reduce(function(s, q){ return s + (Number(q.quote_amount) || 0); }, 0);
-  var completed = rq.filter(function(q){ return q.status === 'completed'; });
-  var completedVal = completed.reduce(function(s, q){ return s + (Number(q.quote_amount) || 0); }, 0);
-  var decided = rq.filter(function(q){ return q.status === 'booked' || q.status === 'completed' || q.status === 'declined'; });
+    .reduce(function(s, q){ return s + wonValue(q); }, 0);
+  var withProfit = rq.filter(function(q){ return won(q) && Number(q.final_price) > 0 && q.parts_cost != null; });
+  var profitOf = function(q){ return Number(q.final_price) - (Number(q.parts_cost) || 0); };
+  var monthProfitRows = withProfit.filter(function(q){ return new Date(q.created_at) >= monthStart; });
+  var monthProfit = monthProfitRows.reduce(function(s, q){ return s + profitOf(q); }, 0);
+  var monthProfitRev = monthProfitRows.reduce(function(s, q){ return s + Number(q.final_price); }, 0);
+  var allProfit = withProfit.reduce(function(s, q){ return s + profitOf(q); }, 0);
+
+  var decided = rq.filter(function(q){ return q.status === 'converted' || q.status === 'completed' || q.status === 'declined'; });
   var conv = decided.length ? Math.round(100 * decided.filter(won).length / decided.length) : 0;
   var amounts = rq.filter(function(q){ return Number(q.quote_amount) > 0; });
   var avg = amounts.length ? amounts.reduce(function(s, q){ return s + Number(q.quote_amount); }, 0) / amounts.length : 0;
@@ -464,8 +446,10 @@ function renderStats(){
   document.getElementById('stPipe').textContent = money(pipeline);
   document.getElementById('stMonthBooked').textContent = money(monthWon);
   document.getElementById('stMonthPrev').textContent = money(prevMonthWon) + ' last month';
-  document.getElementById('stCompletedAll').textContent = money(completedVal);
-  document.getElementById('stCompletedN').textContent = completed.length + ' jobs';
+  document.getElementById('stProfit').textContent = money(monthProfit);
+  document.getElementById('stProfitSub').textContent = monthProfitRows.length
+    ? (Math.round(100 * monthProfit / Math.max(1, monthProfitRev)) + '% margin · ' + money(allProfit) + ' all time')
+    : 'enter job price and parts on converted quotes';
   document.getElementById('stConv').textContent = conv + '%';
   document.getElementById('stAvg').textContent = money(avg);
 }
@@ -526,9 +510,13 @@ function renderCharts(){
 
   var jobs = {};
   rq.forEach(function(q){
-    if (!q.job || !(Number(q.quote_amount) > 0)) return;
-    if (q.status !== 'booked' && q.status !== 'completed') return;
-    jobs[q.job] = (jobs[q.job] || 0) + Number(q.quote_amount);
+    if (!q.job) return;
+    if (q.status !== 'converted' && q.status !== 'completed') return;
+    var v = (Number(q.final_price) > 0 && q.parts_cost != null)
+      ? (Number(q.final_price) - (Number(q.parts_cost) || 0))
+      : (Number(q.quote_amount) || 0);
+    if (v <= 0) return;
+    jobs[q.job] = (jobs[q.job] || 0) + v;
   });
   var top = Object.keys(jobs).map(function(k){ return [k, jobs[k]]; }).sort(function(a, b){ return b[1] - a[1]; }).slice(0, 4);
   var max = top.length ? top[0][1] : 1;
@@ -573,6 +561,7 @@ function renderList(){
         (q.phone ? '<a class="mini" href="tel:' + esc(q.phone) + '">Call</a>' : '') +
         (wa ? '<a class="mini" target="_blank" rel="noopener" href="https://wa.me/' + esc(wa) + '?text=' + waMsg + '">WhatsApp</a>' : '') +
         (st === 'new' ? '<button class="mini" data-contacted="1">Mark contacted</button>' : '') +
+        (st === 'contacted' ? '<button class="mini" data-open="1">Mark converted</button>' : '') +
         '<button class="mini" data-open="1">Details</button>' +
       '</div>' +
     '</div>';
@@ -606,9 +595,6 @@ function updateQuote(id, patch, btn){
   var q = quotes.find(function(x){ return String(x.id) === String(id); });
   if (!q) return;
   patch.updated_at = new Date().toISOString();
-  if (DEMO){
-    Object.assign(q, patch); renderAll(); return;
-  }
   if (btn){ btn.disabled = true; btn.textContent = 'Saving…'; }
   sb.from('quotes').update(patch).eq('id', id).then(function(res){
     if (btn){ btn.disabled = false; }
@@ -661,6 +647,12 @@ function openDetail(id){
     '<div class="statusRow">' + STATUSES.map(function(s){
       return '<button class="tab' + ((q.status || 'new') === s ? ' active' : '') + '" data-set="' + s + '">' + s + '</button>';
     }).join('') + '</div>' +
+    '<label>Money, fill in when converted or completed</label>' +
+    '<div class="grid2" style="margin-bottom:6px;">' +
+      '<div><span style="display:block; font-size:.68rem; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); margin-bottom:4px;">Final job price, ex VAT £</span><input id="finPrice" type="number" min="0" step="1" value="' + esc(q.final_price != null ? q.final_price : '') + '" placeholder="e.g. ' + esc(q.quote_amount || 600) + '" /></div>' +
+      '<div><span style="display:block; font-size:.68rem; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); margin-bottom:4px;">Parts cost £</span><input id="finParts" type="number" min="0" step="1" value="' + esc(q.parts_cost != null ? q.parts_cost : '') + '" placeholder="what the parts cost you" /></div>' +
+    '</div>' +
+    '<div id="profitLine" style="font-size:.85rem; color:var(--ok); min-height:1.3em; margin-bottom:8px;"></div>' +
     '<label for="adminNotes">Workshop notes</label>' +
     '<textarea id="adminNotes" placeholder="Parts ordered, dates offered, anything the team should know.">' + esc(q.admin_notes || '') + '</textarea>' +
     '<div class="sheet-actions">' +
@@ -677,18 +669,30 @@ function openDetail(id){
       b.classList.add('active');
     });
   });
+  function refreshProfitLine(){
+    var fp = parseFloat(document.getElementById('finPrice').value);
+    var pc = parseFloat(document.getElementById('finParts').value);
+    var el = document.getElementById('profitLine');
+    if (fp > 0 && !isNaN(pc)){
+      var pr = fp - pc;
+      el.style.color = pr >= 0 ? 'var(--ok)' : 'var(--warn)';
+      el.textContent = 'Profit on this job: ' + money(pr) + ' (' + Math.round(100 * pr / fp) + '% margin)';
+    } else { el.textContent = ''; }
+  }
+  document.getElementById('finPrice').addEventListener('input', refreshProfitLine);
+  document.getElementById('finParts').addEventListener('input', refreshProfitLine);
+  refreshProfitLine();
   document.getElementById('closeBtn').addEventListener('click', closeDetail);
   document.getElementById('saveBtn').addEventListener('click', function(){
     var btn = this;
     var msg = document.getElementById('saveMsg');
     btn.disabled = true; btn.textContent = 'Saving…';
-    var patch = { status: chosen, admin_notes: document.getElementById('adminNotes').value || null, updated_at: new Date().toISOString() };
-    if (DEMO){
-      Object.assign(q, patch); renderAll();
-      btn.disabled = false; btn.textContent = 'Save changes';
-      msg.style.color = 'var(--ok)'; msg.textContent = 'Saved (demo mode, nothing stored).';
-      return;
-    }
+    var fpv = document.getElementById('finPrice').value;
+    var pcv = document.getElementById('finParts').value;
+    var patch = { status: chosen, admin_notes: document.getElementById('adminNotes').value || null,
+      final_price: fpv === '' ? null : parseFloat(fpv),
+      parts_cost: pcv === '' ? null : parseFloat(pcv),
+      updated_at: new Date().toISOString() };
     sb.from('quotes').update(patch).eq('id', q.id).then(function(res){
       btn.disabled = false; btn.textContent = 'Save changes';
       if (res.error){ msg.style.color = 'var(--warn)'; msg.textContent = 'Save failed: ' + res.error.message; return; }
