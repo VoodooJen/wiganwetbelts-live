@@ -80,5 +80,35 @@ var CONTESTED_ENGINES = [
   }
 ];
 
+
+/* ---- model description matching ------------------------------------------
+   When the registration gives no engine code, the manufacturer's own model
+   description usually still names the engine family (for example
+   "TRANSIT CUSTOM 300LIMITD EBLUE"). Matching that, together with the engine
+   size, identifies the family without guesswork. Verdicts from here are
+   labelled "likely" rather than "confirmed", because they come from the model
+   description rather than the engine code itself. */
+var MODEL_TEXT_FAMILIES = [
+  { test:/ECO ?BLUE|EBLUE/i, ccFrom:1900, ccTo:2050, kind:'wet', engineName:'2.0 EcoBlue',
+    note:'The Ford 2.0 EcoBlue runs two belts inside the engine in oil: the camshaft belt and a separate oil pump belt. Both are replaced together.',
+    interval:'Ford reduced this to 6 years or 100,000 miles, from 10 years or 150,000, because fuel entering the oil during DPF regeneration breaks the belt down early.',
+    source:'Dayco technical bulletin, Fleet News (Ford interval revision)' },
+
+  { test:/ECO ?BOOST/i, ccFrom:950, ccTo:1050, yearTo:2018, kind:'wet', engineName:'1.0 EcoBoost',
+    note:'The 1.0 EcoBoost of this era runs its timing belt inside the engine, in oil. As it degrades it sheds material that blocks the oil pickup, which is what kills these engines.',
+    interval:'Originally 10 years or 150,000 miles. We and most specialists advise inspecting or replacing considerably earlier.',
+    source:'NTN-SNR technical bulletin, Ford parts catalogues' },
+
+  { test:/PURE ?TECH/i, ccFrom:1150, ccTo:1250, yearTo:2022, kind:'wet', engineName:'1.2 PureTech',
+    note:'The 1.2 PureTech runs its belt in oil. Stellantis has acknowledged premature wear, where belt material blocks the oil pickup and can seize the engine.',
+    interval:'Now 6 years or 100,000 km, shortened from 10 years or 175,000 km.',
+    source:'Stellantis service guidance, NTN-SNR technical bulletin' },
+
+  { test:/BLUE ?HDI/i, ccFrom:1450, ccTo:1560, kind:'wetpump', engineName:'1.5 BlueHDi',
+    note:'This engine uses both: a wet belt driving the crankshaft end and water pump, plus an internal chain between the camshafts. Earlier chains are a known weak point, so both want checking.',
+    interval:'Belt on condition and interval. The earlier 7mm chain was superseded by an 8mm design in 2023.',
+    source:'Sumax DV5 technical guide, PSA recall notices' }
+];
+
 var TIMING_SOURCES_NOTE =
   'Verdicts are based on the engine code from your registration where available, cross checked against manufacturer bulletins and parts catalogue data. Where the evidence is not clear cut we say so rather than guess.';

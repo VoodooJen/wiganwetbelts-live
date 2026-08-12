@@ -47,6 +47,25 @@ function byEngineCode(code, year){
   };
 }
 
+function byModelText(text, cc, year){
+  if (!text || typeof MODEL_TEXT_FAMILIES === 'undefined') return null;
+  for (var i = 0; i < MODEL_TEXT_FAMILIES.length; i++){
+    var f = MODEL_TEXT_FAMILIES[i];
+    if (!f.test.test(text)) continue;
+    if (cc && f.ccFrom && (Number(cc) < f.ccFrom || Number(cc) > f.ccTo)) continue;
+    if (f.yearTo && year && Number(year) > f.yearTo) continue;
+    return {
+      confidence: 'likely',
+      kind: f.kind,
+      engineName: f.engineName,
+      note: f.note + ' Identified from the model description on your registration rather than an engine code, so we would confirm it from the VIN before any work.',
+      interval: f.interval,
+      source: f.source
+    };
+  }
+  return null;
+}
+
 function contested(text){
   for (var i = 0; i < CONTESTED_ENGINES.length; i++){
     if (CONTESTED_ENGINES[i].match.test(text || '')) return CONTESTED_ENGINES[i];
@@ -151,7 +170,11 @@ function check(){
         return;
       }
 
-      /* 3. narrow against our own audited data */
+      /* 3. the manufacturer's model description names the engine family */
+      var byText = byModelText(haystack, j.engineSize, j.year);
+      if (byText){ render(byText, vehicle); return; }
+
+      /* 4. narrow against our own audited data */
       var cands = candidateEngines(j.make, j.engineSize);
       if (cands.length === 1){
         var only = cands[0];
