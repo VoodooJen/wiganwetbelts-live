@@ -3,7 +3,7 @@
 
    Keeps the shared secret server side and asks Torque, which owns
    the real workshop calendar. Locked to this site's own pages.
-   Env: TORQUE_URL, PUBLIC_BOOKING_SECRET
+   Env: TORQUE_URL, WWB_BOOKING_KEY
    ============================================================ */
 const ALLOWED = ['https://wiganwetbelts.co.uk', 'https://www.wiganwetbelts.co.uk'];
 
@@ -23,7 +23,7 @@ export default async function handler(req, res) {
   if (!allowed(req)) return res.status(403).json({ ok: false });
 
   const base = process.env.TORQUE_URL;
-  const key = process.env.PUBLIC_BOOKING_SECRET;
+  const key = process.env.WWB_BOOKING_KEY;
   if (!base || !key) {
     // Not wired up yet. The form falls back to a plain date box.
     return res.status(200).json({ ok: false, reason: 'not_configured', slots: [] });

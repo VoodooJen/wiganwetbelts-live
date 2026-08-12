@@ -3,7 +3,7 @@
 
    Creates (in Torque) the customer, vehicle, a draft quote and a
    PROVISIONAL booking the workshop accepts. Secret stays server side.
-   Env: TORQUE_URL, PUBLIC_BOOKING_SECRET
+   Env: TORQUE_URL, WWB_BOOKING_KEY
    ============================================================ */
 const ALLOWED = ['https://wiganwetbelts.co.uk', 'https://www.wiganwetbelts.co.uk'];
 
@@ -19,7 +19,7 @@ export default async function handler(req, res) {
   if (!origin && r0 && !ALLOWED.some((a) => r0.indexOf(a) === 0)) return res.status(403).json({ ok: false });
 
   const base = process.env.TORQUE_URL;
-  const key = process.env.PUBLIC_BOOKING_SECRET;
+  const key = process.env.WWB_BOOKING_KEY;
   if (!base || !key) return res.status(200).json({ ok: false, reason: 'not_configured' });
 
   try {
