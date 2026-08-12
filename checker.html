@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, viewport-fit=cover" />
+<meta name="description" content="Free instant check: does your car have a wet timing belt, a dry belt or a timing chain? Enter your registration and find out in seconds, from the wet belt specialists in Wigan." />
+<meta name="theme-color" content="#07090c" />
+<title>Wet Belt Checker | Is my engine a wet belt? | Wigan Wetbelts</title>
+<link rel="canonical" href="https://wiganwetbelts.co.uk/checker.html" />
+<link rel="icon" type="image/x-icon" href="favicon.ico" />
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png" />
+<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png" />
+<meta property="og:title" content="Is my engine a wet belt? Free instant check" />
+<meta property="og:description" content="Enter your registration and find out in seconds whether your engine has a wet timing belt, a dry belt or a chain, and what it means for you." />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://wiganwetbelts.co.uk/checker.html" />
+<meta property="og:image" content="https://wiganwetbelts.co.uk/images/og-card.jpg" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:image" content="https://wiganwetbelts.co.uk/images/og-card.jpg" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css?v=7">
+<script>(function(){try{var t=localStorage.getItem('wwb.theme');if(!t&&window.matchMedia&&matchMedia('(prefers-color-scheme: light)').matches)t='light';if(t==='light')document.documentElement.setAttribute('data-theme','light');}catch(e){}})();</script>
+<style>
+  .chk-wrap{ max-width:760px; margin:0 auto; padding:132px 20px 80px; }
+  .chk-head{ text-align:center; margin-bottom:30px; }
+  .chk-head h1{ font-size:clamp(1.9rem,5vw,2.8rem); line-height:1.1; margin:14px 0 12px; }
+  .chk-head p{ color:var(--text-2); font-size:1.02rem; max-width:560px; margin:0 auto; }
+  .chk-card{ background:var(--surface); border:1px solid var(--line-2); border-radius:var(--radius); padding:26px 24px; }
+  .chk-row{ display:flex; gap:12px; align-items:stretch; flex-wrap:wrap; }
+  .chk-row .reg-plate{ flex:1 1 240px; }
+  .chk-row .btn{ flex:0 0 auto; }
+  #chkStatus{ display:block; margin-top:12px; font-size:.88rem; color:var(--text-2); min-height:1.2em; }
+  #chkStatus.err{ color:var(--warn); }
+
+  #verdict{ display:none; margin-top:22px; }
+  #verdict.show{ display:block; animation:vIn .35s ease; }
+  @keyframes vIn{ from{ opacity:0; transform:translateY(8px);} to{ opacity:1; transform:none; } }
+  .v-card{ border-radius:var(--radius); padding:26px 24px; border:1px solid; }
+  .v-wet{ background:rgba(248,113,113,.08); border-color:rgba(248,113,113,.42); }
+  .v-dry{ background:var(--accent-dim); border-color:var(--accent-line); }
+  .v-chain{ background:rgba(74,222,128,.07); border-color:rgba(74,222,128,.36); }
+  .v-warn{ background:rgba(251,191,36,.08); border-color:rgba(251,191,36,.42); }
+  .v-kind{ font-family:var(--font-d); font-weight:700; font-size:.74rem; letter-spacing:.18em; text-transform:uppercase; margin-bottom:8px; }
+  .v-wet .v-kind{ color:#f87171; } .v-dry .v-kind{ color:var(--accent); }
+  .v-chain .v-kind{ color:var(--ok,#4ade80); } .v-warn .v-kind{ color:#fbbf24; }
+  .v-card h2{ font-size:1.3rem; margin-bottom:10px; }
+  .v-card p{ color:var(--text-2); font-size:.95rem; margin-bottom:10px; }
+  .v-vehicle{ display:flex; flex-wrap:wrap; gap:8px; margin-bottom:16px; }
+  .v-chip{ font-size:.78rem; background:var(--bg-2); border:1px solid var(--line-2); border-radius:999px; padding:5px 12px; color:var(--text-2); }
+  .v-conf{ display:inline-block; font-size:.68rem; font-weight:700; letter-spacing:.14em; text-transform:uppercase; border-radius:999px; padding:4px 11px; border:1px solid var(--line-2); color:var(--muted); margin-bottom:14px; }
+  .v-conf.definitive{ color:var(--ok,#4ade80); border-color:rgba(74,222,128,.4); }
+  .v-conf.likely{ color:#fbbf24; border-color:rgba(251,191,36,.4); }
+  .v-interval{ margin-top:14px; padding-top:14px; border-top:1px solid var(--line); font-size:.88rem; color:var(--text-2); }
+  .v-interval b{ display:block; color:var(--text); font-size:.7rem; letter-spacing:.14em; text-transform:uppercase; margin-bottom:4px; }
+  .v-actions{ display:flex; gap:10px; flex-wrap:wrap; margin-top:20px; }
+  .v-src{ margin-top:14px; font-size:.76rem; color:var(--muted); }
+  .chk-faq{ margin-top:46px; }
+  .chk-faq h3{ font-size:1.05rem; margin:24px 0 8px; }
+  .chk-faq p{ color:var(--text-2); font-size:.93rem; }
+</style>
+</head>
+<body>
+<nav id="nav" class="scrolled" aria-label="Main navigation">
+  <div class="wrap nav-inner">
+    <a href="index.html" class="brand" aria-label="Wigan Wetbelts home">
+      <svg class="brand-logo" viewBox="0 0 720 190" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Wigan Wetbelts">
+        <rect x="0" y="0" width="280" height="190" fill="#000000"/><rect x="280" y="0" width="440" height="190" fill="#ffffff"/>
+        <rect x="3" y="3" width="714" height="184" fill="none" stroke="#ffffff" stroke-width="6"/>
+        <text x="140" y="125" text-anchor="middle" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="700" font-size="62" letter-spacing="6" fill="#ffffff">WIGAN</text>
+        <text x="500" y="125" text-anchor="middle" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-weight="700" font-size="62" letter-spacing="6" fill="#000000">WETBELTS</text>
+      </svg>
+    </a>
+    <div class="nav-cta">
+      <a class="btn btn-ghost" href="index.html">Back to site</a>
+      <a class="btn btn-primary btn-call" href="index.html#quote">Get a Quote</a>
+    </div>
+  </div>
+</nav>
+
+<main class="chk-wrap">
+  <div class="chk-head">
+    <span class="kicker">Free instant check</span>
+    <h1>Does your engine have a <em style="font-style:normal;color:var(--accent)">wet belt?</em></h1>
+    <p>Enter your registration. We will tell you straight away whether your engine runs a wet timing belt, a conventional dry belt, or a chain, and what that means for you. No email needed.</p>
+  </div>
+
+  <div class="chk-card">
+    <div class="chk-row">
+      <div class="reg-plate">
+        <span class="reg-band" aria-hidden="true">UK</span>
+        <input id="chkReg" type="text" autocomplete="off" placeholder="WN66 ABC" maxlength="10" aria-label="Vehicle registration" />
+      </div>
+      <button type="button" class="btn btn-primary" id="chkBtn">Check my engine</button>
+    </div>
+    <small id="chkStatus">Your reg is used once to identify the engine. We do not store it and we do not need your details.</small>
+
+    <div id="verdict" aria-live="polite"></div>
+  </div>
+
+  <section class="chk-faq">
+    <h3>What is a wet timing belt?</h3>
+    <p>A wet belt runs inside the engine, submerged in oil, rather than behind a cover on the outside. Manufacturers moved to them for efficiency and quietness. The problem is that oil and modern fuels break the rubber down, and as it degrades it sheds material into the sump that blocks the oil pickup screen. Once oil flow is choked, bearing damage follows, and by the time a warning light appears the damage is usually done.</p>
+
+    <h3>Why do intervals keep getting shortened?</h3>
+    <p>Because the original ones were optimistic. Ford cut the 2.0 EcoBlue belt from 10 years or 150,000 miles to 6 years or 100,000 miles, and Stellantis shortened the 1.2 PureTech to 6 years or 100,000 km. Fuel getting into the oil during DPF regeneration accelerates the breakdown, which was not fully accounted for at launch.</p>
+
+    <h3>How accurate is this checker?</h3>
+    <p>Where your registration gives us the engine code, we can identify the exact engine and the answer is definitive. Where it does not, we work from the make, model, engine size and year, and we say the answer is likely rather than certain. If an engine came in more than one timing setup, or the published sources disagree, we tell you that instead of guessing. We would rather ask you one more question than give you a confident wrong answer about your engine.</p>
+
+    <h3>What should I do if I have a wet belt?</h3>
+    <p>Do not panic, but do not ignore it either. Get the belt condition and the oil pickup inspected, and plan the replacement rather than waiting for a symptom. If the engine has been serviced late, or has done a lot of short journeys, treat it as more urgent. We are happy to talk it through on the phone with no obligation.</p>
+  </section>
+</main>
+
+<footer style="border-top:1px solid var(--line); padding:26px 0; text-align:center;">
+  <p style="color:var(--muted); font-size:.8rem;">© 2026 Wigan Wetbelts · 01942 800252 · <a href="index.html" style="color:var(--text-2);">Home</a> · <a href="privacy.html" style="color:var(--text-2);">Privacy</a></p>
+</footer>
+
+<script src="data.js?v=3"></script>
+<script src="timing-data.js?v=1"></script>
+<script src="checker.js?v=1"></script>
+</body>
+</html>
