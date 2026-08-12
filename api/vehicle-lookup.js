@@ -24,13 +24,37 @@ export default async function handler(req, res) {
   const vrm = String(req.query.vrm || '').toUpperCase().replace(/\s+/g, '');
   if (!/^[A-Z0-9]{2,8}$/.test(vrm)) return res.status(400).json({ ok: false, error: 'Enter a valid registration.' });
 
+  res.setHeader('Cache-Control', 's-maxage=86400, stale-while-revalidate=604800');
+
+  // 1. Torque first. It returns the engine code, which is what lets the
+  //    checker be definitive rather than working from make and model.
   try {
     const r = await fetch(base.replace(/\/+$/, '') + '/api/public/vehicle-lookup?vrm=' + encodeURIComponent(vrm), {
       headers: { 'x-booking-key': key },
     });
     const body = await r.json();
-    res.setHeader('Cache-Control', 's-maxage=86400, stale-while-revalidate=604800');
-    return res.status(r.status).json(body);
+    if (body && body.ok && (body.make || body.model)) return res.status(200).json(body);
+  } catch (e) { /* fall through */ }
+
+  // 2. Fall back to the same provider the quote form uses. No engine code,
+  //    so the checker will say "likely" rather than "confirmed", which is
+  //    exactly what we want it to say when it cannot be certain.
+  try {
+    const r2 = await fetch('https://www.voodoofiles.co.uk/api/wwb-reg-lookup?vrm=' + encodeURIComponent(vrm));
+    const b2 = await r2.json();
+    if (b2 && b2.ok) {
+      return res.status(200).json({
+        ok: true, reg: vrm, cached: false,
+        make: b2.make || null,
+        model: b2.model || null,
+        year: b2.year || null,
+        fuel: b2.fuel || null,
+        engineSize: b2.engineCc || null,
+        engineCode: b2.engineCode || null,
+        variant: b2.model || null,
+      });
+    }
+    return res.status(200).json({ ok: false, error: (b2 && b2.error) || 'No vehicle found for that registration.' });
   } catch (e) {
     return res.status(502).json({ ok: false, error: 'Could not reach the lookup service.' });
   }
