@@ -40,7 +40,9 @@ export default async function handler(req, res) {
   //    so the checker will say "likely" rather than "confirmed", which is
   //    exactly what we want it to say when it cannot be certain.
   try {
-    const r2 = await fetch('https://www.voodoofiles.co.uk/api/wwb-reg-lookup?vrm=' + encodeURIComponent(vrm));
+    const r2 = await fetch('https://www.voodoofiles.co.uk/api/wwb-reg-lookup?vrm=' + encodeURIComponent(vrm), {
+      headers: { Referer: 'https://wiganwetbelts.co.uk/', Origin: 'https://wiganwetbelts.co.uk' },
+    });
     const b2 = await r2.json();
     if (b2 && b2.ok) {
       return res.status(200).json({
