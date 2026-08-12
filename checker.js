@@ -20,6 +20,17 @@ function esc(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, function(
 
 function say(msg, cls){ statusEl.textContent = msg; statusEl.className = cls || ''; }
 
+/* The provider returns DVLA fuel wording such as "HEAVY OIL". Customers say diesel. */
+function prettyFuel(f){
+  if (!f) return null;
+  var s = String(f).toUpperCase();
+  if (s.indexOf('HEAVY OIL') !== -1 || s.indexOf('DIESEL') !== -1) return 'Diesel';
+  if (s.indexOf('PETROL') !== -1) return 'Petrol';
+  if (s.indexOf('ELECTRIC') !== -1) return 'Electric';
+  if (s.indexOf('HYBRID') !== -1) return 'Hybrid';
+  return f.charAt(0).toUpperCase() + f.slice(1).toLowerCase();
+}
+
 /* ---------- verdict engine ---------- */
 function byEngineCode(code, year){
   if (!code) return null;
@@ -100,9 +111,13 @@ function kindFromService(service){
 /* ---------- rendering ---------- */
 function render(v, vehicle){
   var kindMeta = TIMING_KINDS[v.kind] || TIMING_KINDS.confirm;
-  var chips = [vehicle.make, vehicle.model, vehicle.year, vehicle.fuel,
+  /* Only show an engine code when it actually identified the engine. The
+     data provider often returns an engine serial number or a VIN fragment in
+     that field, which means nothing to a customer and looks like noise. */
+  var showCode = v.confidence === 'definitive' && vehicle.engineCode;
+  var chips = [vehicle.make, vehicle.model, vehicle.year, prettyFuel(vehicle.fuel),
                vehicle.engineSize ? vehicle.engineSize + 'cc' : null,
-               vehicle.engineCode ? 'Engine code ' + vehicle.engineCode : null]
+               showCode ? 'Engine code ' + vehicle.engineCode : null]
               .filter(Boolean).map(function(c){ return '<span class="v-chip">' + esc(c) + '</span>'; }).join('');
 
   var confLabel = v.confidence === 'definitive' ? 'Confirmed from engine code'
