@@ -824,11 +824,20 @@ if (qcConfirm){
 
     function _showSuccess(){
       qcFeedback.classList.remove('error','sending');
+      var _bookedLine = '';
+      try {
+        var _d = qDate && qDate.value ? qDate.value : '';
+        if (_d){
+          var _opt = qDate.options ? qDate.options[qDate.selectedIndex] : null;
+          var _lbl = _opt && _opt.textContent ? _opt.textContent.replace(' · drop off 08:00', '') : _d;
+          _bookedLine = 'Thank you. We are <strong>holding ' + _lbl + ', 08:00 drop off</strong> for you and will confirm it shortly.';
+        }
+      } catch(_){}
       qcFeedback.innerHTML =
         '<span class="qc-fb-icon" aria-hidden="true">✓</span>' +
         '<div class="qc-fb-body">' +
           '<strong>Enquiry sent successfully</strong>' +
-          '<small>Thank you for contacting <strong>Wigan Wetbelts</strong>. A member of our team will be in touch shortly. For urgent enquiries call ' +
+          '<small>' + (_bookedLine || 'Thank you for contacting <strong>Wigan Wetbelts</strong>. A member of our team will be in touch shortly.') + ' For urgent enquiries call ' +
           '<a href="tel:01942800252" style="color:inherit;text-decoration:underline">01942 800252</a>.</small>' +
           '<div class="qc-after-actions">' +
             '<button type="button" class="btn btn-primary qc-play-btn" id="qcPlayGame">' +
@@ -969,6 +978,28 @@ if (qcConfirm){
             'Prefer': 'return=minimal'
           },
           body: JSON.stringify(row)
+        }).catch(function(){});
+      } catch(_){}
+    })();
+
+    /* Provisional booking in the workshop calendar (Torque). Fire and
+       forget: the email and the admin panel remain the safety net, so a
+       booking outage can never stop an enquiry going through. */
+    (function requestBooking(){
+      if (!date) return;
+      try {
+        fetch('/api/book', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: name, phone: phone, email: email || null, contact: contact || null,
+            reg: (reg || '').toUpperCase(), year: year || null,
+            make: make || null, model: model || null, engine: engine || null,
+            service: job || null,
+            price: (p && typeof p.from === 'number') ? autoQuote(p) : null,
+            hours: (p && typeof p.hrsTo === 'number') ? p.hrsTo : null,
+            date: date, notes: msg || null
+          })
         }).catch(function(){});
       } catch(_){}
     })();
@@ -1371,26 +1402,113 @@ if (qJob){
   qJob.addEventListener('change', function(){ lastAutoReg = null; setTimeout(maybeAutoLookup, 80); });
 }
 
-/* ---------------- date picker: min = today + 14 days ---------------- */
-if (qDate){
-  var _earliest = new Date();
-  _earliest.setDate(_earliest.getDate() + 14);
-  var _yyyy = _earliest.getFullYear();
-  var _mm = String(_earliest.getMonth()+1).padStart(2,'0');
-  var _dd = String(_earliest.getDate()).padStart(2,'0');
-  var _minISO = _yyyy + '-' + _mm + '-' + _dd;
-  qDate.min = _minISO;
-  function _enforceMin(){ if (qDate.value && qDate.value < _minISO) qDate.value = ''; }
-  _enforceMin();
-  function _syncDateAttr(){
-    if (qDate.value) qDate.setAttribute('data-has-value','true');
-    else qDate.removeAttribute('data-has-value');
+/* ---------------- drop off date: real slots from the workshop calendar ----
+   The workshop takes one timing job a day, Monday to Thursday, 08:00 drop
+   off, earliest two weeks out. Jobs over eight hours run two working days.
+   We ask our own /api/availability, which asks Torque. If that is not
+   reachable for any reason we fall back to a plain date box so the quote
+   form can never be blocked. ------------------------------------------- */
+var qDateFallback = document.getElementById('qDateFallback');
+var dateNote = null;
+var slotCache = {};
+var slotsLoaded = false;
+
+function ensureDateNote(){
+  if (dateNote) return dateNote;
+  dateNote = document.createElement('small');
+  dateNote.className = 'date-note';
+  if (qDate && qDate.parentNode) qDate.parentNode.appendChild(dateNote);
+  return dateNote;
+}
+
+function minISO(){
+  var d = new Date();
+  d.setDate(d.getDate() + 14);
+  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+}
+
+function useFallbackDate(reason){
+  if (!qDate || !qDateFallback) return;
+  qDate.hidden = true;
+  qDateFallback.hidden = false;
+  qDateFallback.min = minISO();
+  ensureDateNote().textContent = 'Earliest date is two weeks from today. We will confirm your slot when we reply.';
+  /* keep qDate.value in step so submission and backups still work */
+  qDateFallback.addEventListener('change', function(){
+    if (qDate) qDate.value = qDateFallback.value;
+    saveBackup();
+  });
+}
+
+function currentJobHours(){
+  try {
+    var p = calculateNet(qMake && qMake.value, qModel && qModel.value, qEngine && qEngine.value,
+                         qJob && qJob.value, qYear && qYear.value);
+    if (p && typeof p.hrsTo === 'number') return p.hrsTo;
+  } catch(_){}
+  return '';
+}
+
+function loadSlots(){
+  if (!qDate || qDate.hidden) return;
+  var hours = currentJobHours();
+  var cacheKey = String(hours || 'std');
+  if (slotCache[cacheKey]) { renderSlots(slotCache[cacheKey]); return; }
+
+  qDate.innerHTML = '<option value="">Loading available dates…</option>';
+  fetch('/api/availability?hours=' + encodeURIComponent(hours) + '&limit=14')
+    .then(function(r){ return r.json(); })
+    .then(function(j){
+      if (!j || !j.ok || !j.slots || !j.slots.length){ useFallbackDate('none'); return; }
+      slotCache[cacheKey] = j.slots;
+      slotsLoaded = true;
+      renderSlots(j.slots);
+    })
+    .catch(function(){ useFallbackDate('error'); });
+}
+
+function renderSlots(slots){
+  if (!qDate) return;
+  var keep = qDate.value;
+  qDate.innerHTML = '<option value="">Choose a drop off date…</option>';
+  slots.forEach(function(s){
+    var o = document.createElement('option');
+    o.value = s.date;
+    o.textContent = s.label + ' · drop off 08:00';
+    o.setAttribute('data-days', s.days);
+    o.setAttribute('data-collect', s.collectLabel || '');
+    qDate.appendChild(o);
+  });
+  if (keep) qDate.value = keep;
+  showDateNote();
+}
+
+function showDateNote(){
+  if (!qDate || qDate.hidden) return;
+  var note = ensureDateNote();
+  var opt = qDate.options[qDate.selectedIndex];
+  if (!opt || !opt.value){
+    note.className = 'date-note';
+    note.textContent = 'One timing job a day, Monday to Thursday. Earliest is two weeks out.';
+    return;
   }
-  qDate.addEventListener('change', function(){ _enforceMin(); _syncDateAttr(); });
-  qDate.addEventListener('input', function(){ _enforceMin(); _syncDateAttr(); });
-  qDate.addEventListener('focus', function(){ try { if (qDate.showPicker) qDate.showPicker(); } catch(_){} });
-  qDate.addEventListener('click', function(){ try { if (qDate.showPicker) qDate.showPicker(); } catch(_){} });
-  _syncDateAttr();
+  var days = Number(opt.getAttribute('data-days')) || 1;
+  var collect = opt.getAttribute('data-collect') || '';
+  note.className = 'date-note' + (days > 1 ? ' warn' : '');
+  note.textContent = days > 1
+    ? 'This job needs two days in the workshop. Drop off 08:00, ready for collection ' + collect + '.'
+    : 'Drop off 08:00, ready for collection the same day.';
+}
+
+if (qDate){
+  qDate.addEventListener('change', function(){ showDateNote(); saveBackup(); });
+  [qJob, qMake, qModel, qEngine].forEach(function(el){
+    if (el) el.addEventListener('change', function(){
+      /* job length changes the slots, so refresh once the engine is known */
+      if (qJob && qJob.value) loadSlots();
+    });
+  });
+  showDateNote();
 }
 
 /* ---------------- localStorage backup ---------------- */
